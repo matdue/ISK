@@ -2,6 +2,7 @@
 <resources>
 
     <string name="hello">Hello World, MainActivity!</string>
-    <string name="app_name">ISK</string>
+    <string name="app_name">ISK for EVE Online</string>
+    <string name="app_name_launcher">ISK</string>
 
 </resources>
