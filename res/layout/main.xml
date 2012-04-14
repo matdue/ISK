@@ -2,7 +2,59 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:padding="10dip" >
+
+    <RelativeLayout
+        android:id="@+id/main_balance_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dip"
+        android:clickable="true" >
+
+        <ImageView
+            android:id="@+id/main_pilot_image"
+            android:layout_width="64dip"
+            android:layout_height="64dip"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="3dip"
+            android:contentDescription="@string/main_pilot_portrait"
+            android:maxHeight="64dip"
+            android:maxWidth="64dip"
+            android:scaleType="centerInside"
+            android:src="@android:color/transparent" />
+
+        <ImageView
+            android:id="@+id/main_pilot_choose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/main_pilot_image"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/main_pilot_choose"
+            android:src="@drawable/spinner_edge" />
+        <TextView
+            android:id="@+id/main_pilot_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_margin="5dip"
+            android:layout_toRightOf="@+id/main_pilot_image"
+            android:text="Pilot"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/main_pilot_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/main_pilot_name"
+            android:layout_margin="5dip"
+            android:layout_toLeftOf="@+id/main_pilot_choose"
+            android:layout_toRightOf="@+id/main_pilot_image"
+            android:lines="1"
+            android:text="1234 ISK"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    </RelativeLayout>
 
     <TextView
         android:layout_width="fill_parent"
