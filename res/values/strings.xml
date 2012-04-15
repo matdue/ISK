@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, MainActivity!</string>
     <string name="app_name">ISK for EVE Online</string>
     <string name="app_name_launcher">ISK</string>
     <string name="main_pilot_portrait">Pilot´s portrait</string>
-    <string name="main_pilot_choose">Choose pilot</string>
     <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
     <string name="main_dialog_welcome_close">Close</string>
 

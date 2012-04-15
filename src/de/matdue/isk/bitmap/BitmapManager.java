@@ -117,7 +117,7 @@ public class BitmapManager {
 			} else if (loadingColor != null) {
 				downloadingDrawable = new DownloadingColorDrawable(this, loadingColor);
 			} else {
-				downloadingDrawable = new DownloadingColorDrawable(this, Color.RED);
+				downloadingDrawable = new DownloadingColorDrawable(this, Color.TRANSPARENT);
 			}
 			imageView.setImageDrawable(downloadingDrawable);
 		}
@@ -127,7 +127,9 @@ public class BitmapManager {
 			InputStream cachedImage = fileCache.getStream(params[0]);
 			if (cachedImage != null) {
 				Bitmap bitmap = BitmapFactory.decodeStream(cachedImage);
-				memoryCache.put(params[0], bitmap);
+				if (bitmap != null) {
+					memoryCache.put(params[0], bitmap);
+				}
 				try {
 					cachedImage.close();
 				} catch (IOException e) {
@@ -137,7 +139,9 @@ public class BitmapManager {
 			}
 			
 			Bitmap bitmap = bitmapDownloader.downloadBitmap(params[0]);
-			memoryCache.put(params[0], bitmap);
+			if (bitmap != null) {
+				memoryCache.put(params[0], bitmap);
+			}
 			return bitmap;
 		}
 		
