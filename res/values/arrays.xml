@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<string-array name="update_interval">
+		<item>Hourly</item>
+		<item>Every 2 hours</item>
+		<item>Every 4 hours</item>
+		<item>Every 8 hours</item>
+		<item>Twice a day</item>
+		<item>Daily</item>
+		<item>Manual only</item>
+	</string-array>    
+	<string-array name="update_interval_values" tools:ignore="MissingTranslation">
+		<item>1</item>
+		<item>2</item>
+		<item>4</item>
+		<item>8</item>
+		<item>12</item>
+		<item>24</item>
+		<item>0</item>
+	</string-array>
+	<string-array name="eve_reference_types" tools:ignore="MissingTranslation">
+		<item>Undefined</item>
+		<item>Player Trading</item>
+		<item>Market Transaction</item>
+		<item>GM Cash Transfer</item>
+		<item>ATM Withdraw</item>
+		<item>ATM Deposit</item>
+		<item>Backward Compatible</item>
+		<item>Mission Reward</item>
+		<item>Clone Activation</item>
+		<item>Inheritance</item>
+		<item>Player Donation</item>
+		<item>Corporation Payment</item>
+		<item>Docking Fee</item>
+		<item>Office Rental Fee</item>
+		<item>Factory Slot Rental Fee</item>
+		<item>Repair Bill</item>
+		<item>Bounty</item>
+		<item>Bounty Prize</item>
+		<item>Agents_temporary</item>
+		<item>Insurance</item>
+		<item>Mission Expiration</item>
+		<item>Mission Completion</item>
+		<item>Shares</item>
+		<item>Courier Mission Escrow</item>
+		<item>Mission Cost</item>
+		<item>Agent Miscellaneous</item>
+		<item>LP Store</item>
+		<item>Agent Location Services</item>
+		<item>Agent Donation</item>
+		<item>Agent Security Services</item>
+		<item>Agent Mission Collateral Paid</item>
+		<item>Agent Mission Collateral Refunded</item>
+		<item>Agents_preward</item>
+		<item>Agent Mission Reward</item>
+		<item>Agent Mission Time Bonus Reward</item>
+		<item>CSPA</item>
+		<item>CSPAOfflineRefund</item>
+		<item>Corporation Account Withdrawal</item>
+		<item>Corporation Dividend Payment</item>
+		<item>Corporation Registration Fee</item>
+		<item>Corporation Logo Change Cost</item>
+		<item>Release Of Impounded Property</item>
+		<item>Market Escrow</item>
+		<item>Agent Services Rendered</item>
+		<item>Market Fine Paid</item>
+		<item>Corporation Liquidation</item>
+		<item>Brokers Fee</item>
+		<item>Corporation Bulk Payment</item>
+		<item>Alliance Registration Fee</item>
+		<item>War Fee</item>
+		<item>Alliance Maintainance Fee</item>
+		<item>Contraband Fine</item>
+		<item>Clone Transfer</item>
+		<item>Acceleration Gate Fee</item>
+		<item>Transaction Tax</item>
+		<item>Jump Clone Installation Fee</item>
+		<item>Manufacturing</item>
+		<item>Researching Technology</item>
+		<item>Researching Time Productivity</item>
+		<item>Researching Material Productivity</item>
+		<item>Copying</item>
+		<item>Duplicating</item>
+		<item>Reverse Engineering</item>
+		<item>Contract Auction Bid</item>
+		<item>Contract Auction Bid Refund</item>
+		<item>Contract Collateral</item>
+		<item>Contract Reward Refund</item>
+		<item>Contract Auction Sold</item>
+		<item>Contract Reward</item>
+		<item>Contract Collateral Refund</item>
+		<item>Contract Collateral Payout</item>
+		<item>Contract Price</item>
+		<item>Contract Brokers Fee</item>
+		<item>Contract Sales Tax</item>
+		<item>Contract Deposit</item>
+		<item>Contract Deposit Sales Tax</item>
+		<item>Secure EVE Time Code Exchange</item>
+		<item>Contract Auction Bid (corp)</item>
+		<item>Contract Collateral Deposited (corp)</item>
+		<item>Contract Price Payment (corp)</item>
+		<item>Contract Brokers Fee (corp)</item>
+		<item>Contract Deposit (corp)</item>
+		<item>Contract Deposit Refund</item>
+		<item>Contract Reward Deposited</item>
+		<item>Contract Reward Deposited (corp)</item>
+		<item>Bounty Prizes</item>
+		<item>Advertisement Listing Fee</item>
+		<item>Medal Creation</item>
+		<item>Medal Issued</item>
+		<item>Betting</item>
+		<item>DNA Modification Fee</item>
+		<item>Sovereignity bill</item>
+		<item>Bounty Prize Corporation Tax</item>
+		<item>Agent Mission Reward Corporation Tax</item>
+		<item>Agent Mission Time Bonus Reward Corporation Tax</item>
+		<item>Upkeep adjustment fee</item>
+		<item>Planetary Import Tax</item>
+		<item>Planetary Export Tax</item>
+		<item>Planetary Construction</item>
+		<item>Corporate Reward Payout</item>
+	</string-array>    
+</resources>

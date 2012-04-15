@@ -6,5 +6,14 @@
     <string name="main_pilot_portrait">Pilot´s portrait</string>
     <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
     <string name="main_dialog_welcome_close">Close</string>
+    <string name="main_optmenu_preferences">Settings</string>
 
+    <string name="preferences_title">Settings</string>
+    <string name="preferences_cat_updating_data">Updating data</string>
+    <string name="preferences_update_interval">Update interval</string>
+    <string name="preferences_honor_gs">Honor global sync</string>
+    <string name="preferences_honor_gs_summary">Update with activated global sync only.</string>
+    <string name="preferences_require_wifi">Require WIFI connection</string>
+    <string name="preferences_require_wifi_summary">Update with active WIFI connection only. Data volume may be 1 MByte and more.</string>
+    
 </resources>

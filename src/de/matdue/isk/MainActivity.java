@@ -12,9 +12,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -100,6 +103,26 @@ public class MainActivity extends IskActivity {
 			showDialog(DIALOG_WELCOME);
 		}
 	}
+	
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main_options, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.main_optmenu_preferences:
+			startActivity(new Intent(this, PreferencesActivity.class));
+			return true;
+			
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	
 	private static class PilotData {
 		public String characterId;
