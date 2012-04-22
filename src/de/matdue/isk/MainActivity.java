@@ -24,8 +24,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,6 +69,14 @@ public class MainActivity extends IskActivity {
         PilotAdapter adapter = new PilotAdapter(this, pilots);
         spinner.setAdapter(adapter);
         //spinner.setSelection(1);
+        
+        Button pilotsButton = (Button) findViewById(R.id.pilots);
+		pilotsButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, PilotsActivity.class));
+			}
+		});
         
         // Make sure update service to be called regularly
      	WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), false);

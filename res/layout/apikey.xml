@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <!-- Dummy item to prevent TextView from receiving focus -->
+		<LinearLayout
+		    android:id="@+id/pilots_focus_dummy"
+		    android:focusable="true" android:focusableInTouchMode="true"
+		    android:layout_width="0px" android:layout_height="0px">
+		    <requestFocus/>
+		</LinearLayout>
+
+	    <TextView
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:padding="5dip"
+	        android:text="@string/pilots_key_intro" />
+	
+	    <TextView
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="8dip"
+	        android:padding="5dip"
+	        android:text="@string/pilots_key_first" />
+	
+	    <Button
+	        android:id="@+id/pilots_key_button_choose"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="10dip"
+	        android:layout_marginLeft="30dip"
+	        android:layout_marginTop="10dip"
+	        android:text="@string/pilots_key_button_choose" />
+	
+	    <TextView
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="8dip"
+	        android:padding="5dip"
+	        android:text="@string/pilots_key_second" />
+	
+	    <Button
+	        android:id="@+id/pilots_key_button_create"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="10dip"
+	        android:layout_marginLeft="30dip"
+	        android:layout_marginTop="10dip"
+	        android:text="@string/pilots_key_button_create" />
+	
+	    <TextView
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:autoLink="web"
+	        android:linksClickable="true"
+	        android:layout_marginTop="8dip"
+	        android:padding="5dip"
+	        android:text="@string/pilots_key_third" />
+		    <EditText
+	        android:id="@+id/pilots_key_input_id"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="10dip"
+	        android:layout_marginRight="10dip"
+	        android:layout_marginTop="5dip"
+	        android:hint="@string/pilots_key_hint_id" />
+
+	    <EditText
+	        android:id="@+id/pilots_key_input_code"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="10dip"
+	        android:layout_marginRight="10dip"
+	        android:hint="@string/pilots_key_hint_verificationcode" />
+	
+	    <Button
+	        android:id="@+id/pilots_key_button_add"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="10dip"
+	        android:layout_marginLeft="30dip"
+	        android:layout_marginTop="10dip"
+	        android:text="@string/pilots_key_button_add" />
+    
+    </LinearLayout>
+
+</ScrollView>

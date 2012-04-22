@@ -42,6 +42,24 @@
             android:name=".EveAccessActivity"
             android:label="@string/eveaccess_title" >
         </activity>
+
+        <activity 
+            android:name=".PilotsActivity"
+            android:label="@string/pilots_title">
+        </activity>
+        
+        <activity android:name=".ApiCallbackActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="eve" android:host="api.eveonline.com" android:path="/installKey"/>
+            </intent-filter>
+        </activity>
+        
+        <activity 
+            android:name=".ApiKeyActivity">
+        </activity>
         
         <service android:name=".EveApiUpdaterService"></service>
         <receiver android:name="com.commonsware.cwac.wakeful.AlarmReceiver">

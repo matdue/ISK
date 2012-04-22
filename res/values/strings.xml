@@ -28,4 +28,23 @@
     <string name="eveaccess_title">Eve access</string>
     <string name="eveaccess_no_data">No data</string>
     
+    <string name="pilots_portrait">Pilot´s portrait</string>
+    <string name="pilots_title">Pilots</string>
+    <string name="pilots_context_remove">Remove API key</string>
+    <string name="pilots_optmenu_add">Add</string>
+    <string name="pilots_key_intro">You may add a key by choosing it from a list of your API keys, or enter its code manually. It is possible to create a new individual API key for this app.</string>
+    <string name="pilots_key_first">1. Choose a key\n\nA browser window will open, where you are able to choose one of your existing keys by touching the Install link. The web page is hosted by EVE Online, and you might have to login with your EVE Online account.</string>
+    <string name="pilots_key_second">2. Create a new key\n\nIf you want this app to use its own key, you are able to create a new one. Please do not modify the Access Mask. Once you have finished, go back to this app and choose the new key as described in step 1.</string>
+    <string name="pilots_key_third">3. Enter key manually\n\nPlease provide both ID and Verification Code, as printed on https://support.eveonline.com/api/Key</string>
+    <string name="pilots_key_button_choose">Choose key</string>
+    <string name="pilots_key_button_create">Create key</string>
+    <string name="pilots_key_button_add">Add key</string>
+    <string name="pilots_key_hint_id">ID</string>
+    <string name="pilots_key_hint_verificationcode">Verification Code</string>
+    <string name="pilots_key_checking">Checking key…</string>
+    <string name="pilots_key_empty_fields">Please enter both ID and Verification Code.</string>
+    <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
+    <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key.</string>
+    <string name="pilots_key_error_type">Character key only is allowed.</string>
+    
 </resources>
