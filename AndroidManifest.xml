@@ -33,6 +33,11 @@
             android:label="@string/preferences_title">
         </activity>
         
+        <activity 
+            android:name=".AboutActivity"
+            android:label="@string/about_title" >
+        </activity>
+        
         <service android:name=".EveApiUpdaterService"></service>
         <receiver android:name="com.commonsware.cwac.wakeful.AlarmReceiver">
             <intent-filter>

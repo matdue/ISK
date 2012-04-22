@@ -125,6 +125,9 @@ public class MainActivity extends IskActivity {
 			startActivity(new Intent(this, PreferencesActivity.class));
 			return true;
 			
+		case R.id.main_optmenu_info:
+			startActivity(new Intent(this, AboutActivity.class));
+			
 		default:
 			return super.onOptionsItemSelected(item);
 		}
