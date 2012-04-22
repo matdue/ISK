@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.commonsware.cwac.wakeful.WakefulIntentService;
+
+import de.matdue.isk.eve.EveApi;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -64,6 +68,9 @@ public class MainActivity extends IskActivity {
         spinner.setAdapter(adapter);
         //spinner.setSelection(1);
         
+        // Make sure update service to be called regularly
+     	WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), false);
+     		
         showWelcomeDialog();
     }
     
@@ -180,7 +187,7 @@ public class MainActivity extends IskActivity {
 			TextView pilotBalance = (TextView) view.findViewById(R.id.main_pilot_balance);
 			
 			PilotData pilot = pilots.get(position);
-			getBitmapManager().setImageBitmap(pilotImage, "https://image.eveonline.com/Character/" + pilot.characterId + "_128.jpg");
+			getBitmapManager().setImageBitmap(pilotImage, EveApi.getCharacterUrl(pilot.characterId, 128));
 			pilotName.setText(pilot.name);
 			if (pilotBalance != null) {
 				if (pilot.balance != null) {
