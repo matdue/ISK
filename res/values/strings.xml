@@ -9,6 +9,7 @@
     <string name="main_optmenu_eveaccess">Eve access</string>
     <string name="main_optmenu_preferences">Settings</string>
     <string name="main_optmenu_info">About</string>
+    <string name="main_menu_pilots">Pilots</string>
 
     <string name="preferences_title">Settings</string>
     <string name="preferences_cat_updating_data">Updating data</string>

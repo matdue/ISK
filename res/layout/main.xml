@@ -10,5 +10,92 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="70dip" />
+    
+    <TableLayout 
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent" >
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+            
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:visibility="invisible"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_launcher"
+			        android:background="@android:color/transparent"
+			        android:textColor="@android:color/white" />
+                
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:id="@+id/pilots"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_main_pilots"
+			        android:drawablePadding="10sp"
+			        android:background="@android:color/transparent"
+			        android:text="@string/main_menu_pilots"
+			        android:textAppearance="?android:attr/textAppearanceLarge"
+			        android:textColor="@android:color/white" />
+                
+            </FrameLayout>
+            
+        </TableRow>
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+            
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:visibility="invisible"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_launcher"
+			        android:background="@android:color/transparent"
+			        android:textColor="@android:color/white" />
+                
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:visibility="invisible"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_launcher"
+			        android:background="@android:color/transparent"
+			        android:textColor="@android:color/white" />
+                
+            </FrameLayout>
+            
+        </TableRow>
+        
+    </TableLayout>
 
 </LinearLayout>
