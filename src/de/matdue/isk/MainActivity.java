@@ -121,12 +121,17 @@ public class MainActivity extends IskActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.main_optmenu_eveaccess:
+			startActivity(new Intent(this, EveAccessActivity.class));
+			return true;
+			
 		case R.id.main_optmenu_preferences:
 			startActivity(new Intent(this, PreferencesActivity.class));
 			return true;
 			
 		case R.id.main_optmenu_info:
 			startActivity(new Intent(this, AboutActivity.class));
+			return true;
 			
 		default:
 			return super.onOptionsItemSelected(item);

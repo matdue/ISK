@@ -6,6 +6,7 @@
     <string name="main_pilot_portrait">Pilot´s portrait</string>
     <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
     <string name="main_dialog_welcome_close">Close</string>
+    <string name="main_optmenu_eveaccess">Eve access</string>
     <string name="main_optmenu_preferences">Settings</string>
     <string name="main_optmenu_info">About</string>
 
@@ -22,5 +23,8 @@
     <string name="about_copyright">Copyright \u00A9 2012 Matthias Düsterhöft</string>
     <string name="about_ccp">EVE Online and the EVE logo are the registered trademarks of CCP hf. All rights are reserved worldwide. All other trademarks are the property of their respective owners. EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf. All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf. CCP hf. has granted permission to Matthias Düsterhöft to use EVE Online and all associated logos and designs for promotional and information purposes in its app but does not endorse, and is not in any way affiliated with, Matthias Düsterhöft. CCP is in no way responsible for the content in or functioning of this app, nor can it be liable for any damage arising from the use of this app.</string>
     <string name="about_icons">Icons are designed by IconEden (http://www.iconeden.com/) and Jack Cai (http://www.doublejdesign.co.uk/).</string>
+
+    <string name="eveaccess_title">Eve access</string>
+    <string name="eveaccess_no_data">No data</string>
     
 </resources>
