@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -33,6 +34,7 @@ public class ApiKeyActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.apikey);
 		
 		Button button = (Button) findViewById(R.id.pilots_key_button_choose);
@@ -80,6 +82,21 @@ public class ApiKeyActivity extends Activity {
 			String code = uri.getQueryParameter("vCode");
 			
 			validateKeyAndFinish(id, code);
+		}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			// Jump up to PilotsActivity, if there are any pilots, else jump up to main activity
+			Intent intent = new Intent(this, getIntent().getBooleanExtra("hasNoPilots", false) ? MainActivity.class : PilotsActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
+            
+        default:
+    		return super.onOptionsItemSelected(item);
 		}
 	}
 	

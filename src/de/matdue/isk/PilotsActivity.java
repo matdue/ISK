@@ -42,6 +42,7 @@ public class PilotsActivity extends ExpandableListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		IskApplication iskApp = (IskApplication) getApplication();
 		bitmapManager = iskApp.getBitmapManager();
@@ -67,7 +68,9 @@ public class PilotsActivity extends ExpandableListActivity {
 		
 		// If no API key has been added yet, jump to activity to do that
 		if (groupCount == 0) {
-			startActivityForResult(new Intent(this, ApiKeyActivity.class), ApiKeyActivityRequestCode);
+			Intent intent = new Intent(this, ApiKeyActivity.class);
+			intent.putExtra("hasNoPilots", true);
+			startActivityForResult(intent, ApiKeyActivityRequestCode);
 		}
 	}
 	
@@ -125,6 +128,12 @@ public class PilotsActivity extends ExpandableListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
+		
 		case R.id.pilots_add:
 			startActivityForResult(new Intent(this, ApiKeyActivity.class), ApiKeyActivityRequestCode);
 			return true;
