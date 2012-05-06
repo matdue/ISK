@@ -291,6 +291,29 @@ public class IskDatabase extends SQLiteOpenHelper {
 			Log.e("IskDatabase", "storeBalance", e);
 		}
 	}
+	
+	public Cursor queryCharactersAndBalance() {
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(CharacterTable.TABLE_NAME + " LEFT JOIN " + BalanceTable.TABLE_NAME + " ON " + CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID + "=" + BalanceTable.TABLE_NAME + "." + BalanceTable.CHARACTER_ID,
+					new String[] {
+					CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID,
+					CharacterTable.TABLE_NAME + "." + CharacterTable.NAME,
+					BalanceTable.TABLE_NAME + "." + BalanceTable.BALANCE
+				},
+				CharacterTable.TABLE_NAME + "." + CharacterTable.SELECTED + "=?",  // where
+				new String[] { "1" },  // where arguments
+				null,  // group by
+				null,  // having
+				null); // order by
+			
+			return cursor;
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryCharactersAndBalance", e);
+		}
+		
+		return null;
+	}
 
 	public ApiKey queryApiKey(String characterId) {
 		ApiKey result = null;

@@ -77,7 +77,13 @@ public class EveApiUpdaterService extends WakefulIntentService {
 			}
 		} catch (Exception e) {
 			Log.e("EveApiUpdaterService",  "Error while performing update", e);
-			sendEmptyResponseIntent();
+			String message = e.getMessage();
+			if (message == null) {
+				message = e.toString();
+			}
+			sendBroadcast(new Intent(ACTION_RESP)
+				.addCategory(Intent.CATEGORY_DEFAULT)
+				.putExtra("error", message));
 		} finally {
 			iskDatabase.close();
 		}
@@ -126,11 +132,9 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		updateWallet(characterId);
 		
 		// Inform listeners about updated character
-		Intent broadcastIntent = new Intent();
-		broadcastIntent.setAction(ACTION_RESP);
-		broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-		broadcastIntent.putExtra("characterId", characterId);
-		sendBroadcast(broadcastIntent);
+		sendBroadcast(new Intent(ACTION_RESP)
+			.addCategory(Intent.CATEGORY_DEFAULT)
+			.putExtra("characterId", characterId));
 	}
 	
 	/**

@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     
     <item
+        android:id="@+id/menu_refresh"
+        android:title="@string/main_optmenu_refresh"
+        android:icon="@drawable/ic_action_refresh"
+        android:showAsAction="ifRoom">
+    </item>
+    <item
         android:id="@+id/main_optmenu_eveaccess"
         android:title="@string/main_optmenu_eveaccess"
         android:icon="@android:drawable/ic_menu_recent_history"

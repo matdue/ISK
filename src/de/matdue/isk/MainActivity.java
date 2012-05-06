@@ -14,10 +14,13 @@ import de.matdue.isk.eve.EveApi;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,12 +34,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends IskActivity {
 
 	// Dialogs
 	private static final int DIALOG_WELCOME = 0;
-		
+	
+	private BroadcastReceiver eveApiUpdaterReceiver;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,12 +52,19 @@ public class MainActivity extends IskActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				//Log.d("onItemSelected", "" + position);
+				PilotData selectedPilot = (PilotData) parent.getItemAtPosition(position);
+				getPreferences()
+					.edit()
+					.putString("startCharacterID", selectedPilot.characterId)
+					.apply();
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				//Log.d("onNothingSelected", "");
+				getPreferences()
+					.edit()
+					.remove("startCharacterID")
+					.apply();
 			}
 		});
         
@@ -66,9 +79,9 @@ public class MainActivity extends IskActivity {
  			}
  		});
  		
-        PilotAdapter adapter = new PilotAdapter(this, pilots);
+ 		PilotAdapter adapter = new PilotAdapter(this, pilots);
         spinner.setAdapter(adapter);
-        //spinner.setSelection(1);
+        refreshPilots();
         
         Button pilotsButton = (Button) findViewById(R.id.pilots);
 		pilotsButton.setOnClickListener(new OnClickListener() {
@@ -131,6 +144,10 @@ public class MainActivity extends IskActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_refresh:
+			refreshCurrentCharacter();
+			return true;
+		
 		case R.id.main_optmenu_eveaccess:
 			startActivity(new Intent(this, EveAccessActivity.class));
 			return true;
@@ -146,6 +163,118 @@ public class MainActivity extends IskActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		refreshPilots();
+		
+		// Register broadcast receiver: If character data has been updated in background,
+		// show latest data immediately
+		IntentFilter filter = new IntentFilter(EveApiUpdaterService.ACTION_RESP);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        eveApiUpdaterReceiver = new BroadcastReceiver(){
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				// Character has been updated in background
+				// => Update view now, if the current character has been updated
+				String characterId = intent.getStringExtra("characterId");
+				String currentCharacterID = getPreferences().getString("startCharacterID", null);
+				if (currentCharacterID != null && currentCharacterID.equals(characterId)) {
+					refreshPilots();
+				}
+				
+				String errorMessage = intent.getStringExtra("error");
+				if (errorMessage != null) {
+					String message = getResources().getString(R.string.main_refresh_error, errorMessage);
+					Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+				}
+				
+				// Stop progress bar
+				setRefreshActionItemState(false);
+			}
+		};
+        registerReceiver(eveApiUpdaterReceiver, filter);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		unregisterReceiver(eveApiUpdaterReceiver);
+		
+		// Stop progress bar
+		setRefreshActionItemState(false);
+	}
+	
+	
+	private void refreshPilots() {
+		// Get active pilot
+		String characterID = getPreferences().getString("startCharacterID", null);
+		
+		// Load all pilots and their balance
+		List<PilotData> pilots = new ArrayList<PilotData>();
+		Cursor pilotsCursor = getDatabase().queryCharactersAndBalance();
+		while (pilotsCursor.moveToNext()) {
+			PilotData pilotData = new PilotData();
+			pilotData.characterId = pilotsCursor.getString(0);
+			pilotData.name = pilotsCursor.getString(1);
+			pilotData.balance = BigDecimal.ZERO;
+			String sBalance = pilotsCursor.getString(2);
+			if (sBalance != null && sBalance.length() > 0) {
+				pilotData.balance = new BigDecimal(sBalance);
+			}
+			
+			pilots.add(pilotData);
+		}
+		pilotsCursor.close();
+		
+		// Sort by character name
+ 		final Collator collator = Collator.getInstance();
+ 		Collections.sort(pilots, new Comparator<PilotData>() {
+ 			@Override
+ 			public int compare(PilotData lhs, PilotData rhs) {
+ 				return collator.compare(lhs.name, rhs.name);
+ 			}
+ 		});
+ 		
+ 		// Find index of active pilot
+ 		int activePilot = 0;
+ 		for (int i = 0; i < pilots.size(); ++i) {
+ 			if (pilots.get(i).characterId.equals(characterID)) {
+ 				activePilot = i;
+ 				break;
+ 			}
+ 		}
+ 		
+ 		// Update spinner and its adapter
+ 		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
+ 		PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
+ 		adapter.refresh(pilots);
+ 		adapter.notifyDataSetChanged();
+ 		spinner.setSelection(activePilot);
+	}
+	
+	/**
+	 * Refreshes current character
+	 */
+	private void refreshCurrentCharacter() {
+		String currentCharacterID = getPreferences().getString("startCharacterID", null);
+		if (currentCharacterID == null) {
+			return;
+		}
+		
+		// Force refresh of current character
+		Intent msgIntent = new Intent(this, EveApiUpdaterService.class);
+		msgIntent.putExtra("characterId", currentCharacterID);
+		msgIntent.putExtra("force", true);
+		WakefulIntentService.sendWakefulWork(this, msgIntent);
+		
+		// Show refresh animation
+		setRefreshActionItemState(true);
 	}
 	
 	
@@ -192,6 +321,10 @@ public class MainActivity extends IskActivity {
 		@Override
 		public View getDropDownView(int position, View convertView, ViewGroup parent) {
 			return getPilotView(position, convertView, parent, R.layout.main_pilot_spinner_item);
+		}
+		
+		public void refresh(List<PilotData> pilots) {
+			this.pilots = pilots;
 		}
 		
 		private View getPilotView(int position, View convertView, ViewGroup parent, int resource) {
