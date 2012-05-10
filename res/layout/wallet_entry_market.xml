@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/wallet_entry_market_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
+
+    <TextView
+        android:id="@+id/wallet_entry_market_partner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/wallet_entry_market_action"
+        android:ellipsize="end"
+        android:lines="1"
+        android:scrollHorizontally="true" />
+
+    <TextView
+        android:id="@+id/wallet_entry_market_station"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/wallet_entry_market_action"
+        android:ellipsize="end"
+        android:lines="1"
+        android:scrollHorizontally="true" />
+
+    <LinearLayout
+        android:id="@+id/wallet_entry_market_item_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/wallet_entry_market_station"
+        android:orientation="horizontal" 
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            android:id="@+id/wallet_entry_market_item_image"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:contentDescription="@string/wallet_item_image"
+            android:maxHeight="48dip"
+            android:maxWidth="48dip"
+            android:scaleType="centerInside"
+            android:src="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/wallet_entry_market_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:lines="1"
+            android:scrollHorizontally="true" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/wallet_entry_market_quantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/wallet_entry_market_item_line" />
+
+    <TextView
+        android:id="@+id/wallet_entry_market_static3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/wallet_entry_market_quantity"
+        android:layout_toRightOf="@+id/wallet_entry_market_quantity"
+        android:text="@string/wallet_quantity_symbol" />
+
+    <TextView
+        android:id="@+id/wallet_entry_market_single_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/wallet_entry_market_static3"
+        android:layout_toRightOf="@+id/wallet_entry_market_static3" />
+
+    <TextView
+        android:id="@+id/wallet_entry_market_total_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/wallet_entry_market_single_price"
+        android:layout_alignParentRight="true" />
+
+</RelativeLayout>

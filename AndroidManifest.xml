@@ -48,6 +48,11 @@
             android:label="@string/pilots_title">
         </activity>
         
+        <activity 
+            android:name=".WalletActivity" 
+            android:label="@string/wallet_title">
+        </activity>
+        
         <activity android:name=".ApiCallbackActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>

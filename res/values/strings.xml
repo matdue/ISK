@@ -10,6 +10,7 @@
     <string name="main_optmenu_eveaccess">Eve access</string>
     <string name="main_optmenu_preferences">Settings</string>
     <string name="main_optmenu_info">About</string>
+    <string name="main_menu_wallet">Wallet</string>
     <string name="main_menu_pilots">Pilots</string>
     <string name="main_refresh_error">Error while refreshing data: %1$s</string>
 
@@ -48,5 +49,15 @@
     <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
     <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key.</string>
     <string name="pilots_key_error_type">Character key only is allowed.</string>
+    
+    <string name="wallet_title">Wallet and transactions</string>
+    <string name="wallet_no_data">No data</string>
+    <string name="wallet_personal_buy">Buy from\u00A0</string>
+    <string name="wallet_personal_sell">Sell to\u00A0</string>
+    <string name="wallet_corp_buy">Corporation buy from\u00A0</string>
+    <string name="wallet_corp_sell">Corporation sell to\u00A0</string>
+    <string name="wallet_taxes">Tax</string>
+    <string name="wallet_quantity_symbol">\u00A0\u00D7\u00A0</string>
+    <string name="wallet_item_image">Item image</string>
     
 </resources>

@@ -83,6 +83,19 @@ public class MainActivity extends IskActivity {
         spinner.setAdapter(adapter);
         refreshPilots();
         
+        Button walletButton = (Button) findViewById(R.id.wallet);
+        walletButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String characterID = getPreferences().getString("startCharacterID", null);
+				if (characterID != null) {
+					Intent intent = new Intent(MainActivity.this, WalletActivity.class);
+					intent.putExtra("characterID", characterID);
+					startActivity(intent);
+				}
+			}
+		});
+        
         Button pilotsButton = (Button) findViewById(R.id.pilots);
 		pilotsButton.setOnClickListener(new OnClickListener() {
 			@Override
