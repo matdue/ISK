@@ -9,8 +9,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:lines="1"
-        android:scrollHorizontally="true"
+        android:layout_toLeftOf="@+id/wallet_entry_default_amount"
+        android:singleLine="true"
         android:ellipsize="end" />
 
     <TextView

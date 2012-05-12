@@ -1,27 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string-array name="update_interval">
-		<item>Hourly</item>
-		<item>Every 2 hours</item>
-		<item>Every 4 hours</item>
-		<item>Every 8 hours</item>
-		<item>Twice a day</item>
-		<item>Daily</item>
-		<item>Manual only</item>
+		<item>Stündlich</item>
+		<item>Alle 2 Stunden</item>
+		<item>Alle 4 Stunden</item>
+		<item>Alle 8 Stunden</item>
+		<item>2x täglich</item>
+		<item>Täglich</item>
+		<item>Nur manuell</item>
 	</string-array>    
-	<string-array name="update_interval_values" tools:ignore="MissingTranslation">
-		<item>1</item>
-		<item>2</item>
-		<item>4</item>
-		<item>8</item>
-		<item>12</item>
-		<item>24</item>
-		<item>0</item>
-	</string-array>
 	<string-array name="eve_reference_types">
-		<item>Undefined</item>
+		<item>Unbekannt</item>
 		<item>Player Trading</item>
-		<item>Market Transaction</item>
+		<item>Markt-Transaktion</item>
 		<item>GM Cash Transfer</item>
 		<item>ATM Withdraw</item>
 		<item>ATM Deposit</item>
@@ -34,7 +25,7 @@
 		<item>Docking Fee</item>
 		<item>Office Rental Fee</item>
 		<item>Factory Slot Rental Fee</item>
-		<item>Repair Bill</item>
+		<item>Reparatur-Rechnung</item>
 		<item>Bounty</item>
 		<item>Bounty Prize</item>
 		<item>Agents_temporary</item>
@@ -52,8 +43,8 @@
 		<item>Agent Mission Collateral Paid</item>
 		<item>Agent Mission Collateral Refunded</item>
 		<item>Agents_preward</item>
-		<item>Agent Mission Reward</item>
-		<item>Agent Mission Time Bonus Reward</item>
+		<item>Agent - Missions-Belohnung</item>
+		<item>Agent - Missions-Belohnung für Zeitbonus</item>
 		<item>CSPA</item>
 		<item>CSPAOfflineRefund</item>
 		<item>Corporation Account Withdrawal</item>
@@ -61,11 +52,11 @@
 		<item>Corporation Registration Fee</item>
 		<item>Corporation Logo Change Cost</item>
 		<item>Release Of Impounded Property</item>
-		<item>Market Escrow</item>
+		<item>Markt-Hinterlegung</item>
 		<item>Agent Services Rendered</item>
 		<item>Market Fine Paid</item>
 		<item>Corporation Liquidation</item>
-		<item>Brokers Fee</item>
+		<item>Maklergebühr</item>
 		<item>Corporation Bulk Payment</item>
 		<item>Alliance Registration Fee</item>
 		<item>War Fee</item>
@@ -73,13 +64,13 @@
 		<item>Contraband Fine</item>
 		<item>Clone Transfer</item>
 		<item>Acceleration Gate Fee</item>
-		<item>Transaction Tax</item>
+		<item>Transaktionssteuer</item>
 		<item>Jump Clone Installation Fee</item>
-		<item>Manufacturing</item>
-		<item>Researching Technology</item>
+		<item>Fertigung</item>
+		<item>Technologieforschung</item>
 		<item>Researching Time Productivity</item>
 		<item>Researching Material Productivity</item>
-		<item>Copying</item>
+		<item>Kopieren</item>
 		<item>Duplicating</item>
 		<item>Reverse Engineering</item>
 		<item>Contract Auction Bid</item>
@@ -91,9 +82,9 @@
 		<item>Contract Collateral Refund</item>
 		<item>Contract Collateral Payout</item>
 		<item>Contract Price</item>
-		<item>Contract Brokers Fee</item>
+		<item>Vertrag - Maklergebühr</item>
 		<item>Contract Sales Tax</item>
-		<item>Contract Deposit</item>
+		<item>Vertrag - Einlage</item>
 		<item>Contract Deposit Sales Tax</item>
 		<item>Secure EVE Time Code Exchange</item>
 		<item>Contract Auction Bid (corp)</item>
@@ -104,20 +95,20 @@
 		<item>Contract Deposit Refund</item>
 		<item>Contract Reward Deposited</item>
 		<item>Contract Reward Deposited (corp)</item>
-		<item>Bounty Prizes</item>
+		<item>Kopfgeld-Auszahlungen</item>
 		<item>Advertisement Listing Fee</item>
 		<item>Medal Creation</item>
 		<item>Medal Issued</item>
 		<item>Betting</item>
 		<item>DNA Modification Fee</item>
 		<item>Sovereignity bill</item>
-		<item>Bounty Prize Corporation Tax</item>
-		<item>Agent Mission Reward Corporation Tax</item>
-		<item>Agent Mission Time Bonus Reward Corporation Tax</item>
+		<item>Kopfgeld-Auszahlung Corporation-Steuer</item>
+		<item>Agent - Missions-Belohnung Corporation-Steuer</item>
+		<item>Agent - Missions-Belohnung für Zeitbonus-Corporation-Steuer</item>
 		<item>Upkeep adjustment fee</item>
-		<item>Planetary Import Tax</item>
-		<item>Planetary Export Tax</item>
-		<item>Planetary Construction</item>
+		<item>Planetarische Einfuhrsteuer</item>
+		<item>Planetarische Ausfuhrsteuer</item>
+		<item>Planetarische Konstruktion</item>
 		<item>Corporate Reward Payout</item>
 	</string-array>    
 </resources>

@@ -80,7 +80,7 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 			// Restart service on change
 			if (!updateInterval.equals(previousUpdateInterval)) {
 				WakefulIntentService.cancelAlarms(getApplicationContext());
-//				WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), true);
+				WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), true);
 				previousUpdateInterval = updateInterval;
 			}
 		}
