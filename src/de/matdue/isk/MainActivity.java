@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -225,50 +226,63 @@ public class MainActivity extends IskActivity {
 	
 	
 	private void refreshPilots() {
-		// Get active pilot
-		String characterID = getPreferences().getString("startCharacterID", null);
-		
-		// Load all pilots and their balance
-		List<PilotData> pilots = new ArrayList<PilotData>();
-		Cursor pilotsCursor = getDatabase().queryCharactersAndBalance();
-		while (pilotsCursor.moveToNext()) {
-			PilotData pilotData = new PilotData();
-			pilotData.characterId = pilotsCursor.getString(0);
-			pilotData.name = pilotsCursor.getString(1);
-			pilotData.balance = BigDecimal.ZERO;
-			String sBalance = pilotsCursor.getString(2);
-			if (sBalance != null && sBalance.length() > 0) {
-				pilotData.balance = new BigDecimal(sBalance);
+		new AsyncTask<Void, Void, List<PilotData>>() {
+			
+			String characterID;
+			
+			@Override
+			protected List<PilotData> doInBackground(Void... params) {
+				// Get active pilot
+				characterID = getPreferences().getString("startCharacterID", null);
+				
+				// Load all pilots and their balance
+				List<PilotData> pilots = new ArrayList<PilotData>();
+				Cursor pilotsCursor = getDatabase().queryCharactersAndBalance();
+				while (pilotsCursor.moveToNext()) {
+					PilotData pilotData = new PilotData();
+					pilotData.characterId = pilotsCursor.getString(0);
+					pilotData.name = pilotsCursor.getString(1);
+					pilotData.balance = BigDecimal.ZERO;
+					String sBalance = pilotsCursor.getString(2);
+					if (sBalance != null && sBalance.length() > 0) {
+						pilotData.balance = new BigDecimal(sBalance);
+					}
+					
+					pilots.add(pilotData);
+				}
+				pilotsCursor.close();
+				
+				// Sort by character name
+		 		final Collator collator = Collator.getInstance();
+		 		Collections.sort(pilots, new Comparator<PilotData>() {
+		 			@Override
+		 			public int compare(PilotData lhs, PilotData rhs) {
+		 				return collator.compare(lhs.name, rhs.name);
+		 			}
+		 		});
+		 		
+				return pilots;
 			}
 			
-			pilots.add(pilotData);
-		}
-		pilotsCursor.close();
-		
-		// Sort by character name
- 		final Collator collator = Collator.getInstance();
- 		Collections.sort(pilots, new Comparator<PilotData>() {
- 			@Override
- 			public int compare(PilotData lhs, PilotData rhs) {
- 				return collator.compare(lhs.name, rhs.name);
- 			}
- 		});
- 		
- 		// Find index of active pilot
- 		int activePilot = 0;
- 		for (int i = 0; i < pilots.size(); ++i) {
- 			if (pilots.get(i).characterId.equals(characterID)) {
- 				activePilot = i;
- 				break;
- 			}
- 		}
- 		
- 		// Update spinner and its adapter
- 		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
- 		PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
- 		adapter.refresh(pilots);
- 		adapter.notifyDataSetChanged();
- 		spinner.setSelection(activePilot);
+			@Override
+			protected void onPostExecute(List<PilotData> result) {
+		 		// Find index of active pilot
+		 		int activePilot = 0;
+		 		for (int i = 0; i < result.size(); ++i) {
+		 			if (result.get(i).characterId.equals(characterID)) {
+		 				activePilot = i;
+		 				break;
+		 			}
+		 		}
+		 		
+		 		// Update spinner and its adapter
+		 		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
+		 		PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
+		 		adapter.refresh(result);
+		 		adapter.notifyDataSetChanged();
+		 		spinner.setSelection(activePilot);
+			}
+		}.execute();
 	}
 	
 	/**
