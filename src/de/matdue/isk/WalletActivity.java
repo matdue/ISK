@@ -5,43 +5,34 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 
-import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.eve.EveApi;
-import android.app.ListActivity;
+import android.app.FragmentManager;
+import android.app.ListFragment;
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
-public class WalletActivity extends ListActivity {
+public class WalletActivity extends IskActivity {
 	
-	private BitmapManager bitmapManager;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
-		setContentView(R.layout.wallet);
-		
-		IskApplication iskApp = (IskApplication) getApplication();
-		bitmapManager = iskApp.getBitmapManager();
-		
-		String characterId = getIntent().getStringExtra("characterID");
-		Cursor walletCursor = iskApp.getIskDatabase().getEveWallet(characterId);
-		startManagingCursor(walletCursor);
-		
-		ListAdapter adapter = new WalletAdapter(this, 
-				R.layout.wallet_entry, 
-				walletCursor);
-		setListAdapter(adapter);
+		FragmentManager fm = getFragmentManager();
+		if (fm.findFragmentById(android.R.id.content) == null) {
+            CursorLoaderListFragment list = new CursorLoaderListFragment();
+            fm.beginTransaction().add(android.R.id.content, list).commit();
+        }
 	}
 	
 	@Override
@@ -56,6 +47,64 @@ public class WalletActivity extends ListActivity {
         default:
     		return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+		
+		private WalletAdapter adapter;
+
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
+			
+			// Give some text to display if there is no data.
+			setEmptyText(getResources().getText(R.string.wallet_no_data));
+			
+			adapter = new WalletAdapter(getActivity(), 
+					R.layout.wallet_entry, 
+					null);
+			setListAdapter(adapter);
+			
+			// Start out with a progress indicator.
+            setListShown(false);
+            
+            // Prepare the loader. Either re-connect with an existing one, or start a new one.
+            getLoaderManager().initLoader(0, null, this);
+		}
+		
+		@Override
+		public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+			return new SimpleCursorLoader(getActivity()) {
+				@Override
+				public Cursor loadInBackground() {
+					String characterId = getIntent().getStringExtra("characterID");
+					return getDatabase().getEveWallet(characterId);
+				}
+			};
+		}
+
+		@Override
+		public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+			// Swap the new cursor in.  (The framework will take care of closing the
+            // old cursor once we return.)
+            adapter.swapCursor(data);
+
+            // The list should now be shown.
+            if (isResumed()) {
+                setListShown(true);
+            } else {
+                setListShownNoAnimation(true);
+            }		
+        }
+
+		@Override
+		public void onLoaderReset(Loader<Cursor> arg0) {
+			// This is called when the last Cursor provided to onLoadFinished()
+            // above is about to be closed.  We need to make sure we are no
+            // longer using it.
+			adapter.swapCursor(null);
+		}
+		
 	}
 
 	class WalletAdapter extends ResourceCursorAdapter {
@@ -166,8 +215,8 @@ public class WalletActivity extends ListActivity {
 			viewHolder.marketStation.setText(cursor.getString(12));
 			viewHolder.marketItem.setText(cursor.getString(9));
 			String imageUrl = EveApi.getTypeUrl(cursor.getString(15), 64);
-			bitmapManager.setLoadingColor(Color.TRANSPARENT);
-			bitmapManager.setImageBitmap(viewHolder.marketItemImage, imageUrl);
+			getBitmapManager().setLoadingColor(Color.TRANSPARENT);
+			getBitmapManager().setImageBitmap(viewHolder.marketItemImage, imageUrl);
 			
 			int quantity = cursor.getInt(8);
 			viewHolder.marketQuantity.setText(integerFormatter.format(quantity));
