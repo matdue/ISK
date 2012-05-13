@@ -3,7 +3,7 @@
     <item 
         android:id="@+id/pilots_add" 
         android:title="@string/pilots_optmenu_add" 
-        android:icon="@drawable/ic_action_add_pilot"
+        android:icon="@drawable/ic_menu_add_pilot"
         android:showAsAction="ifRoom">
     </item>
     
