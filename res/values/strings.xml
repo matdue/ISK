@@ -35,6 +35,7 @@
     <string name="pilots_title">Pilots</string>
     <string name="pilots_context_remove">Remove API key</string>
     <string name="pilots_optmenu_add">Add</string>
+    <string name="pilots_key_title">Add key</string>
     <string name="pilots_key_intro">You may add a key by choosing it from a list of your API keys, or enter its code manually. It is possible to create a new individual API key for this app.</string>
     <string name="pilots_key_first">1. Choose a key\n\nA browser window will open, where you are able to choose one of your existing keys by touching the Install link. The web page is hosted by EVE Online, and you might have to login with your EVE Online account.</string>
     <string name="pilots_key_second">2. Create a new key\n\nIf you want this app to use its own key, you are able to create a new one. Please do not modify the Access Mask. Once you have finished, go back to this app and choose the new key as described in step 1.</string>

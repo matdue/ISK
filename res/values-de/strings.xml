@@ -35,8 +35,9 @@
     <string name="pilots_title">Piloten</string>
     <string name="pilots_context_remove">API-Key entfernen</string>
     <string name="pilots_optmenu_add">Hinzufügen</string>
+    <string name="pilots_key_title">Key hinzufügen</string>
     <string name="pilots_key_intro">Fügen Sie einen Key hinzu, indem Sie ihn aus der Liste der API-Keys auswählen, oder geben Sie die Daten manuell ein. Sie können auch einen neuen API-Key mit dieser App erstellen.</string>
-    <string name="pilots_key_first">1. Key auswählen\n\nIn einem Browser-Fenster können Sie einen bereits vorhandenen Key auswählen, indem sie den Install-Link antippen. Der Browser zeigt eine offizielle EVE Online an, wo Sie sich mit Ihren EVE Online-Logindaten anmelden müssen.</string>
+    <string name="pilots_key_first">1. Key auswählen\n\nIn einem Browser-Fenster können Sie einen bereits vorhandenen Key auswählen, indem sie den Install-Link antippen. Der Browser zeigt eine offizielle EVE Online-Seite an, wo Sie sich mit Ihren EVE Online-Logindaten anmelden müssen.</string>
     <string name="pilots_key_second">2. Neuen Key erstellen\n\nWenn Sie für diese App einen eigenen Key benutzen möchten, können Sie hier einen neuen erstellen. Bitte verändern Sie nicht die Access Mask. Nach Abschluss gehen Sie zu dieser App zurück und wählen den neuen Key aus wie in Punkt 1 beschrieben.</string>
     <string name="pilots_key_third">3. Key manuell eingeben\n\nGeben Sie ID und Verification Code ein, wie er auf https://support.eveonline.com/api/Key angezeigt wird.</string>
     <string name="pilots_key_button_choose">Key auswählen</string>

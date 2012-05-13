@@ -63,7 +63,8 @@
         </activity>
         
         <activity 
-            android:name=".ApiKeyActivity">
+            android:name=".ApiKeyActivity"
+            android:label="@string/pilots_key_title">
         </activity>
         
         <service android:name=".EveApiUpdaterService"></service>
