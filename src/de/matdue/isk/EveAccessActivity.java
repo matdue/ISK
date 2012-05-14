@@ -44,7 +44,7 @@ public class EveAccessActivity extends IskActivity {
 		}
 	}
 
-	class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 		
 		private HistoryAdapter adapter;
 
@@ -72,7 +72,7 @@ public class EveAccessActivity extends IskActivity {
 			return new SimpleCursorLoader(getActivity()) {
 				@Override
 				public Cursor loadInBackground() {
-					return getDatabase().getEveApiHistoryCursor();
+					return ((IskActivity)getActivity()).getDatabase().getEveApiHistoryCursor();
 				}
 			};
 		}

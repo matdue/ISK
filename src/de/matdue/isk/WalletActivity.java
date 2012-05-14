@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 
+import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.eve.EveApi;
 import android.app.FragmentManager;
 import android.app.ListFragment;
@@ -49,7 +50,7 @@ public class WalletActivity extends IskActivity {
 		}
 	}
 	
-	class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 		
 		private WalletAdapter adapter;
 
@@ -62,7 +63,8 @@ public class WalletActivity extends IskActivity {
 			
 			adapter = new WalletAdapter(getActivity(), 
 					R.layout.wallet_entry, 
-					null);
+					null,
+					((IskActivity)getActivity()).getBitmapManager());
 			setListAdapter(adapter);
 			
 			// Start out with a progress indicator.
@@ -77,8 +79,8 @@ public class WalletActivity extends IskActivity {
 			return new SimpleCursorLoader(getActivity()) {
 				@Override
 				public Cursor loadInBackground() {
-					String characterId = getIntent().getStringExtra("characterID");
-					return getDatabase().getEveWallet(characterId);
+					String characterId = getActivity().getIntent().getStringExtra("characterID");
+					return ((IskActivity)getActivity()).getDatabase().getEveWallet(characterId);
 				}
 			};
 		}
@@ -107,16 +109,19 @@ public class WalletActivity extends IskActivity {
 		
 	}
 
-	class WalletAdapter extends ResourceCursorAdapter {
+	static class WalletAdapter extends ResourceCursorAdapter {
 		
+		private BitmapManager bitmapManager;
 		private DateFormat dateFormatter;
 		private NumberFormat numberFormatter;
 		private NumberFormat integerFormatter;
 		private int positiveNumber;
 		private int negativeNumber;
 		
-		public WalletAdapter(Context context, int layout, Cursor c) {
+		public WalletAdapter(Context context, int layout, Cursor c, BitmapManager bitmapManager) {
 			super(context, layout, c);
+			
+			this.bitmapManager = bitmapManager;
 			
 			dateFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 			
@@ -215,8 +220,8 @@ public class WalletActivity extends IskActivity {
 			viewHolder.marketStation.setText(cursor.getString(12));
 			viewHolder.marketItem.setText(cursor.getString(9));
 			String imageUrl = EveApi.getTypeUrl(cursor.getString(15), 64);
-			getBitmapManager().setLoadingColor(Color.TRANSPARENT);
-			getBitmapManager().setImageBitmap(viewHolder.marketItemImage, imageUrl);
+			bitmapManager.setLoadingColor(Color.TRANSPARENT);
+			bitmapManager.setImageBitmap(viewHolder.marketItemImage, imageUrl);
 			
 			int quantity = cursor.getInt(8);
 			viewHolder.marketQuantity.setText(integerFormatter.format(quantity));
