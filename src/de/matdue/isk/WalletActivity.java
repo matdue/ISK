@@ -242,9 +242,8 @@ public class WalletActivity extends IskActivity {
 		private void formatDefault(ViewHolder viewHolder, Context context, Cursor cursor) {
 			viewHolder.defaultInclude.setVisibility(View.VISIBLE);
 			
-			String[] eveReferenceTypes = context.getResources().getStringArray(R.array.eve_reference_types);
 			int refType = cursor.getInt(2);
-			viewHolder.defaultType.setText(eveReferenceTypes[refType < eveReferenceTypes.length ? refType : 0]);
+			viewHolder.defaultType.setText(getIndexedResourceString(context, R.array.eve_reference_types, R.array.eve_reference_types_idx, refType, 0));
 			
 			BigDecimal amount = new BigDecimal(cursor.getString(6));
 			BigDecimal tax = new BigDecimal(cursor.getString(7));

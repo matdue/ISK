@@ -69,7 +69,7 @@
 		<item>Fertigung</item>
 		<item>Technologieforschung</item>
 		<item>Researching Time Productivity</item>
-		<item>Researching Material Productivity</item>
+		<item>Materialproduktivitätsforschung</item>
 		<item>Kopieren</item>
 		<item>Duplicating</item>
 		<item>Reverse Engineering</item>
@@ -110,5 +110,28 @@
 		<item>Planetarische Ausfuhrsteuer</item>
 		<item>Planetarische Konstruktion</item>
 		<item>Corporate Reward Payout</item>
+		<item>Bounty Surcharge</item><!-- 101 -->
+		<item>Contract Reversal</item><!-- 102 -->
+		<item>Corporate Reward Tax</item><!-- 103 -->
+		<item>Store Purchase</item><!-- 106 -->
+		<item>Store Purchase Refund</item><!-- 107 -->
+		<item>PLEX sold for Aurum</item><!-- 108 -->
+		<item>Lottery Give Away</item><!-- 109 -->
+		<item>Aurum Token exchanged for Aur</item><!-- 111 -->
+		<item>Datacore-Gebühr</item><!-- 112 -->
+		<item>War Surrender Fee</item><!-- 113 -->
+		<item>War Ally Contract</item><!-- 114 -->
+		<item>Modify ISK</item><!-- 10001 -->
+		<item>Primary Marketplace Purchase</item><!-- 10002 -->
+		<item>Battle Reward</item><!-- 10003 -->
+		<item>New Character Starting Funds</item><!-- 10004 -->
+		<item>Corporation Account Withdrawal</item><!-- 10005 -->
+		<item>Corporation Account Deposit</item><!-- 10006 -->
+		<item>Battle WP Win Reward</item><!-- 10007 -->
+		<item>Battle WP Loss Reward</item><!-- 10008 -->
+		<item>Battle Win Reward</item><!-- 10009 -->
+		<item>Battle Loss Reward</item><!-- 10010 -->
+		<item>Modify AUR</item><!-- 11001 -->
+		<item>Respec payment</item><!-- 11002 -->
 	</string-array>    
 </resources>
