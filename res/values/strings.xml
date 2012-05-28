@@ -20,7 +20,7 @@
     <string name="preferences_honor_gs">Honor global sync</string>
     <string name="preferences_honor_gs_summary">Update with activated global sync only.</string>
     <string name="preferences_require_wifi">Require WIFI connection</string>
-    <string name="preferences_require_wifi_summary">Update with active WIFI connection only. Data volume may be 1 MByte and more.</string>
+    <string name="preferences_require_wifi_summary">Data volume may be 1 MByte and more.</string>
 
     <string name="about_title">About ISK</string>
     <string name="about_version">ISK for EVE Online 1.0</string>

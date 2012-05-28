@@ -20,7 +20,7 @@
     <string name="preferences_honor_gs">Berücksichtige Global Sync</string>
     <string name="preferences_honor_gs_summary">Nur aktualisieren, wenn globale Synchronisierung eingeschaltet ist.</string>
     <string name="preferences_require_wifi">Benötigt WLAN-Verbindung</string>
-    <string name="preferences_require_wifi_summary">Nur mit WLAN-Verbindung aktualisieren. Das Datenvolumen kann 1 MByte und mehr betragen.</string>
+    <string name="preferences_require_wifi_summary">Das Datenvolumen kann 1 MByte und mehr betragen.</string>
 
     <string name="about_title">ISK</string>
     <string name="about_version">ISK für EVE Online 1.0</string>
