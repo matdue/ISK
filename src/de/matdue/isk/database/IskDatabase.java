@@ -27,6 +27,7 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class IskDatabase extends SQLiteOpenHelper {
@@ -503,7 +504,14 @@ public class IskDatabase extends SQLiteOpenHelper {
 		}
 	}
 	
-	public Cursor getEveWallet(String characterId) {
+	public Cursor getEveWallet(String characterId, String searchFilter) {
+		String selection = WalletTable.CHARACTER_ID + "=?";
+		String[] selectionArgs = new String[] { characterId };
+		if (!TextUtils.isEmpty(searchFilter)) {
+			selection += " AND " + WalletTable.TYPE_NAME + " LIKE ?";
+			selectionArgs = new String[] { characterId, "%" + searchFilter + "%" };
+		}
+		
 		try {
 			SQLiteDatabase db = getReadableDatabase();
 			Cursor cursor = db.query(WalletTable.TABLE_NAME,
@@ -525,8 +533,8 @@ public class IskDatabase extends SQLiteOpenHelper {
 					WalletTable.TRANSACTION_FOR,
 					WalletTable.TYPE_ID
 				},
-				WalletTable.CHARACTER_ID + "=?",  // where
-				new String[] { characterId },  // where arguments
+				selection,  // where
+				selectionArgs,  // where arguments
 				null,  // group by
 				null,  // having
 				WalletTable.DATE + " desc"); // order by
