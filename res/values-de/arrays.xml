@@ -81,9 +81,9 @@
 		<item>Contract Reward</item>
 		<item>Contract Collateral Refund</item>
 		<item>Contract Collateral Payout</item>
-		<item>Contract Price</item>
+		<item>Vertrag - Preis</item>
 		<item>Vertrag - Maklergebühr</item>
-		<item>Contract Sales Tax</item>
+		<item>Vertrag - Umsatzsteuer</item>
 		<item>Vertrag - Einlage</item>
 		<item>Contract Deposit Sales Tax</item>
 		<item>Secure EVE Time Code Exchange</item>
@@ -92,8 +92,8 @@
 		<item>Contract Price Payment (corp)</item>
 		<item>Contract Brokers Fee (corp)</item>
 		<item>Contract Deposit (corp)</item>
-		<item>Contract Deposit Refund</item>
-		<item>Contract Reward Deposited</item>
+		<item>Vertrag - Einlagenrückzahlung</item>
+		<item>Vertrag - Belohnung eingezahlt</item>
 		<item>Contract Reward Deposited (corp)</item>
 		<item>Kopfgeld-Auszahlungen</item>
 		<item>Advertisement Listing Fee</item>
