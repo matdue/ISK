@@ -99,7 +99,10 @@ public class WalletActivity extends IskActivity {
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 			inflater.inflate(R.menu.wallet_options, menu);
-			((SearchView)menu.findItem(R.id.search).getActionView()).setOnQueryTextListener(this);
+			
+			SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+			searchView.setOnQueryTextListener(this);
+			searchView.setQueryHint(getResources().getText(R.string.wallet_search_hint));
 			
 			super.onCreateOptionsMenu(menu, inflater);
 		}

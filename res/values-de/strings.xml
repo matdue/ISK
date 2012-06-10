@@ -61,5 +61,6 @@
     <string name="wallet_quantity_symbol">\u00A0\u00D7\u00A0</string>
     <string name="wallet_item_image">Item-Bild</string>
     <string name="wallet_optmenu_search">Suchen</string>
+    <string name="wallet_search_hint">Gegenstand</string>
     
 </resources>
