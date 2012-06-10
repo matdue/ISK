@@ -31,10 +31,14 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
 public class WalletActivity extends IskActivity {
@@ -65,13 +69,16 @@ public class WalletActivity extends IskActivity {
 		}
 	}
 	
-	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnQueryTextListener {
 		
 		private WalletAdapter adapter;
+		private String searchFilter;
 
 		@Override
 		public void onActivityCreated(Bundle savedInstanceState) {
 			super.onActivityCreated(savedInstanceState);
+			
+			setHasOptionsMenu(true);
 			
 			// Give some text to display if there is no data.
 			setEmptyText(getResources().getText(R.string.wallet_no_data));
@@ -90,12 +97,23 @@ public class WalletActivity extends IskActivity {
 		}
 		
 		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+			inflater.inflate(R.menu.wallet_options, menu);
+			
+			SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+			searchView.setOnQueryTextListener(this);
+			searchView.setQueryHint(getResources().getText(R.string.wallet_search_hint));
+			
+			super.onCreateOptionsMenu(menu, inflater);
+		}
+		
+		@Override
 		public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 			return new SimpleCursorLoader(getActivity()) {
 				@Override
 				public Cursor loadInBackground() {
 					String characterId = getActivity().getIntent().getStringExtra("characterID");
-					return ((IskActivity)getActivity()).getDatabase().getEveWallet(characterId);
+					return ((IskActivity)getActivity()).getDatabase().getEveWallet(characterId, searchFilter);
 				}
 			};
 		}
@@ -120,6 +138,19 @@ public class WalletActivity extends IskActivity {
             // above is about to be closed.  We need to make sure we are no
             // longer using it.
 			adapter.swapCursor(null);
+		}
+
+		@Override
+		public boolean onQueryTextChange(String newText) {
+			searchFilter = newText;
+			getLoaderManager().restartLoader(0, null, this);
+			return true;
+		}
+
+		@Override
+		public boolean onQueryTextSubmit(String query) {
+			// Do nothing, everything is handled by onQueryTextChange()
+			return true;
 		}
 		
 	}
