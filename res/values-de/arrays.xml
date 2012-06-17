@@ -20,7 +20,7 @@
 		<item>Mission Reward</item>
 		<item>Clone Activation</item>
 		<item>Inheritance</item>
-		<item>Player Donation</item>
+		<item>Spielerspende</item>
 		<item>Corporation Payment</item>
 		<item>Docking Fee</item>
 		<item>Office Rental Fee</item>
@@ -40,8 +40,8 @@
 		<item>Agent Location Services</item>
 		<item>Agent Donation</item>
 		<item>Agent Security Services</item>
-		<item>Agent Mission Collateral Paid</item>
-		<item>Agent Mission Collateral Refunded</item>
+		<item>Agent - Missions-Sicherheitszahlung</item>
+		<item>Agent - Missions-Sicherheitsrückzahlung</item>
 		<item>Agents_preward</item>
 		<item>Agent - Missions-Belohnung</item>
 		<item>Agent - Missions-Belohnung für Zeitbonus</item>
