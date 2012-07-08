@@ -36,7 +36,8 @@
 			        android:background="?android:attr/selectableItemBackground"
 			        android:text="@string/main_menu_wallet"
 			        android:textAppearance="?android:attr/textAppearanceLarge"
-			        android:textColor="@android:color/white" />
+			        android:textColor="@android:color/white"
+			        android:onClick="gotoWallet" />
                 
             </FrameLayout>
 
@@ -100,7 +101,8 @@
 			        android:background="?android:attr/selectableItemBackground"
 			        android:text="@string/main_menu_pilots"
 			        android:textAppearance="?android:attr/textAppearanceLarge"
-			        android:textColor="@android:color/white" />
+			        android:textColor="@android:color/white"
+			        android:onClick="gotoPilots" />
                 
             </FrameLayout>
             

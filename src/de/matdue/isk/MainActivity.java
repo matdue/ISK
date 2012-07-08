@@ -99,31 +99,19 @@ public class MainActivity extends IskActivity {
         spinner.setAdapter(adapter);
         refreshPilots();
         
-        Button walletButton = (Button) findViewById(R.id.wallet);
-        walletButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String characterID = getPreferences().getString("startCharacterID", null);
-				if (characterID != null) {
-					Intent intent = new Intent(MainActivity.this, WalletActivity.class);
-					intent.putExtra("characterID", characterID);
-					startActivity(intent);
-				}
-			}
-		});
-        
-        Button pilotsButton = (Button) findViewById(R.id.pilots);
-		pilotsButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				startActivity(new Intent(MainActivity.this, PilotsActivity.class));
-			}
-		});
-        
         // Make sure update service to be called regularly
      	WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), false);
      		
         showWelcomeDialog();
+    }
+    
+    public void gotoWallet(View view) {
+    	String characterID = getPreferences().getString("startCharacterID", null);
+		if (characterID != null) {
+			Intent intent = new Intent(this, WalletActivity.class);
+			intent.putExtra("characterID", characterID);
+			startActivity(intent);
+		}
     }
     
     public void gotoMarketOrders(View view) {
@@ -133,6 +121,10 @@ public class MainActivity extends IskActivity {
 			intent.putExtra("characterID", characterID);
 			startActivity(intent);
 		}
+    }
+    
+    public void gotoPilots(View view) {
+    	startActivity(new Intent(this, PilotsActivity.class));
     }
     
     @Override
