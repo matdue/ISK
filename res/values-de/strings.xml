@@ -12,6 +12,7 @@
     <string name="main_optmenu_info">Info</string>
     <string name="main_menu_wallet">Konto</string>
     <string name="main_menu_pilots">Piloten</string>
+    <string name="main_menu_market_orders">Aufträge</string>
     <string name="main_refresh_error">Fehler beim Aktualisieren: %1$s</string>
 
     <string name="preferences_title">Einstellungen</string>
@@ -62,5 +63,17 @@
     <string name="wallet_item_image">Item-Bild</string>
     <string name="wallet_optmenu_search">Suchen</string>
     <string name="wallet_search_hint">Gegenstand</string>
+    
+    <string name="market_order_title">Marktaufträge</string>
+    <string name="market_order_unknown_item">Unbekanntes Teil (%1$s)</string>
+    <string name="market_order_unknown_station">Unbekannte Station (%1$s)</string>
+    <string name="market_order_price_per_unit">%1$s/Stück</string>
+    <string name="market_order_orderstate_buy">Kauf</string>
+    <string name="market_order_orderstate_sell">Verkauf</string>
+    <string name="market_order_orderstate_bought">Gekauft oder ausgelaufen</string>
+    <string name="market_order_orderstate_sold">Verkauft oder ausgelaufen</string>
+    <string name="market_order_fulfilled">%1$d%% erfüllt (%2$s/%3$s)</string>
+    <string name="market_order_expires">Gültig bis %1$s</string>
+    <string name="market_order_watch">Beobachten</string>
     
 </resources>

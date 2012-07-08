@@ -33,7 +33,7 @@ import android.util.Log;
 public class IskDatabase extends SQLiteOpenHelper {
 	
 	private static final String DATABASE_NAME = "isk.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	
 	public IskDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,18 +48,19 @@ public class IskDatabase extends SQLiteOpenHelper {
 		db.execSQL(BalanceTable.SQL_CREATE);
 		db.execSQL(WalletTable.SQL_CREATE);
 		db.execSQL(WalletTable.IDX_CREATE);
+		db.execSQL(OrderWatchTable.SQL_CREATE);
+		db.execSQL(OrderWatchItemTable.SQL_CREATE);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL(WalletTable.IDX_DROP);
-		db.execSQL(WalletTable.SQL_DROP);
-		db.execSQL(BalanceTable.SQL_DROP);
-		db.execSQL(CharacterTable.SQL_DROP);
-		db.execSQL(ApiKeyTable.SQL_DROP);
-		db.execSQL(EveApiHistoryTable.SQL_DROP);
-		db.execSQL(EveApiCacheTable.SQL_DROP);
-		onCreate(db);
+		switch (oldVersion) {
+		case 1:
+			// 1 -> 2: New tables 'orderWatch' and 'orderWatchItem'
+			db.execSQL(OrderWatchTable.SQL_CREATE);
+			db.execSQL(OrderWatchItemTable.SQL_CREATE);
+			break;
+		}
 	}
 
 	public Cursor getApiKeyCursor() {
@@ -546,4 +547,155 @@ public class IskDatabase extends SQLiteOpenHelper {
 		return null;
 	}
 	
+	public Cursor queryOrderWatches(String characterId) {
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
+					new String[] { 
+						"rowid _id",
+						OrderWatchTable.ORDER_ID, 
+						OrderWatchTable.ORDER_STATE, 
+						OrderWatchTable.TYPE_ID, 
+						OrderWatchTable.TYPE_NAME, 
+						OrderWatchTable.STATION_ID, 
+						OrderWatchTable.STATION_NAME, 
+						OrderWatchTable.PRICE, 
+						OrderWatchTable.VOL_ENTERED, 
+						OrderWatchTable.VOL_REMAINING, 
+						OrderWatchTable.FULFILLED, 
+						OrderWatchTable.EXPIRES, 
+						OrderWatchTable.ACTION,
+						OrderWatchTable.STATUS,
+						OrderWatchTable.SORT_KEY,
+						OrderWatchTable.SEQ_ID
+					}, 
+					OrderWatchTable.CHARACTER_ID + "=?", 
+					new String[] { characterId }, 
+					null, 
+					null, 
+					OrderWatchTable.SORT_KEY + " desc");  // order by
+			return cursor;
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryOrderWatches", e);
+		}
+		return null;
+	}
+	
+	public List<OrderWatch> queryAllOrderWatches(String characterId) {
+		ArrayList<OrderWatch> result = new ArrayList<OrderWatch>();
+		try {
+			Cursor cursor = queryOrderWatches(characterId); 
+			while (cursor.moveToNext()) {
+				OrderWatch orderWatch = new OrderWatch();
+				orderWatch.orderID = cursor.getLong(1);
+				orderWatch.orderState = cursor.getInt(2);
+				orderWatch.typeID = cursor.getInt(3);
+				orderWatch.typeName = cursor.getString(4);
+				orderWatch.stationID = cursor.getInt(5);
+				orderWatch.stationName = cursor.getString(6);
+				orderWatch.price = new BigDecimal(cursor.getString(7));
+				orderWatch.volEntered = cursor.getInt(8);
+				orderWatch.volRemaining = cursor.getInt(9);
+				orderWatch.fulfilled = cursor.getInt(10);
+				orderWatch.expires = new Date(cursor.getLong(11));
+				orderWatch.action = cursor.getInt(12);
+				orderWatch.status = cursor.getInt(13);
+				orderWatch.sortKey = cursor.getInt(14);
+				orderWatch.seqId = cursor.getLong(15);
+				
+				result.add(orderWatch);
+			}
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryAllOrderWatches", e);
+		}
+		
+		return result;
+	}
+	
+	public void storeOrderWatches(String characterId, List<OrderWatch> orderWatches) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			InsertHelper insertHelper = new InsertHelper(db, OrderWatchTable.TABLE_NAME);
+			try {
+				db.beginTransaction();
+				
+				db.delete(OrderWatchTable.TABLE_NAME, 
+						OrderWatchTable.CHARACTER_ID + "=?", 
+						new String[] { characterId });
+				
+				for (OrderWatch orderWatch : orderWatches) {
+					ContentValues values = new ContentValues();
+					values.put(OrderWatchTable.CHARACTER_ID, characterId);
+					values.put(OrderWatchTable.ORDER_ID, orderWatch.orderID);
+					values.put(OrderWatchTable.ORDER_STATE, orderWatch.orderState);
+					values.put(OrderWatchTable.TYPE_ID, orderWatch.typeID);
+					values.put(OrderWatchTable.TYPE_NAME, orderWatch.typeName);
+					values.put(OrderWatchTable.STATION_ID, orderWatch.stationID);
+					values.put(OrderWatchTable.STATION_NAME, orderWatch.stationName);
+					values.put(OrderWatchTable.PRICE, orderWatch.price.toString());
+					values.put(OrderWatchTable.VOL_ENTERED, orderWatch.volEntered);
+					values.put(OrderWatchTable.VOL_REMAINING, orderWatch.volRemaining);
+					values.put(OrderWatchTable.FULFILLED, orderWatch.fulfilled);
+					values.put(OrderWatchTable.EXPIRES, orderWatch.expires.getTime());
+					values.put(OrderWatchTable.ACTION, orderWatch.action);
+					values.put(OrderWatchTable.STATUS, orderWatch.status);
+					values.put(OrderWatchTable.SORT_KEY, orderWatch.sortKey);
+					values.put(OrderWatchTable.SEQ_ID, orderWatch.seqId);
+					insertHelper.insert(values);
+				}
+				
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+				insertHelper.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeOrderWatches", e);
+		}
+	}
+
+	public void setOrderWatchStatusWatch(String characterId, long seqId, boolean checked) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
+					new String[] { OrderWatchTable.STATUS }, 
+					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?", 
+					new String[] { characterId, Long.toString(seqId) }, 
+					null, 
+					null, 
+					null);
+			if (cursor.moveToNext()) {
+				int status = cursor.getInt(0);
+				cursor.close();
+				
+				if (checked) {
+					status |= OrderWatch.WATCH;
+				} else {
+					status &= ~OrderWatch.WATCH;
+				}
+				
+				ContentValues values = new ContentValues();
+				values.put(OrderWatchTable.STATUS, status);
+				db.update(OrderWatchTable.TABLE_NAME, 
+						values, 
+						OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?", 
+						new String[] { characterId, Long.toString(seqId) });
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "setOrderWatchStatusWatch", e);
+		}
+	}
+	
+	public void deleteOrderWatch(String characterId, long seqId) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			db.delete(OrderWatchTable.TABLE_NAME, 
+					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?",  
+					new String[] { characterId, Long.toString(seqId) });
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "deleteOrderWatch", e);
+		}
+	}
+
 }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" 
+    android:padding="5dip">
+    
+    <TextView
+        android:id="@+id/market_order_entry_orderstate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/market_order_orderstate_buy" />
+    
+    <TextView 
+        android:id="@+id/market_order_entry_station"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/market_order_entry_orderstate"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="@string/market_order_unknown_station" />
+    
+    <LinearLayout
+        android:id="@+id/market_order_entry_item_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/market_order_entry_station"
+        android:orientation="horizontal" 
+        tools:ignore="UseCompoundDrawables">
+
+        <ImageView
+            android:id="@+id/market_order_entry_item_image"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:contentDescription="@string/wallet_item_image"
+            android:maxHeight="48dip"
+            android:maxWidth="48dip"
+            android:scaleType="centerInside"
+            android:src="@android:color/white" />
+
+        <TextView
+            android:id="@+id/market_order_entry_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@string/market_order_unknown_item" />
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/market_order_entry_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/market_order_entry_item_line"
+        android:text="@string/market_order_price_per_unit" />
+
+    <include
+        android:id="@+id/market_order_entry_incl_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/market_order_entry_price"
+        layout="@layout/market_order_entry_active" />
+
+</RelativeLayout>

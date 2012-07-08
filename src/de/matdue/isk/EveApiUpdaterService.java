@@ -16,6 +16,7 @@
 package de.matdue.isk;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import android.content.ContentResolver;
@@ -23,19 +24,24 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
 import de.matdue.isk.database.ApiKey;
 import de.matdue.isk.database.Balance;
+import de.matdue.isk.database.EveDatabase;
+import de.matdue.isk.database.OrderWatch;
 import de.matdue.isk.database.Wallet;
 import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.eve.AccountBalance;
 import de.matdue.isk.eve.CacheInformation;
 import de.matdue.isk.eve.EveApi;
 import de.matdue.isk.eve.EveApiCache;
+import de.matdue.isk.eve.MarketOrder;
 import de.matdue.isk.eve.WalletJournal;
 
 public class EveApiUpdaterService extends WakefulIntentService {
@@ -43,6 +49,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 	public static final String ACTION_RESP = "de.matdue.isk.EVE_API_UPDATER_FINISHED";
 	
 	private IskDatabase iskDatabase;
+	private EveDatabase eveDatabase;
 	private EveApi eveApi;
 
 	public EveApiUpdaterService() {
@@ -80,6 +87,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		
 		try {
 			iskDatabase = new IskDatabase(this);
+			eveDatabase = new EveDatabase(this);
 			eveApi = new EveApi(new EveApiCacheDatabase(forcedUpdate));
 			
 			// If 'characterId' is given, update that specific character only
@@ -101,6 +109,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 				.putExtra("error", message));
 		} finally {
 			iskDatabase.close();
+			eveDatabase.close();
 		}
 	}
 	
@@ -145,6 +154,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 	private void updateCharacter(String characterId) {
 		updateBalance(characterId);
 		updateWallet(characterId);
+		updateMarketOrders(characterId);
 		
 		// Inform listeners about updated character
 		sendBroadcast(new Intent(ACTION_RESP)
@@ -200,6 +210,138 @@ public class EveApiUpdaterService extends WakefulIntentService {
 					walletDatas.add(walletData);
 				}
 				iskDatabase.storeEveWallet(characterId, walletDatas);
+			}
+		}
+	}
+	
+	private OrderWatch createOrderWatch(MarketOrder marketOrder, String characterId, SparseArray<String> itemNameCache, SparseArray<String> stationNameCache) {
+		OrderWatch orderWatch = new OrderWatch();
+		orderWatch.characterId = characterId;
+		orderWatch.orderID = marketOrder.orderID;
+		orderWatch.orderState = marketOrder.orderState;
+		
+		orderWatch.typeID = marketOrder.typeID;
+		String typeName = itemNameCache.get(marketOrder.typeID);
+		if (typeName == null) {
+			typeName = eveDatabase.queryTypeName(marketOrder.typeID);
+			itemNameCache.put(marketOrder.typeID, typeName);
+		}
+		orderWatch.typeName = typeName;
+		
+		orderWatch.stationID = marketOrder.stationID;
+		String stationName = stationNameCache.get(marketOrder.stationID);
+		if (stationName == null) {
+			stationName = eveDatabase.queryStationName(marketOrder.stationID);
+			stationNameCache.put(marketOrder.stationID, stationName);
+		}
+		orderWatch.stationName = stationName;
+		
+		orderWatch.price = marketOrder.price;
+		orderWatch.volEntered = marketOrder.volEntered;
+		orderWatch.volRemaining = marketOrder.volRemaining;
+		orderWatch.fulfilled = 100 - ((marketOrder.volEntered != 0) ? (100 * marketOrder.volRemaining / marketOrder.volEntered) : 0);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(marketOrder.issued);
+		calendar.add(Calendar.DATE, marketOrder.duration);
+		orderWatch.expires = calendar.getTime();
+		
+		orderWatch.action = marketOrder.bid;
+		orderWatch.status = 0;
+		orderWatch.sortKey = orderWatch.fulfilled;
+		
+		return orderWatch;
+	}
+	
+	private void updateMarketOrders(String characterId) {
+		ApiKey apiKey = iskDatabase.queryApiKey(characterId);
+		if (apiKey != null) {
+			List<MarketOrder> marketOrders = eveApi.queryMarketOrders(apiKey.key, apiKey.code, characterId);
+			if (marketOrders != null) {
+				long seqId = SystemClock.elapsedRealtime();
+				
+				// Load old data objects (for expired orders)
+				List<OrderWatch> oldOrderWatches = iskDatabase.queryAllOrderWatches(characterId);
+				
+				// Prepare data objects
+				ArrayList<OrderWatch> orderWatches = new ArrayList<OrderWatch>();
+				
+				// Copy expired orders
+				for (OrderWatch oldOrderWatch : oldOrderWatches) {
+					if (oldOrderWatch.orderID == 0) {
+						oldOrderWatch.seqId = ++seqId;
+						orderWatches.add(oldOrderWatch);
+					}
+				}
+				
+				// Cache for item name and station name to minimize database access
+				SparseArray<String> itemNameCache = new SparseArray<String>();
+				SparseArray<String> stationNameCache = new SparseArray<String>();
+				
+				for (MarketOrder marketOrder : marketOrders) {
+					// Ignore market orders with a duration of 0
+					// These are immediate buy/sell orders
+					if (marketOrder.duration == 0) {
+						continue;
+					}
+					
+					OrderWatch orderWatch = createOrderWatch(marketOrder, characterId, itemNameCache, stationNameCache);
+					orderWatch.seqId = ++seqId;
+
+					// Look up order in 'oldOrderWatches'
+					OrderWatch savedOrderWatch = null;
+					for (OrderWatch oldOrderWatch : oldOrderWatches) {
+						if (oldOrderWatch.orderID == orderWatch.orderID) {
+							savedOrderWatch = oldOrderWatch;
+							break;
+						}
+					}
+					
+					if (orderWatch.orderState == 0) {
+						// Active order
+						if (savedOrderWatch != null) {
+							orderWatch.status = savedOrderWatch.status;
+						} else {
+							// TODO: Automatically watch order if item ID is in OrderWatchItems
+						}
+						
+						orderWatches.add(orderWatch);
+					} else {
+						// Inactive order: If it was watched, remember it
+						if (savedOrderWatch != null) {
+							orderWatch.orderID = 0;
+							orderWatch.sortKey = 1000 + orderWatch.fulfilled;
+							orderWatches.add(orderWatch);
+							
+							// TODO: Notify about expires/fulfilled order
+						}
+					}
+				}
+				
+				// Mark missing orders as expired/fulfilled
+				for (OrderWatch oldOrderWatch : oldOrderWatches) {
+					if (oldOrderWatch.orderID == 0) {
+						continue;
+					}
+					
+					boolean isMissing = true;
+					for (MarketOrder marketOrder : marketOrders) {
+						if (oldOrderWatch.orderID == marketOrder.orderID) {
+							isMissing = false;
+							break;
+						}
+					}
+					if (isMissing) {
+						// Add as inactive order
+						oldOrderWatch.orderID = 0;
+						oldOrderWatch.sortKey = 1000 + oldOrderWatch.fulfilled;
+						orderWatches.add(oldOrderWatch);
+						
+						// TODO: Notify about expires/fulfilled order
+					}
+				}
+				
+				iskDatabase.storeOrderWatches(characterId, orderWatches);
 			}
 		}
 	}

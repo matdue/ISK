@@ -12,6 +12,7 @@
     <string name="main_optmenu_info">About</string>
     <string name="main_menu_wallet">Wallet</string>
     <string name="main_menu_pilots">Pilots</string>
+    <string name="main_menu_market_orders">Orders</string>
     <string name="main_refresh_error">Error while refreshing data: %1$s</string>
 
     <string name="preferences_title">Settings</string>
@@ -63,4 +64,15 @@
     <string name="wallet_optmenu_search">Search</string>
     <string name="wallet_search_hint">Item name</string>
     
+    <string name="market_order_title">Market orders</string>
+    <string name="market_order_unknown_item">Unknown item (%1$s)</string>
+    <string name="market_order_unknown_station">Unknown station (%1$s)</string>
+    <string name="market_order_price_per_unit">%1$s per unit</string>
+    <string name="market_order_orderstate_buy">Buy</string>
+    <string name="market_order_orderstate_sell">Sell</string>
+    <string name="market_order_orderstate_bought">Bought or expired</string>
+    <string name="market_order_orderstate_sold">Sold or expired</string>
+    <string name="market_order_fulfilled">%1$d%% fulfilled (%2$s/%3$s)</string>
+    <string name="market_order_expires">Expires %1$s</string>
+    <string name="market_order_watch">Watch</string>
 </resources>

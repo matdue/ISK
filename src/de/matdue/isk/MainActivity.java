@@ -126,6 +126,15 @@ public class MainActivity extends IskActivity {
         showWelcomeDialog();
     }
     
+    public void gotoMarketOrders(View view) {
+    	String characterID = getPreferences().getString("startCharacterID", null);
+		if (characterID != null) {
+			Intent intent = new Intent(this, MarketOrderActivity.class);
+			intent.putExtra("characterID", characterID);
+			startActivity(intent);
+		}
+    }
+    
     @Override
 	protected Dialog onCreateDialog(int id, Bundle args) {
 		Dialog dialog = null;

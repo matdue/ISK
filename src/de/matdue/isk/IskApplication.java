@@ -16,6 +16,7 @@
 package de.matdue.isk;
 
 import de.matdue.isk.bitmap.BitmapManager;
+import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
@@ -24,6 +25,7 @@ import android.os.StrictMode;
 public class IskApplication extends Application {
 	
 	private IskDatabase iskDatabase;
+	private EveDatabase eveDatabase;
 	private BitmapManager bitmapManager;
 	
 	@Override
@@ -48,11 +50,16 @@ public class IskApplication extends Application {
 		}
 		
 		iskDatabase = new IskDatabase(this);
+		eveDatabase = new EveDatabase(this);
 		bitmapManager = new BitmapManager(this, getCacheDir());
 	}
 	
 	public IskDatabase getIskDatabase() {
 		return iskDatabase;
+	}
+	
+	public EveDatabase getEveDatabase() {
+		return eveDatabase;
 	}
 	
 	public BitmapManager getBitmapManager() {

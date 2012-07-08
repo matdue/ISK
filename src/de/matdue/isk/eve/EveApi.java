@@ -514,5 +514,68 @@ public class EveApi {
 		
 		return root;
 	}
+	
+	private RootElement prepareMarketOrderXmlParser(final List<MarketOrder> result, final CacheInformation cacheInformation) {
+		RootElement root = new RootElement("eveapi");
+		prepareCacheInformationXmlParser(root, cacheInformation);
+		
+		root.getChild("result").getChild("rowset").getChild("row").setStartElementListener(new StartElementListener() {
+			@Override
+			public void start(Attributes attributes) {
+				try {
+					MarketOrder marketOrder = new MarketOrder();
+					marketOrder.orderID = Long.parseLong(attributes.getValue("orderID"));
+					marketOrder.stationID = Integer.parseInt(attributes.getValue("stationID"));
+					marketOrder.volEntered = Integer.parseInt(attributes.getValue("volEntered"));
+					marketOrder.volRemaining = Integer.parseInt(attributes.getValue("volRemaining"));
+					marketOrder.orderState = Integer.parseInt(attributes.getValue("orderState"));
+					marketOrder.typeID = Integer.parseInt(attributes.getValue("typeID"));
+					marketOrder.duration = Integer.parseInt(attributes.getValue("duration"));
+					marketOrder.price = new BigDecimal(attributes.getValue("price"));
+					marketOrder.bid = Integer.parseInt(attributes.getValue("bid"));
+					marketOrder.issued = dateFormatter.parse(attributes.getValue("issued"));
+					
+					result.add(marketOrder);
+				} catch (Exception e) {
+					Log.e("EveApi", "Market order parsing error", e);
+					// Ignore error, do not add this record
+				}
+			}
+		});
+		
+		return root;
+	}
+	
+	public List<MarketOrder> queryMarketOrders(String keyID, String vCode, String characterID) {
+		final String marketOrderURL = "/char/MarketOrders.xml.aspx";
+		
+		// Lookup in cache
+		String cacheKey = CacheInformation.buildHashKey(marketOrderURL, keyID, vCode, characterID);
+		if (apiCache.isCached(cacheKey)) {
+			return null;
+		}
+		
+		CacheInformation cacheInformation = new CacheInformation();
+
+		// Prepare XML parser
+		ArrayList<MarketOrder> result = new ArrayList<MarketOrder>();
+		RootElement root = prepareMarketOrderXmlParser(result, cacheInformation);
+		
+		// Query API
+		if (!queryApi(root.getContentHandler(), marketOrderURL, keyID, vCode, characterID)) {
+			return null;
+		}
+		Log.d("EveApi", "Market orders loaded: " + result.size());
+		
+		// Plausibility check
+		if (result.isEmpty()) {
+			return null;
+		}
+		
+		// Cache result
+		apiCache.cache(cacheKey, cacheInformation);
+		
+		return result;
+	}
 
 }
