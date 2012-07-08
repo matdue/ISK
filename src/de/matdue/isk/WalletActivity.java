@@ -79,7 +79,6 @@ public class WalletActivity extends IskActivity {
 			super.onActivityCreated(savedInstanceState);
 			
 			setHasOptionsMenu(true);
-			getListView().setFastScrollEnabled(true);
 			
 			// Give some text to display if there is no data.
 			setEmptyText(getResources().getText(R.string.wallet_no_data));
