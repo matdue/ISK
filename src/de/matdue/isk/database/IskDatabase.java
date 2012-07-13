@@ -155,13 +155,37 @@ public class IskDatabase extends SQLiteOpenHelper {
 	public void deleteApiKey(long id) {
 		try {
 			SQLiteDatabase db = getWritableDatabase();
-			db.delete(CharacterTable.TABLE_NAME,
-					CharacterTable.API_ID + "=?",
-					new String[] { Long.toString(id) });
-			
-			db.delete(ApiKeyTable.TABLE_NAME, 
-					ApiKeyTable.ID + "=?", 
-					new String[] { Long.toString(id) });
+			String subselect = "(SELECT " + CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID + " FROM " + CharacterTable.TABLE_NAME + " WHERE " + CharacterTable.TABLE_NAME + "." + CharacterTable.API_ID + "=?)";
+			try {
+				db.beginTransaction();
+				String idStr = Long.toString(id);
+				db.delete(BalanceTable.TABLE_NAME, 
+						BalanceTable.CHARACTER_ID + " IN " + subselect, 
+						new String[] { idStr });
+				
+				db.delete(WalletTable.TABLE_NAME, 
+						WalletTable.CHARACTER_ID + " IN " + subselect, 
+						new String[] { idStr });
+				
+				db.delete(OrderWatchTable.TABLE_NAME, 
+						OrderWatchTable.CHARACTER_ID + " IN " + subselect, 
+						new String[] { idStr });
+				
+				db.delete(OrderWatchItemTable.TABLE_NAME, 
+						OrderWatchItemTable.CHARACTER_ID + " IN " + subselect, 
+						new String[] { idStr });
+				
+				db.delete(CharacterTable.TABLE_NAME,
+						CharacterTable.API_ID + "=?",
+						new String[] { idStr });
+				
+				db.delete(ApiKeyTable.TABLE_NAME, 
+						ApiKeyTable.ID + "=?", 
+						new String[] { idStr });
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+			}
 		} catch (SQLiteException e) {
 			Log.e("IskDatabase", "deleteApiKey", e);
 		}
