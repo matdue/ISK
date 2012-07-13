@@ -693,7 +693,6 @@ public class IskDatabase extends SQLiteOpenHelper {
 					null);
 			if (cursor.moveToNext()) {
 				int status = cursor.getInt(0);
-				cursor.close();
 				
 				if (checked) {
 					status |= OrderWatch.WATCH;
@@ -708,6 +707,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 						OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?", 
 						new String[] { characterId, Long.toString(seqId) });
 			}
+			cursor.close();
 		} catch (SQLiteException e) {
 			Log.e("IskDatabase", "setOrderWatchStatusWatch", e);
 		}
@@ -723,5 +723,71 @@ public class IskDatabase extends SQLiteOpenHelper {
 			Log.e("IskDatabase", "deleteOrderWatch", e);
 		}
 	}
+	
+	public boolean shouldWatchItem(String characterId, int typeID, int action) {
+		boolean result = false;
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(OrderWatchItemTable.TABLE_NAME, 
+					new String[] { "rowid _id" }, 
+					OrderWatchItemTable.CHARACTER_ID + "=? AND " + OrderWatchItemTable.TYPE_ID + "=? AND " + OrderWatchItemTable.ACTION + "=?", 
+					new String[] { characterId, Integer.toString(typeID), Integer.toString(action) }, 
+					null, 
+					null, 
+					null);
+			result = cursor.moveToNext();
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "getOrderWatchItem", e);
+		}
+		
+		return result;
+	}
 
+	public void storeOrderWatchItem(String characterId, long seqId, boolean checked, int action) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			
+			// Get item's type ID
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
+					new String[] { OrderWatchTable.TYPE_ID }, 
+					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?", 
+					new String[] { characterId, Long.toString(seqId) }, 
+					null, 
+					null, 
+					null);
+			if (cursor.moveToNext()) {
+				int typeID = cursor.getInt(0);
+				cursor.close();
+				
+				if (checked) {
+					cursor = db.query(OrderWatchItemTable.TABLE_NAME, 
+							new String[] { "rowid _id" }, 
+							OrderWatchItemTable.CHARACTER_ID + "=? AND " + OrderWatchItemTable.TYPE_ID + "=? AND " + OrderWatchItemTable.ACTION + "=?", 
+							new String[] { characterId, Integer.toString(typeID), Integer.toString(action) }, 
+							null, 
+							null, 
+							null);
+					boolean isRecorded = cursor.moveToNext();
+					cursor.close();
+					if (!isRecorded) {
+						ContentValues values = new ContentValues();
+						values.put(OrderWatchItemTable.CHARACTER_ID, characterId);
+						values.put(OrderWatchItemTable.TYPE_ID, typeID);
+						values.put(OrderWatchItemTable.ACTION, action);
+						db.insert(OrderWatchItemTable.TABLE_NAME, null, values);
+					}
+				} else {
+					db.delete(OrderWatchItemTable.TABLE_NAME,
+							OrderWatchItemTable.CHARACTER_ID + "=? AND " + OrderWatchItemTable.TYPE_ID + "=? AND " + OrderWatchItemTable.ACTION + "=?",
+							new String[] { characterId, Integer.toString(typeID), Integer.toString(action) });
+				}
+			} else {
+				cursor.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeOrderWatchItem", e);
+		}
+	}
+	
 }

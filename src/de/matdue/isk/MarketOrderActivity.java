@@ -259,6 +259,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 				@Override
 				protected Void doInBackground(Void... params) {
 					iskDatabase.setOrderWatchStatusWatch(characterId, seqId, isChecked);
+					iskDatabase.storeOrderWatchItem(characterId, seqId, isChecked, action);
 					return null;
 				}
 				

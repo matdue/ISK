@@ -304,7 +304,11 @@ public class EveApiUpdaterService extends WakefulIntentService {
 						if (savedOrderWatch != null) {
 							orderWatch.status = savedOrderWatch.status;
 						} else {
-							// TODO: Automatically watch order if item ID is in OrderWatchItems
+							// Watch this order if the same type ID has been watched in the past
+							boolean shouldWatch = iskDatabase.shouldWatchItem(characterId, orderWatch.typeID, orderWatch.action);
+							if (shouldWatch) {
+								orderWatch.status |= OrderWatch.WATCH;
+							}
 						}
 						
 						orderWatches.add(orderWatch);
