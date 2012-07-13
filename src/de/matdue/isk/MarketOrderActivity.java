@@ -45,7 +45,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.SearchView.OnQueryTextListener;
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
@@ -149,13 +151,14 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		}
 	}
 	
-	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, MarketOrderAdapter.MarketOrderListener {
+	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnQueryTextListener, MarketOrderAdapter.MarketOrderListener {
 		
 		private String characterId;
 		private int action;
 		private int orderBy;
 		private IskDatabase iskDatabase;
 		private MarketOrderAdapter adapter;
+		private String searchFilter;
 
 		public static CursorLoaderListFragment newInstance(int action) {
 			Bundle args = new Bundle();
@@ -225,6 +228,10 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 			inflater.inflate(R.menu.market_order_options, menu);
 			
+			SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+			searchView.setOnQueryTextListener(this);
+			searchView.setQueryHint(getResources().getText(R.string.market_order_search_hint));
+
 			super.onCreateOptionsMenu(menu, inflater);
 		}
 		
@@ -233,7 +240,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			return new SimpleCursorLoader(getActivity(), args) {
 				@Override
 				public Cursor loadInBackground() {
-					return iskDatabase.queryOrderWatches(characterId, action, orderBy);
+					return iskDatabase.queryOrderWatches(characterId, action, orderBy, searchFilter);
 				}
 			};
 		}
@@ -298,6 +305,19 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			Bundle args = new Bundle();
 			args.putBoolean("scrollToTop", true);
 			getLoaderManager().restartLoader(0, args, this);
+		}
+
+		@Override
+		public boolean onQueryTextChange(String newText) {
+			searchFilter = newText;
+			getLoaderManager().restartLoader(0, null, this);
+			return true;
+		}
+
+		@Override
+		public boolean onQueryTextSubmit(String query) {
+			// Do nothing, everything is handled by onQueryTextChange()
+			return true;
 		}
 		
 	}

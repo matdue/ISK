@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <item android:id="@+id/search"
+          android:title="@string/market_order_optmenu_search"
+          android:icon="@drawable/ic_menu_search"
+          android:showAsAction="collapseActionView|ifRoom"
+          android:actionViewClass="android.widget.SearchView" />
     <item
         android:id="@+id/market_order_optmenu_sort"
         android:icon="@drawable/ic_menu_sort"

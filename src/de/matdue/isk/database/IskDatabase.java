@@ -547,7 +547,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 		return null;
 	}
 	
-	public Cursor queryOrderWatches(String characterId, Integer action, Integer orderBy) {
+	public Cursor queryOrderWatches(String characterId, Integer action, Integer orderBy, String searchFilter) {
 		String selection = OrderWatchTable.CHARACTER_ID + "=?";
 		ArrayList<String> selectionArgs = new ArrayList<String>();
 		selectionArgs.add(characterId);
@@ -555,6 +555,11 @@ public class IskDatabase extends SQLiteOpenHelper {
 		if (action != null) {
 			selection += " AND " + OrderWatchTable.ACTION + "=?";
 			selectionArgs.add(action.toString());
+		}
+		
+		if (!TextUtils.isEmpty(searchFilter)) {
+			selection += " AND " + OrderWatchTable.TYPE_NAME + " LIKE ?";
+			selectionArgs.add("%" + searchFilter + "%");
 		}
 		
 		String orderingTerm = OrderWatchTable.SORT_KEY;
@@ -610,7 +615,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 	public List<OrderWatch> queryAllOrderWatches(String characterId) {
 		ArrayList<OrderWatch> result = new ArrayList<OrderWatch>();
 		try {
-			Cursor cursor = queryOrderWatches(characterId, null, null); 
+			Cursor cursor = queryOrderWatches(characterId, null, null, null); 
 			while (cursor.moveToNext()) {
 				OrderWatch orderWatch = new OrderWatch();
 				orderWatch.orderID = cursor.getLong(1);
