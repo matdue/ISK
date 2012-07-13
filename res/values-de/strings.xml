@@ -82,5 +82,8 @@
     <string name="market_order_optmenu_sort_name">Sortieren nach Name</string>
     <string name="market_order_optmenu_sort_fulfillment">Sortieren nach Erfüllungsgrad</string>
     <string name="market_order_optmenu_sort_expiration">Sortieren nach Ablaufdatum</string>
+    <string name="market_order_optmenu_help">Hilfe</string>
+    <string name="market_order_helpdialog">Alle aktiven Marktaufträge werden hier aufgelistet.\n\nAufträge können zur Beobachtung markiert werden. Sie werden nach Ablauf oder vollständiger Erfüllung ebenfalls hier aufgelistet. Anschließend können sie mit einem Wisch nach links oder rechts entfernt werden.</string>
+    <string name="market_order_helpdialog_close">Schließen</string>
     
 </resources>

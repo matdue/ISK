@@ -82,5 +82,8 @@
     <string name="market_order_optmenu_sort_name">Sort by name</string>
     <string name="market_order_optmenu_sort_fulfillment">Sort by fulfillment</string>
     <string name="market_order_optmenu_sort_expiration">Sort by expiration date</string>
+    <string name="market_order_optmenu_help">Help</string>
+    <string name="market_order_helpdialog">Here you see all your active market orders.\n\nYou can watch an order by marking it. Orders which have completed or expired will be listed here, too. Remove them with a right or left swipe.</string>
+    <string name="market_order_helpdialog_close">Close</string>
     
 </resources>

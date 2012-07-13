@@ -22,11 +22,15 @@ import java.util.Date;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Resources;
@@ -134,6 +138,15 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 	
 	public void sortByExpiration(MenuItem menuItem) {
 		sortBy(OrderWatch.ORDER_BY_EXPIRATION);
+	}
+	
+	public void showHelp(MenuItem menuItem) {
+		FragmentManager fm = getFragmentManager();
+		if (fm.findFragmentByTag("HelpDialog") == null) {
+			FragmentTransaction ft = fm.beginTransaction().addToBackStack(null);
+			HelpDialogFragment fragment = HelpDialogFragment.newInstance();
+			fragment.show(ft, "HelpDialog");
+		}
 	}
 	
 	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, MarketOrderAdapter.MarketOrderListener {
@@ -416,6 +429,28 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			TextView expires;
 			CheckBox watch;
 			TextView watchDescription;
+		}
+		
+	}
+	
+	public static class HelpDialogFragment extends DialogFragment {
+		
+		public static HelpDialogFragment newInstance() {
+			HelpDialogFragment instance = new HelpDialogFragment();
+			return instance;
+		}
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			return new AlertDialog.Builder(getActivity())
+				.setMessage(R.string.market_order_helpdialog)
+				.setNeutralButton(R.string.market_order_helpdialog_close, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				})
+				.create();
 		}
 		
 	}
