@@ -21,6 +21,9 @@ import java.util.Date;
 public class OrderWatch {
 	
 	public static final int WATCH = 0x00000001;
+	
+	public static final int SELL = 0;
+	public static final int BUY = 1;
 
 	// No getters and setters to achive better performance
 	public String characterId;

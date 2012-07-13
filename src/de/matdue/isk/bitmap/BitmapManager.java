@@ -45,10 +45,6 @@ public class BitmapManager {
 	// Bitmap downloader
 	private BitmapDownloader bitmapDownloader;
 	
-	// Show this image or color while loading
-	private Integer loadingBitmap;
-	private Integer loadingColor;
-	
 	private Context context;
 
 	public BitmapManager(Context context, File cacheDir) {
@@ -74,17 +70,7 @@ public class BitmapManager {
 		bitmapDownloader.shutdown();
 	}
 	
-	public void setLoadingBitmap(int resourceId) {
-		loadingBitmap = resourceId;
-		loadingColor = null;
-	}
-	
-	public void setLoadingColor(int color) {
-		loadingColor = color;
-		loadingBitmap = null;
-	}
-	
-	public void setImageBitmap(ImageView imageView, String imageUrl) {
+	public void setImageBitmap(ImageView imageView, String imageUrl, Integer loadingBitmap, Integer loadingColor) {
 		// Bitmap cached in memory?
 		Bitmap cachedBitmap = memoryCache.get(imageUrl);
 		if (cachedBitmap != null) {
@@ -93,7 +79,7 @@ public class BitmapManager {
 		}
 
 		// Download bitmap and set ImageView
-		new DownloadTask(imageView).execute(imageUrl);
+		new DownloadTask(imageView, loadingBitmap, loadingColor).execute(imageUrl);
 	}
 	
 	/**
@@ -121,7 +107,7 @@ public class BitmapManager {
 		
 		private WeakReference<ImageView> imageViewReference;
 		
-		public DownloadTask(ImageView imageView) {
+		public DownloadTask(ImageView imageView, Integer loadingBitmap, Integer loadingColor) {
 			imageViewReference = new WeakReference<ImageView>(imageView);
 			
 			// Show loading image

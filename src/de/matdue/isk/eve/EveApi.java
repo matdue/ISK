@@ -53,6 +53,7 @@ public class EveApi {
 	private static final String IMAGE_BASE = "https://image.eveonline.com/";
 
 	private EveApiCache apiCache;
+	private HttpClient apiHttpClient;
 	
 	static {
 		// EVE Online API always uses GMT
@@ -64,12 +65,31 @@ public class EveApi {
 		this.apiCache = apiCache;
 	}
 	
+	public void close() {
+		if (apiHttpClient != null && apiHttpClient instanceof AndroidHttpClient) {
+			try {
+				((AndroidHttpClient) apiHttpClient).close();
+			} catch (Exception e) {
+				// Ignore error while closing, there's nothing we could do
+			} finally {
+				apiHttpClient = null;
+			}
+		}
+	}
+	
 	public static String getCharacterUrl(String characterId, int resolution) {
 		return IMAGE_BASE + "Character/" + characterId + "_" + resolution + ".jpg";
 	}
 	
 	public static String getTypeUrl(String typeID, int resolution) {
 		return IMAGE_BASE + "Type/" + typeID + "_" + resolution + ".png";
+	}
+	
+	private HttpClient getHttpClient() {
+		if (apiHttpClient == null) {
+			apiHttpClient = AndroidHttpClient.newInstance(AGENT);
+		}
+		return apiHttpClient;
 	}
 	
 	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode) {
@@ -87,7 +107,7 @@ public class EveApi {
 		
 		try {
 			// Create request
-			httpClient = AndroidHttpClient.newInstance(AGENT);
+			httpClient = getHttpClient();
 			HttpPost request = new HttpPost(URL_BASE + url);
 			AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
 			
@@ -139,13 +159,6 @@ public class EveApi {
 			if (entity != null) {
 				try {
 					entity.consumeContent();
-				} catch (Exception e) {
-					// Ignore error while closing, there's nothing we could do
-				}
-			}
-			if (httpClient != null && httpClient instanceof AndroidHttpClient) {
-				try {
-					((AndroidHttpClient) httpClient).close();
 				} catch (Exception e) {
 					// Ignore error while closing, there's nothing we could do
 				}

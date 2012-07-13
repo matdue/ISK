@@ -75,5 +75,7 @@
     <string name="market_order_fulfilled">%1$d%% erfüllt (%2$s/%3$s)</string>
     <string name="market_order_expires">Gültig bis %1$s</string>
     <string name="market_order_watch">Beobachten</string>
+    <string name="market_order_tab_buy">Kauf</string>
+    <string name="market_order_tab_sell">Verkauf</string>
     
 </resources>

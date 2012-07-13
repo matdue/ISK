@@ -43,10 +43,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -381,7 +379,7 @@ public class MainActivity extends IskActivity {
 			TextView pilotBalance = (TextView) view.findViewById(R.id.main_pilot_balance);
 			
 			PilotData pilot = pilots.get(position);
-			getBitmapManager().setImageBitmap(pilotImage, EveApi.getCharacterUrl(pilot.characterId, 128));
+			getBitmapManager().setImageBitmap(pilotImage, EveApi.getCharacterUrl(pilot.characterId, 128), null, null);
 			pilotName.setText(pilot.name);
 			if (pilotBalance != null) {
 				if (pilot.balance != null) {

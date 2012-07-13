@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -266,8 +265,7 @@ public class WalletActivity extends IskActivity {
 			viewHolder.marketStation.setText(cursor.getString(12));
 			viewHolder.marketItem.setText(cursor.getString(9));
 			String imageUrl = EveApi.getTypeUrl(cursor.getString(15), 64);
-			bitmapManager.setLoadingColor(Color.TRANSPARENT);
-			bitmapManager.setImageBitmap(viewHolder.marketItemImage, imageUrl);
+			bitmapManager.setImageBitmap(viewHolder.marketItemImage, imageUrl, null, null);
 			
 			int quantity = cursor.getInt(8);
 			viewHolder.marketQuantity.setText(integerFormatter.format(quantity));

@@ -110,6 +110,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		} finally {
 			iskDatabase.close();
 			eveDatabase.close();
+			eveApi.close();
 		}
 	}
 	
@@ -248,7 +249,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		
 		orderWatch.action = marketOrder.bid;
 		orderWatch.status = 0;
-		orderWatch.sortKey = orderWatch.fulfilled;
+		orderWatch.sortKey = 0;
 		
 		return orderWatch;
 	}
@@ -299,6 +300,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 					
 					if (orderWatch.orderState == 0) {
 						// Active order
+						orderWatch.sortKey = 1000;
 						if (savedOrderWatch != null) {
 							orderWatch.status = savedOrderWatch.status;
 						} else {
@@ -310,7 +312,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 						// Inactive order: If it was watched, remember it
 						if (savedOrderWatch != null) {
 							orderWatch.orderID = 0;
-							orderWatch.sortKey = 1000 + orderWatch.fulfilled;
+							orderWatch.sortKey = 0;
 							orderWatches.add(orderWatch);
 							
 							// TODO: Notify about expires/fulfilled order
@@ -334,7 +336,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 					if (isMissing) {
 						// Add as inactive order
 						oldOrderWatch.orderID = 0;
-						oldOrderWatch.sortKey = 1000 + oldOrderWatch.fulfilled;
+						oldOrderWatch.sortKey = 0;
 						orderWatches.add(oldOrderWatch);
 						
 						// TODO: Notify about expires/fulfilled order

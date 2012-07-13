@@ -18,16 +18,24 @@ package de.matdue.isk;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Bundle;
 
 /**
  * Based on android.content.CursorLoader
  */
 public abstract class SimpleCursorLoader extends AsyncTaskLoader<Cursor> {
 	
+	private Bundle args;
 	private Cursor mCursor;
 
 	public SimpleCursorLoader(Context context) {
+		this(context, null);
+	}
+	
+	public SimpleCursorLoader(Context context, Bundle args) {
 		super(context);
+		
+		this.args = args;
 	}
 
 	/**
@@ -96,6 +104,10 @@ public abstract class SimpleCursorLoader extends AsyncTaskLoader<Cursor> {
 			mCursor.close();
 		}
 		mCursor = null;
+	}
+	
+	public Bundle getArgs() {
+		return args;
 	}
 	
 }

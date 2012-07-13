@@ -322,8 +322,7 @@ public class PilotsActivity extends ExpandableListActivity {
 			String imageUrl = EveApi.getCharacterUrl(cursor.getString(3), 128);
 			if (!imageUrl.equals(imageViewUrl)) {
 				imageView.setTag(imageUrl);
-				bitmapManager.setLoadingBitmap(R.drawable.unknown_character_1_128);
-				bitmapManager.setImageBitmap(imageView, imageUrl);
+				bitmapManager.setImageBitmap(imageView, imageUrl, R.drawable.unknown_character_1_128, null);
 			}
 
 			CheckBox checkBox = (CheckBox) view.findViewById(R.id.pilot_checked);

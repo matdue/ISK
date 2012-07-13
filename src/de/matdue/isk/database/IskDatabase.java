@@ -547,7 +547,16 @@ public class IskDatabase extends SQLiteOpenHelper {
 		return null;
 	}
 	
-	public Cursor queryOrderWatches(String characterId) {
+	public Cursor queryOrderWatches(String characterId, Integer action) {
+		String selection = OrderWatchTable.CHARACTER_ID + "=?";
+		ArrayList<String> selectionArgs = new ArrayList<String>();
+		selectionArgs.add(characterId);
+		
+		if (action != null) {
+			selection += " AND " + OrderWatchTable.ACTION + "=?";
+			selectionArgs.add(action.toString());
+		}
+		
 		try {
 			SQLiteDatabase db = getReadableDatabase();
 			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
@@ -569,11 +578,11 @@ public class IskDatabase extends SQLiteOpenHelper {
 						OrderWatchTable.SORT_KEY,
 						OrderWatchTable.SEQ_ID
 					}, 
-					OrderWatchTable.CHARACTER_ID + "=?", 
-					new String[] { characterId }, 
+					selection, 
+					selectionArgs.toArray(new String[0]), 
 					null, 
 					null, 
-					OrderWatchTable.SORT_KEY + " desc");  // order by
+					OrderWatchTable.SORT_KEY + ", " + OrderWatchTable.FULFILLED + " DESC");  // order by
 			return cursor;
 		} catch (SQLiteException e) {
 			Log.e("IskDatabase", "queryOrderWatches", e);
@@ -584,7 +593,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 	public List<OrderWatch> queryAllOrderWatches(String characterId) {
 		ArrayList<OrderWatch> result = new ArrayList<OrderWatch>();
 		try {
-			Cursor cursor = queryOrderWatches(characterId); 
+			Cursor cursor = queryOrderWatches(characterId, null); 
 			while (cursor.moveToNext()) {
 				OrderWatch orderWatch = new OrderWatch();
 				orderWatch.orderID = cursor.getLong(1);

@@ -20,7 +20,10 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -28,7 +31,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -43,18 +45,60 @@ import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
 import de.matdue.isk.eve.EveApi;
 
-public class MarketOrderActivity extends IskActivity {
+public class MarketOrderActivity extends IskActivity implements ActionBar.TabListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		
+		int selectedTab = 0;
+		if (savedInstanceState != null) {
+			selectedTab = savedInstanceState.getInt("tab", 0);
+        }
+		
+		Tab tab = actionBar.newTab();
+		tab.setText(R.string.market_order_tab_sell);
+		tab.setTabListener(this);
+		tab.setTag(OrderWatch.SELL);
+		actionBar.addTab(tab, selectedTab == 0);
+		
+		tab = actionBar.newTab();
+		tab.setText(R.string.market_order_tab_buy);
+		tab.setTabListener(this);
+		tab.setTag(OrderWatch.BUY);
+		actionBar.addTab(tab, selectedTab == 1);
 		
 		FragmentManager fm = getFragmentManager();
 		if (fm.findFragmentById(android.R.id.content) == null) {
-            CursorLoaderListFragment list = new CursorLoaderListFragment();
+            CursorLoaderListFragment list = CursorLoaderListFragment.newInstance(OrderWatch.SELL);
             fm.beginTransaction().add(android.R.id.content, list).commit();
         }
+	}
+	
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	}
+	
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getFragmentManager().findFragmentById(android.R.id.content);
+		if (fragment != null) {
+			fragment.switchBuySell((Integer) tab.getTag());
+		}
+	}
+	
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
+		outState.putInt("tab", getActionBar().getSelectedNavigationIndex());
 	}
 	
 	@Override
@@ -74,16 +118,32 @@ public class MarketOrderActivity extends IskActivity {
 	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, MarketOrderAdapter.MarketOrderListener {
 		
 		private String characterId;
+		private int action;
 		private IskDatabase iskDatabase;
 		private MarketOrderAdapter adapter;
 
+		public static CursorLoaderListFragment newInstance(int action) {
+			Bundle args = new Bundle();
+			args.putInt("action", action);
+			
+			CursorLoaderListFragment instance = new CursorLoaderListFragment();
+			instance.setArguments(args);
+			return instance;
+		}
+		
 		@Override
-		public void onActivityCreated(Bundle savedInstanceState) {
-			super.onActivityCreated(savedInstanceState);
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 			
 			setHasOptionsMenu(true);
 			characterId = getActivity().getIntent().getStringExtra("characterID");
 			iskDatabase = ((IskActivity)getActivity()).getDatabase();
+			action = getArguments().getInt("action");
+		}
+		
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
 			
 			// Give some text to display if there is no data.
 			setEmptyText(getResources().getText(R.string.wallet_no_data));
@@ -127,10 +187,10 @@ public class MarketOrderActivity extends IskActivity {
 		
 		@Override
 		public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-			return new SimpleCursorLoader(getActivity()) {
+			return new SimpleCursorLoader(getActivity(), args) {
 				@Override
 				public Cursor loadInBackground() {
-					return iskDatabase.queryOrderWatches(characterId);
+					return iskDatabase.queryOrderWatches(characterId, action);
 				}
 			};
 		}
@@ -148,6 +208,10 @@ public class MarketOrderActivity extends IskActivity {
                 setListShownNoAnimation(true);
             }            
             
+            Bundle args = ((SimpleCursorLoader)loader).getArgs();
+            if (args != null && args.getBoolean("scrollToTop")) {
+            	getListView().setSelectionAfterHeaderView();
+            }
 		}
 
 		@Override
@@ -172,6 +236,13 @@ public class MarketOrderActivity extends IskActivity {
 					getLoaderManager().restartLoader(0, null, CursorLoaderListFragment.this);
 				}
 			}.execute();
+		}
+		
+		public void switchBuySell(int action) {
+			this.action = action;
+			Bundle args = new Bundle();
+			args.putBoolean("scrollToTop", true);
+			getLoaderManager().restartLoader(0, args, this);
 		}
 		
 	}
@@ -244,8 +315,7 @@ public class MarketOrderActivity extends IskActivity {
 			viewHolder.item.setText(itemName);
 			
 			String imageUrl = EveApi.getTypeUrl(Integer.toString(cursor.getInt(3)), 64);
-			bitmapManager.setLoadingColor(Color.TRANSPARENT);
-			bitmapManager.setImageBitmap(viewHolder.itemImage, imageUrl);
+			bitmapManager.setImageBitmap(viewHolder.itemImage, imageUrl, null, null);
 			
 			BigDecimal price = new BigDecimal(cursor.getString(7));
 			String sPrice = resources.getString(R.string.market_order_price_per_unit, numberFormatter.format(price) + " ISK");
