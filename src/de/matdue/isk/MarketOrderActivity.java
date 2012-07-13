@@ -33,6 +33,8 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
@@ -115,10 +117,30 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		}
 	}
 	
+	private void sortBy(int sortOrder) {
+		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getFragmentManager().findFragmentById(android.R.id.content);
+		if (fragment != null) {
+			fragment.switchSortOrder(sortOrder);
+		}
+	}
+	
+	public void sortByName(MenuItem menuItem) {
+		sortBy(OrderWatch.ORDER_BY_NAME);
+	}
+	
+	public void sortByFulfillment(MenuItem menuItem) {
+		sortBy(OrderWatch.ORDER_BY_FULFILLMENT);
+	}
+	
+	public void sortByExpiration(MenuItem menuItem) {
+		sortBy(OrderWatch.ORDER_BY_EXPIRATION);
+	}
+	
 	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, MarketOrderAdapter.MarketOrderListener {
 		
 		private String characterId;
 		private int action;
+		private int orderBy;
 		private IskDatabase iskDatabase;
 		private MarketOrderAdapter adapter;
 
@@ -139,6 +161,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			characterId = getActivity().getIntent().getStringExtra("characterID");
 			iskDatabase = ((IskActivity)getActivity()).getDatabase();
 			action = getArguments().getInt("action");
+			orderBy = ((IskActivity)getActivity()).getPreferences().getInt("MarketOrderSortOrder", OrderWatch.ORDER_BY_FULFILLMENT);
 		}
 		
 		@Override
@@ -146,7 +169,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			super.onActivityCreated(savedInstanceState);
 			
 			// Give some text to display if there is no data.
-			setEmptyText(getResources().getText(R.string.wallet_no_data));
+			setEmptyText(getResources().getText(R.string.market_order_no_data));
 			
 			adapter = new MarketOrderAdapter(getActivity(), 
 					R.layout.market_order_entry, 
@@ -186,11 +209,18 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		}
 		
 		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+			inflater.inflate(R.menu.market_order_options, menu);
+			
+			super.onCreateOptionsMenu(menu, inflater);
+		}
+		
+		@Override
 		public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 			return new SimpleCursorLoader(getActivity(), args) {
 				@Override
 				public Cursor loadInBackground() {
-					return iskDatabase.queryOrderWatches(characterId, action);
+					return iskDatabase.queryOrderWatches(characterId, action, orderBy);
 				}
 			};
 		}
@@ -240,6 +270,17 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		
 		public void switchBuySell(int action) {
 			this.action = action;
+			Bundle args = new Bundle();
+			args.putBoolean("scrollToTop", true);
+			getLoaderManager().restartLoader(0, args, this);
+		}
+		
+		public void switchSortOrder(int orderBy) {
+			this.orderBy = orderBy;
+			((IskActivity)getActivity()).getPreferences()
+				.edit()
+				.putInt("MarketOrderSortOrder", orderBy)
+				.apply();
 			Bundle args = new Bundle();
 			args.putBoolean("scrollToTop", true);
 			getLoaderManager().restartLoader(0, args, this);

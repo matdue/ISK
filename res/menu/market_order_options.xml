@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/market_order_optmenu_sort"
+        android:icon="@drawable/ic_menu_sort"
+        android:showAsAction="ifRoom"
+        android:title="@string/market_order_optmenu_sort">
+        <menu>
+            <item
+                android:id="@+id/market_order_optmenu_sort_name"
+                android:onClick="sortByName"
+                android:title="@string/market_order_optmenu_sort_name"/>
+            <item
+                android:id="@+id/market_order_optmenu_sort_fulfillment"
+                android:onClick="sortByFulfillment"
+                android:title="@string/market_order_optmenu_sort_fulfillment"/>
+            <item
+                android:id="@+id/market_order_optmenu_sort_expiration"
+                android:onClick="sortByExpiration"
+                android:title="@string/market_order_optmenu_sort_expiration"/>
+        </menu>
+    </item>
+
+</menu>

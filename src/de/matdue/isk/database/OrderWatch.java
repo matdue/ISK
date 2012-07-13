@@ -24,6 +24,10 @@ public class OrderWatch {
 	
 	public static final int SELL = 0;
 	public static final int BUY = 1;
+	
+	public static final int ORDER_BY_FULFILLMENT = 0;
+	public static final int ORDER_BY_NAME = 1;
+	public static final int ORDER_BY_EXPIRATION = 2;
 
 	// No getters and setters to achive better performance
 	public String characterId;

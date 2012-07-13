@@ -77,5 +77,10 @@
     <string name="market_order_watch">Beobachten</string>
     <string name="market_order_tab_buy">Kauf</string>
     <string name="market_order_tab_sell">Verkauf</string>
+    <string name="market_order_no_data">Keine Daten</string>
+    <string name="market_order_optmenu_sort">Sortierung</string>
+    <string name="market_order_optmenu_sort_name">Sortieren nach Name</string>
+    <string name="market_order_optmenu_sort_fulfillment">Sortieren nach Erfüllungsgrad</string>
+    <string name="market_order_optmenu_sort_expiration">Sortieren nach Ablaufdatum</string>
     
 </resources>
