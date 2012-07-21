@@ -257,6 +257,11 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		orderWatch.volEntered = marketOrder.volEntered;
 		orderWatch.volRemaining = marketOrder.volRemaining;
 		orderWatch.fulfilled = 100 - ((marketOrder.volEntered != 0) ? (100 * marketOrder.volRemaining / marketOrder.volEntered) : 0);
+		if (orderWatch.fulfilled == 100 && marketOrder.volRemaining != marketOrder.volEntered) {
+			// Make sure nearly completed orders do not reach 100%
+			// because of rounding
+			--orderWatch.fulfilled;
+		}
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(marketOrder.issued);
