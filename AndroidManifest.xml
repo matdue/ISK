@@ -81,6 +81,11 @@
             <meta-data android:resource="@xml/wakeful" android:name="com.commonsware.cwac.wakeful"/>
         </receiver>
         
+        <receiver android:name=".NotificationDeletedReceiver">
+        </receiver>
+        <service android:name=".NotificationDeletedService" android:exported="false">
+        </service>
+        
     </application>
 
 </manifest>

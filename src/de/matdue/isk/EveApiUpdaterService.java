@@ -18,14 +18,19 @@ package de.matdue.isk;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -98,6 +103,9 @@ public class EveApiUpdaterService extends WakefulIntentService {
 			} else {
 				updateAllCharacters();
 			}
+			
+			// Notify about updates
+			submitNotification();
 		} catch (Exception e) {
 			Log.e("EveApiUpdaterService",  "Error while performing update", e);
 			String message = e.getMessage();
@@ -225,6 +233,9 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		String typeName = itemNameCache.get(marketOrder.typeID);
 		if (typeName == null) {
 			typeName = eveDatabase.queryTypeName(marketOrder.typeID);
+			if (typeName == null) {
+				typeName = getString(R.string.market_order_unknown_item, Integer.toString(marketOrder.typeID));
+			}
 			itemNameCache.put(marketOrder.typeID, typeName);
 		}
 		orderWatch.typeName = typeName;
@@ -233,6 +244,9 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		String stationName = stationNameCache.get(marketOrder.stationID);
 		if (stationName == null) {
 			stationName = eveDatabase.queryStationName(marketOrder.stationID);
+			if (stationName == null) {
+				stationName = getString(R.string.market_order_unknown_station, Integer.toString(marketOrder.stationID));
+			}
 			stationNameCache.put(marketOrder.stationID, stationName);
 		}
 		orderWatch.stationName = stationName;
@@ -314,17 +328,17 @@ public class EveApiUpdaterService extends WakefulIntentService {
 						orderWatches.add(orderWatch);
 					} else {
 						// Inactive order: If it was watched, remember it
-						if (savedOrderWatch != null) {
+						if (savedOrderWatch != null && (savedOrderWatch.status & OrderWatch.WATCH) != 0) {
 							orderWatch.orderID = 0;
 							orderWatch.sortKey = 0;
+							orderWatch.status &= ~OrderWatch.NOTIFIED;
 							orderWatches.add(orderWatch);
-							
-							// TODO: Notify about expires/fulfilled order
 						}
 					}
 				}
 				
 				// Mark missing orders as expired/fulfilled
+				// but only those who are watched
 				for (OrderWatch oldOrderWatch : oldOrderWatches) {
 					if (oldOrderWatch.orderID == 0) {
 						continue;
@@ -337,19 +351,63 @@ public class EveApiUpdaterService extends WakefulIntentService {
 							break;
 						}
 					}
-					if (isMissing) {
+					if (isMissing && (oldOrderWatch.status & OrderWatch.WATCH) != 0) {
 						// Add as inactive order
 						oldOrderWatch.orderID = 0;
 						oldOrderWatch.sortKey = 0;
+						oldOrderWatch.status &= ~OrderWatch.NOTIFIED;
 						orderWatches.add(oldOrderWatch);
-						
-						// TODO: Notify about expires/fulfilled order
 					}
 				}
 				
 				iskDatabase.storeOrderWatches(characterId, orderWatches);
 			}
 		}
+	}
+	
+	private void submitNotification() {
+		// Fetch unnotified market orders
+		Cursor marketOrderCursor = iskDatabase.getJustEndedOrderWatches();
+		if (marketOrderCursor == null) {
+			return;
+		}
+		
+		String characterId = null;
+		ArrayList<String> itemNames = new ArrayList<String>();
+		while (marketOrderCursor.moveToNext()) {
+			characterId = marketOrderCursor.getString(0);
+			itemNames.add(marketOrderCursor.getString(1));
+		}
+		marketOrderCursor.close();
+		if (characterId == null || itemNames.isEmpty()) {
+			return;
+		}
+		
+		// Intent when user clicks notification
+		Context context = getApplicationContext();
+		Intent notificationIntent = new Intent(context, MarketOrderActivity.class);
+		notificationIntent.putExtra("characterID", characterId);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		// Intent when user clears notification
+		PendingIntent deleteIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, NotificationDeletedReceiver.class), 0);
+		
+		// Prepare notification
+		Notification notification = new Notification.Builder(context)
+			.setSmallIcon(R.drawable.ic_stat_isk)
+			.setContentTitle(getResources().getText(R.string.market_order_notification_title))
+			.setContentText(TextUtils.join(", ", itemNames))
+			.setContentIntent(contentIntent)
+			.setDeleteIntent(deleteIntent)
+			.setTicker(getResources().getText(R.string.market_order_notification_ticker))
+			.setNumber(itemNames.size())
+			.setWhen(System.currentTimeMillis())
+			.setOnlyAlertOnce(true)
+			.getNotification();
+		
+		// Submit it
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.notify(R.id.market_order_notification, notification);
 	}
 	
 	private class EveApiCacheDatabase implements EveApiCache {

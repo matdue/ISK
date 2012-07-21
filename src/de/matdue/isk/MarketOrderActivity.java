@@ -29,6 +29,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -84,6 +86,9 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
             CursorLoaderListFragment list = CursorLoaderListFragment.newInstance(OrderWatch.SELL);
             fm.beginTransaction().add(android.R.id.content, list).commit();
         }
+		
+		// Cancel notifications
+		((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(R.id.market_order_notification);
 	}
 	
 	@Override
@@ -221,7 +226,9 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
             setListShown(false);
             
             // Prepare the loader. Either re-connect with an existing one, or start a new one.
-            getLoaderManager().initLoader(0, null, this);
+            Bundle args = new Bundle();
+            args.putBoolean("setNotificationBit", true);
+            getLoaderManager().initLoader(0, args, this);
 		}
 		
 		@Override
@@ -240,6 +247,9 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			return new SimpleCursorLoader(getActivity(), args) {
 				@Override
 				public Cursor loadInBackground() {
+					if (getArgs() != null && getArgs().getBoolean("setNotificationBit")) {
+						iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED);
+					}
 					return iskDatabase.queryOrderWatches(characterId, action, orderBy, searchFilter);
 				}
 			};

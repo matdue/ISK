@@ -87,5 +87,7 @@
     <string name="market_order_helpdialog">Alle aktiven Marktaufträge werden hier aufgelistet.\n\nAufträge können zur Beobachtung markiert werden. Sie werden nach Ablauf oder vollständiger Erfüllung ebenfalls hier aufgelistet. Anschließend können sie mit einem Wisch nach links oder rechts entfernt werden.</string>
     <string name="market_order_helpdialog_close">Schließen</string>
     <string name="market_order_search_hint">Gegenstand</string>
+    <string name="market_order_notification_ticker">Marktauftrag beendet</string>
+    <string name="market_order_notification_title">Marktauftrag beendet</string>
     
 </resources>

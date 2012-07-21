@@ -87,5 +87,7 @@
     <string name="market_order_helpdialog">Here you see all your active market orders.\n\nYou can watch an order by marking it. Orders which have completed or expired will be listed here, too. Remove them with a right or left swipe.</string>
     <string name="market_order_helpdialog_close">Close</string>
     <string name="market_order_search_hint">Item name</string>
+    <string name="market_order_notification_ticker">Market order has ended</string>
+    <string name="market_order_notification_title">Market order has ended</string>
     
 </resources>

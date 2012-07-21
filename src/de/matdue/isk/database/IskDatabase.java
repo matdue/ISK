@@ -819,4 +819,34 @@ public class IskDatabase extends SQLiteOpenHelper {
 		}
 	}
 	
+	public void setOrderWatchStatusBits(int bitmask) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			Cursor cursor = db.rawQuery("UPDATE " + OrderWatchTable.TABLE_NAME + " SET " + OrderWatchTable.STATUS + " = (" + OrderWatchTable.STATUS + " | ?)", 
+					new String[] { Integer.toString(bitmask) });
+			cursor.moveToNext();
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeOrderWatchItem", e);
+		}
+	}
+	
+	public Cursor getJustEndedOrderWatches() {
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
+					new String[] { OrderWatchTable.CHARACTER_ID, OrderWatchTable.TYPE_NAME }, 
+					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0", 
+					new String[] { Integer.toString(OrderWatch.NOTIFIED) }, 
+					null, 
+					null, 
+					null);
+			return cursor;
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "getOrderWatchesNotNotified", e);
+		}
+		
+		return null;
+	}
+	
 }
