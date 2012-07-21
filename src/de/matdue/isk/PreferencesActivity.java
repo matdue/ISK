@@ -22,12 +22,18 @@ import com.commonsware.cwac.wakeful.WakefulIntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.preference.RingtonePreference;
 import android.view.MenuItem;
 
-public class PreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+public class PreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener, OnPreferenceChangeListener {
 	
 	private String previousUpdateInterval;
 
@@ -42,6 +48,8 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		previousUpdateInterval = preferences.getString("updateInterval", null);
 		updateUpdateInterval(preferences);
+		updateRingtone(preferences);
+		updateVibration(preferences);
 	}
 	
 	@Override
@@ -64,6 +72,10 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 		
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		preferences.registerOnSharedPreferenceChangeListener(this);
+
+		// RingtonePreference does not fire onSharedPreferenceChanged()...
+		RingtonePreference ringtonePreference = (RingtonePreference) findPreference("ringtone");
+		ringtonePreference.setOnPreferenceChangeListener(this);
 	}
 	
 	@Override
@@ -78,9 +90,19 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if ("updateInterval".equals(key)) {
 			updateUpdateInterval(sharedPreferences);
+		} else if ("vibration".equals(key)) {
+			updateVibration(sharedPreferences);
 		}
 	}
 	
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object newValue) {
+		if ("ringtone".equals(preference.getKey())) {
+			updateRingtone(newValue.toString());
+		}
+		return true;
+	}
+
 	private void updateUpdateInterval(SharedPreferences preferences) {
 		String updateInterval = preferences.getString("updateInterval", null);
 		if (updateInterval != null) {
@@ -99,6 +121,37 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 				previousUpdateInterval = updateInterval;
 			}
 		}
+	}
+	
+	private void updateVibration(SharedPreferences preferences) {
+		String vibration = preferences.getString("vibration", null);
+		if (vibration != null) {
+			String[] vibrationValues = getResources().getStringArray(R.array.notification_vibration_values);
+			int idxVibration = Arrays.asList(vibrationValues).indexOf(vibration);
+			if (idxVibration != -1) {
+				String txtVibration = getResources().getStringArray(R.array.notification_vibration)[idxVibration];
+				findPreference("vibration").setSummary(txtVibration);
+			}
+		}
+	}
+	
+	private void updateRingtone(SharedPreferences preferences) {
+		String ringtone = preferences.getString("ringtone", "");
+		updateRingtone(ringtone);
+	}
+	
+	private void updateRingtone(String ringtoneUri) {
+		String ringtoneName = null;
+		if (!"".equals(ringtoneUri)) {
+			Ringtone ringtone = RingtoneManager.getRingtone(this, Uri.parse(ringtoneUri));
+			if (ringtone != null) {
+				ringtoneName = ringtone.getTitle(this);
+			}
+		} 
+		if (ringtoneName == null) {
+			ringtoneName = getString(R.string.preferences_ringtone_silent);
+		}
+		findPreference("ringtone").setSummary(ringtoneName);
 	}
 
 }

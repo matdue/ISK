@@ -19,6 +19,17 @@
 		<item>0</item>
 	</string-array>
 	
+	<string-array name="notification_vibration">
+	    <item>Always</item>
+	    <item>In silent mode only</item>
+	    <item>Never</item>
+	</string-array>
+	<string-array name="notification_vibration_values" tools:ignore="MissingTranslation">
+	    <item>1</item>
+	    <item>2</item>
+	    <item>0</item>
+	</string-array>
+	
 	<!-- Source: https://api.eveonline.com/eve/RefTypes.xml.aspx -->
 	<string-array name="eve_reference_types">
 		<item>Undefined</item>

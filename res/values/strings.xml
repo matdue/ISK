@@ -22,6 +22,13 @@
     <string name="preferences_honor_gs_summary">Update with activated global sync only.</string>
     <string name="preferences_require_wifi">Require WIFI connection</string>
     <string name="preferences_require_wifi_summary">Data volume may be 1 MByte and more.</string>
+    <string name="preferences_cat_notifications">Notifications</string>
+    <string name="preferences_notifications">Notifications</string>
+    <string name="preferences_notifications_summary">Enable notifications (ended market orders)</string>
+    <string name="preferences_ringtone">Ringtone</string>
+    <string name="preferences_ringtone_silent">Silent</string>
+    <string name="preferences_vibration">Vibration</string>
+    <string name="preferences_phone_led">Phone LED</string>
 
     <string name="about_title">About ISK</string>
     <string name="about_version">ISK for EVE Online 1.0</string>

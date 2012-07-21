@@ -22,7 +22,14 @@
     <string name="preferences_honor_gs_summary">Nur aktualisieren, wenn globale Synchronisierung eingeschaltet ist.</string>
     <string name="preferences_require_wifi">Benötigt WLAN-Verbindung</string>
     <string name="preferences_require_wifi_summary">Das Datenvolumen kann 1 MByte und mehr betragen.</string>
-
+    <string name="preferences_cat_notifications">Benachrichtigungen</string>
+    <string name="preferences_notifications">Benachrichtigungen</string>
+    <string name="preferences_notifications_summary">Benachrichtigungen einschalten (bei beendeten Marktaufträgen)</string>
+    <string name="preferences_ringtone">Klingelton</string>
+    <string name="preferences_ringtone_silent">Lautlos</string>
+    <string name="preferences_vibration">Vibration</string>
+    <string name="preferences_phone_led">Telefon-LED</string>
+    
     <string name="about_title">ISK</string>
     <string name="about_version">ISK für EVE Online 1.0</string>
     <string name="about_copyright">Copyright \u00A9 2012 Matthias Düsterhöft</string>

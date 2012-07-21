@@ -26,8 +26,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -366,6 +368,24 @@ public class EveApiUpdaterService extends WakefulIntentService {
 	}
 	
 	private void submitNotification() {
+		// Get notification settings (ringtone etc.)
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		boolean doNotify = preferences.getBoolean("notification", true);
+		if (!doNotify) {
+			return;
+		}
+		String ringtoneUri = preferences.getString("ringtone", "");
+		String vibration = preferences.getString("vibration", "");
+		boolean doVibrate = "1".equals(vibration);
+		if ("2".equals(vibration)) {
+			AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+			int ringerMode = audioManager.getRingerMode();
+			if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
+				doVibrate = true;
+			}
+		}
+		boolean showLights = preferences.getBoolean("lights", true);
+		
 		// Fetch unnotified market orders
 		Cursor marketOrderCursor = iskDatabase.getJustEndedOrderWatches();
 		if (marketOrderCursor == null) {
@@ -393,7 +413,14 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		PendingIntent deleteIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, NotificationDeletedReceiver.class), 0);
 		
 		// Prepare notification
-		Notification notification = new Notification.Builder(context)
+		int defaults = 0;
+		if (doVibrate) {
+			defaults |= Notification.DEFAULT_VIBRATE;
+		}
+		if (showLights) {
+			defaults |= Notification.DEFAULT_LIGHTS;
+		}
+		Notification.Builder builder = new Notification.Builder(context)
 			.setSmallIcon(R.drawable.ic_stat_isk)
 			.setContentTitle(getResources().getText(R.string.market_order_notification_title))
 			.setContentText(TextUtils.join(", ", itemNames))
@@ -403,7 +430,11 @@ public class EveApiUpdaterService extends WakefulIntentService {
 			.setNumber(itemNames.size())
 			.setWhen(System.currentTimeMillis())
 			.setOnlyAlertOnce(true)
-			.getNotification();
+			.setDefaults(defaults);
+		if (!"".equals(ringtoneUri)) {
+			builder.setSound(Uri.parse(ringtoneUri));
+		}
+		Notification notification = builder.getNotification();
 		
 		// Submit it
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
