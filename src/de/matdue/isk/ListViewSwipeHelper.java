@@ -15,6 +15,10 @@
  */
 package de.matdue.isk;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
@@ -221,9 +225,19 @@ public class ListViewSwipeHelper implements View.OnTouchListener, AbsListView.On
 					onSwipe(v, itemView, itemViewPosition, event.getX() > swipeInitialX ? Direction.RIGHT : Direction.LEFT);
 				}
 				
-				// Restore item position and transparency abruptly
-				itemView.setX(itemViewOriginalX);
-				itemView.setAlpha(itemViewOriginalAlpha);
+				// Fade out smoothly
+				ValueAnimator collapseAnimator = ValueAnimator.ofInt(itemView.getHeight(), 1);
+				collapseAnimator.addUpdateListener(new HeightSetter(itemView));
+				
+				float destX = itemView.getX() >= 0 ? itemView.getWidth() : -itemView.getWidth();
+				ObjectAnimator fadeOutAnimator = ObjectAnimator.ofPropertyValuesHolder(itemView, 
+						PropertyValuesHolder.ofFloat("x", itemView.getX(), destX),
+						PropertyValuesHolder.ofFloat("alpha", itemView.getAlpha(), 0.0f));
+				
+				AnimatorSet animator = new AnimatorSet();
+				animator.playTogether(collapseAnimator, fadeOutAnimator);
+				animator.setDuration(150);
+				animator.start();
 
 				itemView = null;
 				currentSwipeMode = SwipeMode.NONE;

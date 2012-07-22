@@ -3,4 +3,5 @@
     <item name="market_order_disposable" type="id"/>
     <item name="market_order_seq_id" type="id"/>
     <item name="market_order_notification" type="id"/>
+    <item name="market_order_abandon" type="id"/>
 </resources>

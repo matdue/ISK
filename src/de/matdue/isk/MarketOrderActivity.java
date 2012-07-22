@@ -42,6 +42,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -202,6 +203,9 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			ListViewSwipeHelper swipeHelper = new ListViewSwipeHelper(getActivity()) {
 				@Override
 				void onSwipe(View listView, View itemView, int position, Direction direction) {
+					// Mark item view as unrecycable
+					itemView.setTag(R.id.market_order_abandon, Boolean.TRUE);
+
 					// On swipe, delete entry
 					Long seqId = (Long) itemView.getTag(R.id.market_order_seq_id);
 					new AsyncTask<Long, Void, Void>() {
@@ -363,6 +367,19 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			marketOrderListener = listener;
 		}
 
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// Do not recycle view if it has been marked
+			// Swipe-out action modified the view too much...
+			if (convertView != null) {
+				Boolean shallAbandon = (Boolean) convertView.getTag(R.id.market_order_abandon);
+				if (shallAbandon != null && shallAbandon.booleanValue()) {
+					convertView = null;
+				}
+			}
+			return super.getView(position, convertView, parent);
+		}
+		
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
 			// View holder pattern: http://developer.android.com/training/improving-layouts/smooth-scrolling.html#ViewHolder
