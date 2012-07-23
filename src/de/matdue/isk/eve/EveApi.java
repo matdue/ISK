@@ -350,17 +350,17 @@ public class EveApi {
 				lowestTransactionID = Math.min(lowestTransactionID, transactionID);
 			}
 			
-			// Query next batch
-			if (!queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", Long.toString(lowestTransactionID))) {
-				return null;
-			}
-			Log.d("EveApi", "Transactions loaded: " + walletTransactionsByIdBatch.size());
-			
 			// Finish batch
 			walletTransactionsById.putAll(walletTransactionsByIdBatch);
 			walletTransactionsByIdBatch.clear();
 			walletTransactionsByJournalId.putAll(walletTransactionsByJournalIdBatch);
 			walletTransactionsByJournalIdBatch.clear();
+			
+			// Query next batch
+			if (!queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", Long.toString(lowestTransactionID))) {
+				return null;
+			}
+			Log.d("EveApi", "Transactions loaded: " + walletTransactionsByIdBatch.size());
 		}
 		walletTransactionsById.putAll(walletTransactionsByIdBatch);
 		walletTransactionsByIdBatch.clear();
@@ -387,15 +387,15 @@ public class EveApi {
 				lowestRefID = Math.min(lowestRefID, journalEntry.refID);
 			}
 			
+			// Finish batch
+			walletJournal.addAll(walletJournalBatch);
+			walletJournalBatch.clear();
+			
 			// Query next batch
 			if (!queryApi(root.getContentHandler(), journalURL, keyID, vCode, characterID, "2560", Long.toString(lowestRefID))) {
 				return null;
 			}
 			Log.d("EveApi", "Journals loaded: " + walletJournalBatch.size());
-			
-			// Finish batch
-			walletJournal.addAll(walletJournalBatch);
-			walletJournalBatch.clear();
 		}
 		walletJournal.addAll(walletJournalBatch);
 		walletJournalBatch.clear();
