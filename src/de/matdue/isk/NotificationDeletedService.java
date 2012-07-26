@@ -27,7 +27,7 @@ public class NotificationDeletedService extends WakelockedService {
 		IskDatabase iskDatabase = null;
 		try {
 			iskDatabase = new IskDatabase(getApplicationContext());
-			iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED);
+			iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED_AND_READ);
 		} catch (Exception e) {
 			Log.e("NotificationDeletedService",  "Error occured", e);
 		} finally {

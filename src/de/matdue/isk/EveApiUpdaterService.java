@@ -338,7 +338,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 						if (savedOrderWatch != null && (savedOrderWatch.status & OrderWatch.WATCH) != 0) {
 							orderWatch.orderID = 0;
 							orderWatch.sortKey = 0;
-							orderWatch.status &= ~OrderWatch.NOTIFIED;
+							orderWatch.status &= ~(OrderWatch.NOTIFIED_AND_READ | OrderWatch.NOTIFIED);
 							orderWatches.add(orderWatch);
 						}
 					}
@@ -362,7 +362,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 						// Add as inactive order
 						oldOrderWatch.orderID = 0;
 						oldOrderWatch.sortKey = 0;
-						oldOrderWatch.status &= ~OrderWatch.NOTIFIED;
+						oldOrderWatch.status &= ~(OrderWatch.NOTIFIED_AND_READ | OrderWatch.NOTIFIED);
 						orderWatches.add(oldOrderWatch);
 					}
 				}
@@ -390,6 +390,13 @@ public class EveApiUpdaterService extends WakefulIntentService {
 			}
 		}
 		boolean showLights = preferences.getBoolean("lights", true);
+		
+		// Any market order available which has not been notified?
+		boolean hasUnnotifiedOrders = iskDatabase.hasUnreadOrderWatches();
+		if (!hasUnnotifiedOrders) {
+			return;
+		}
+		iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED);
 		
 		// Fetch unnotified market orders
 		Cursor marketOrderCursor = iskDatabase.getJustEndedOrderWatches();

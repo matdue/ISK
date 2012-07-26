@@ -18,10 +18,18 @@ package de.matdue.isk.database;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * Lifecycle:
+ * 1. New market order => new OrderWatch with orderID != 0 and status = 0
+ * 2. Notification => status |= NOTIFIED
+ * 3. Notification read or dismissed => status |= NOTIFIED_AND_READ
+ * 4. Market order ended => orderID = 0
+ */
 public class OrderWatch {
 	
 	public static final int WATCH = 0x00000001;
-	public static final int NOTIFIED = 0x00000002;
+	public static final int NOTIFIED_AND_READ = 0x00000002;
+	public static final int NOTIFIED = 0x00000004;
 	
 	public static final int SELL = 0;
 	public static final int BUY = 1;

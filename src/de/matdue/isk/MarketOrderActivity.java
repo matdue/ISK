@@ -251,7 +251,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 				@Override
 				public Cursor loadInBackground() {
 					if (getArgs() != null && getArgs().getBoolean("setNotificationBit")) {
-						iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED);
+						iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED_AND_READ);
 					}
 					return iskDatabase.queryOrderWatches(characterId, action, orderBy, searchFilter);
 				}

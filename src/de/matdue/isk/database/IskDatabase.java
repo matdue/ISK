@@ -23,6 +23,7 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -837,7 +838,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
 					new String[] { OrderWatchTable.CHARACTER_ID, OrderWatchTable.TYPE_NAME }, 
 					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0", 
-					new String[] { Integer.toString(OrderWatch.NOTIFIED) }, 
+					new String[] { Integer.toString(OrderWatch.NOTIFIED_AND_READ) }, 
 					null, 
 					null, 
 					null);
@@ -847,6 +848,22 @@ public class IskDatabase extends SQLiteOpenHelper {
 		}
 		
 		return null;
+	}
+	
+	public boolean hasUnreadOrderWatches() {
+		boolean result = false;
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			long count = DatabaseUtils.queryNumEntries(db, 
+					OrderWatchTable.TABLE_NAME, 
+					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0",
+					new String[] { Integer.toString(OrderWatch.NOTIFIED) });
+			result = count != 0;
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "hasUnreadOrderWatches", e);
+		}
+		
+		return result;
 	}
 	
 }
