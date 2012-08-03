@@ -24,17 +24,12 @@ public class NotificationDeletedService extends WakelockedService {
 
 	@Override
 	protected void onHandleBroadcastIntent(Intent broadcastIntent) {
-		IskDatabase iskDatabase = null;
 		try {
-			iskDatabase = new IskDatabase(getApplicationContext());
+			IskApplication iskApplication = (IskApplication) getApplication();
+			IskDatabase iskDatabase = iskApplication.getIskDatabase();
 			iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED_AND_READ);
 		} catch (Exception e) {
 			Log.e("NotificationDeletedService",  "Error occured", e);
-		} finally {
-			if (iskDatabase != null) {
-				iskDatabase.close();
-				iskDatabase = null;
-			}
 		}
 	}
 

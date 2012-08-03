@@ -93,8 +93,9 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		}
 		
 		try {
-			iskDatabase = new IskDatabase(this);
-			eveDatabase = new EveDatabase(this);
+			IskApplication iskApplication = (IskApplication) getApplication();
+			iskDatabase = iskApplication.getIskDatabase();
+			eveDatabase = iskApplication.getEveDatabase();
 			eveApi = new EveApi(new EveApiCacheDatabase(forcedUpdate));
 			
 			// If 'characterId' is given, update that specific character only
@@ -118,8 +119,6 @@ public class EveApiUpdaterService extends WakefulIntentService {
 				.addCategory(Intent.CATEGORY_DEFAULT)
 				.putExtra("error", message));
 		} finally {
-			iskDatabase.close();
-			eveDatabase.close();
 			eveApi.close();
 		}
 	}
