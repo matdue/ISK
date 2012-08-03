@@ -96,5 +96,6 @@
     <string name="market_order_search_hint">Item name</string>
     <string name="market_order_notification_ticker">Market order has ended</string>
     <string name="market_order_notification_title">Market order has ended</string>
+    <string name="market_order_notification_summary">+%1$d more</string>
     
 </resources>

@@ -96,5 +96,6 @@
     <string name="market_order_search_hint">Gegenstand</string>
     <string name="market_order_notification_ticker">Marktauftrag beendet</string>
     <string name="market_order_notification_title">Marktauftrag beendet</string>
+    <string name="market_order_notification_summary">+%1$d weitere</string>
     
 </resources>

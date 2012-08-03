@@ -70,6 +70,16 @@ public class BitmapManager {
 		bitmapDownloader.shutdown();
 	}
 	
+	/**
+	 * Load an image asynchronously.
+	 * This method returns immediately. If the image is in memory cache, 
+	 * all work is done. Otherwise, a background thread will load the image.
+	 * 
+	 * @param imageView ImageView which will receive the bitmap
+	 * @param imageUrl URL of bitmap
+	 * @param loadingBitmap Show this resource bitmap while loading
+	 * @param loadingColor Show this color while loading
+	 */
 	public void setImageBitmap(ImageView imageView, String imageUrl, Integer loadingBitmap, Integer loadingColor) {
 		// Bitmap cached in memory?
 		Bitmap cachedBitmap = memoryCache.get(imageUrl);
@@ -80,6 +90,42 @@ public class BitmapManager {
 
 		// Download bitmap and set ImageView
 		new DownloadTask(imageView, loadingBitmap, loadingColor).execute(imageUrl);
+	}
+	
+	/**
+	 * Load an image synchronously.
+	 * This method blocks until the image has been loaded.
+	 * 
+	 * @param imageUrl URL of bitmap
+	 * @return Loaded bitmap, or <code>null</code>
+	 */
+	public Bitmap getImage(String imageUrl) {
+		// Bitmap cached in memory?
+		Bitmap cachedBitmap = memoryCache.get(imageUrl);
+		if (cachedBitmap != null) {
+			return cachedBitmap;
+		}
+		
+		// In file cache?
+		InputStream cachedImage = fileCache.getStream(imageUrl);
+		if (cachedImage != null) {
+			Bitmap bitmap = BitmapFactory.decodeStream(cachedImage);
+			if (bitmap != null) {
+				memoryCache.put(imageUrl, bitmap);
+			}
+			try {
+				cachedImage.close();
+			} catch (IOException e) {
+				// Ignore errors
+			}
+			return bitmap;
+		}
+		
+		Bitmap bitmap = bitmapDownloader.downloadBitmap(imageUrl);
+		if (bitmap != null) {
+			memoryCache.put(imageUrl, bitmap);
+		}
+		return bitmap;
 	}
 	
 	/**

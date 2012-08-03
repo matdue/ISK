@@ -18,6 +18,7 @@ package de.matdue.isk;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,11 +26,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -38,6 +42,7 @@ import android.util.SparseArray;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
+import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.ApiKey;
 import de.matdue.isk.database.Balance;
 import de.matdue.isk.database.EveDatabase;
@@ -57,6 +62,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 	
 	private IskDatabase iskDatabase;
 	private EveDatabase eveDatabase;
+	private BitmapManager bitmapManager;
 	private EveApi eveApi;
 
 	public EveApiUpdaterService() {
@@ -96,6 +102,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 			IskApplication iskApplication = (IskApplication) getApplication();
 			iskDatabase = iskApplication.getIskDatabase();
 			eveDatabase = iskApplication.getEveDatabase();
+			bitmapManager = iskApplication.getBitmapManager();
 			eveApi = new EveApi(new EveApiCacheDatabase(forcedUpdate));
 			
 			// If 'characterId' is given, update that specific character only
@@ -371,6 +378,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void submitNotification() {
 		// Get notification settings (ringtone etc.)
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -424,6 +432,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		PendingIntent deleteIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, NotificationDeletedReceiver.class), 0);
 		
 		// Prepare notification
+    	Resources resources = getResources();
 		int defaults = 0;
 		if (doVibrate) {
 			defaults |= Notification.DEFAULT_VIBRATE;
@@ -433,24 +442,58 @@ public class EveApiUpdaterService extends WakefulIntentService {
 		}
 		Notification.Builder builder = new Notification.Builder(context)
 			.setSmallIcon(R.drawable.ic_stat_isk)
-			.setContentTitle(getResources().getText(R.string.market_order_notification_title))
+			.setContentTitle(resources.getText(R.string.market_order_notification_title))
 			.setContentText(TextUtils.join(", ", itemNames))
 			.setContentIntent(contentIntent)
 			.setDeleteIntent(deleteIntent)
-			.setTicker(getResources().getText(R.string.market_order_notification_ticker))
-			.setNumber(itemNames.size())
+			.setTicker(resources.getText(R.string.market_order_notification_ticker))
 			.setWhen(System.currentTimeMillis())
 			.setOnlyAlertOnce(true)
 			.setDefaults(defaults);
 		if (!"".equals(ringtoneUri)) {
 			builder.setSound(Uri.parse(ringtoneUri));
 		}
-		Notification notification = builder.getNotification();
+		if (itemNames.size() > 1) {
+			builder.setNumber(itemNames.size());
+		}
+		
+		// Use portrait as large icon
+		Bitmap portrait = bitmapManager.getImage(EveApi.getCharacterUrl(characterId, 128));
+		if (portrait != null) {
+			Bitmap largeIcon = Bitmap.createScaledBitmap(
+	    			portrait,
+	                resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width),
+	                resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height),
+	                false);
+			builder.setLargeIcon(largeIcon);
+		}
+		
+		// Create notification
+		Notification notification;
+    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+	    	notification = buildJellyBeanNotification(builder, itemNames);
+    	} else {
+    		notification = builder.getNotification();
+    	}
 		
 		// Submit it
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(R.id.market_order_notification, notification);
 	}
+	
+	@TargetApi(16)
+	private Notification buildJellyBeanNotification(Notification.Builder builder, ArrayList<String> itemNames) {
+    	Notification.InboxStyle inboxNotification = new Notification.InboxStyle(builder);
+    	int itemsToAdd = Math.min(5, itemNames.size());
+		for (int i = 0; i < itemsToAdd; ++i) {
+    		inboxNotification.addLine(itemNames.get(i));
+    	}
+    	if (itemNames.size() > 5) {
+    		int additional = 5 - itemNames.size();
+    		inboxNotification.setSummaryText(getResources().getString(R.string.market_order_notification_summary, additional));
+    	}
+    	return inboxNotification.build();
+    }
 	
 	private class EveApiCacheDatabase implements EveApiCache {
 		
