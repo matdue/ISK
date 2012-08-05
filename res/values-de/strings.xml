@@ -4,7 +4,7 @@
     <string name="app_name">ISK für EVE Online</string>
     <string name="app_name_launcher">ISK</string>
     <string name="main_pilot_portrait">Piloten-Portrait</string>
-    <string name="main_dialog_welcome">Willkommen!\n\nMit ISK für EVE Online können Sie jederzeit den Kontostand Ihrer Piloten einsehen.\n\nTippen Sie auf das Piloten-Icon und bestimmen Sie, welche Kapselpiloten Sie beobachten möchten.</string>
+    <string name="main_dialog_welcome">Willkommen!\n\nMit ISK für EVE Online können Sie jederzeit den Kontostand und die Marktaufträge Ihrer Piloten einsehen.\n\nTippen Sie auf das Piloten-Icon und bestimmen Sie, welche Kapselpiloten Sie beobachten möchten.</string>
     <string name="main_dialog_welcome_close">Schließen</string>
     <string name="main_optmenu_refresh">Aktualisieren</string>
     <string name="main_optmenu_eveaccess">Letzte Aktualisierungen</string>

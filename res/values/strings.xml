@@ -4,7 +4,7 @@
     <string name="app_name">ISK for EVE Online</string>
     <string name="app_name_launcher">ISK</string>
     <string name="main_pilot_portrait">Pilot´s portrait</string>
-    <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
+    <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet and market orders at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
     <string name="main_dialog_welcome_close">Close</string>
     <string name="main_optmenu_refresh">Refresh</string>
     <string name="main_optmenu_eveaccess">Update history</string>
