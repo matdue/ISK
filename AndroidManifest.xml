@@ -32,7 +32,12 @@
         
         <activity 
             android:name=".PreferencesActivity" 
-            android:label="@string/preferences_title">
+            android:label="@string/preferences_title"
+            tools:ignore="ExportedActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         
         <activity 
