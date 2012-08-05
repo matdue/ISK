@@ -29,6 +29,9 @@ import de.matdue.isk.eve.EveApi;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -52,9 +55,6 @@ import android.widget.Toast;
 
 public class MainActivity extends IskActivity {
 
-	// Dialogs
-	private static final int DIALOG_WELCOME = 0;
-	
 	private BroadcastReceiver eveApiUpdaterReceiver;
 	
     @Override
@@ -125,32 +125,6 @@ public class MainActivity extends IskActivity {
     	startActivity(new Intent(this, PilotsActivity.class));
     }
     
-    @Override
-	protected Dialog onCreateDialog(int id, Bundle args) {
-		Dialog dialog = null;
-		switch (id) {
-		case DIALOG_WELCOME:
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder
-				.setMessage(R.string.main_dialog_welcome)
-				.setNeutralButton(R.string.main_dialog_welcome_close, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						SharedPreferences preferences = getPreferences();
-						preferences
-							.edit()
-							.putBoolean("welcomed", true)
-							.commit();
-						dialog.dismiss();
-					}
-				});
-			dialog = builder.create();
-			break;
-		}
-		
-		return dialog;
-	}
-    
     /**
 	 * Show a Welcome! dialog
 	 */
@@ -158,7 +132,12 @@ public class MainActivity extends IskActivity {
 		SharedPreferences preferences = getPreferences();
 		boolean welcomed = preferences.getBoolean("welcomed", false);
 		if (!welcomed) {
-			showDialog(DIALOG_WELCOME);
+			FragmentManager fm = getFragmentManager();
+			if (fm.findFragmentByTag("WelcomeDialog") == null) {
+				FragmentTransaction ft = fm.beginTransaction().addToBackStack(null);
+				WelcomeDialogFragment fragment = WelcomeDialogFragment.newInstance();
+				fragment.show(ft, "WelcomeDialog");
+			}
 		}
 	}
 	
@@ -391,6 +370,34 @@ public class MainActivity extends IskActivity {
 			}
 			
 			return view;
+		}
+		
+	}
+	
+	public static class WelcomeDialogFragment extends DialogFragment {
+		
+		public static WelcomeDialogFragment newInstance() {
+			WelcomeDialogFragment instance = new WelcomeDialogFragment();
+			return instance;
+		}
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder
+				.setMessage(R.string.main_dialog_welcome)
+				.setNeutralButton(R.string.main_dialog_welcome_close, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						SharedPreferences preferences = ((IskActivity)getActivity()).getPreferences();
+						preferences
+							.edit()
+							.putBoolean("welcomed", true)
+							.apply();
+						dialog.dismiss();
+					}
+				});
+			return builder.create();		
 		}
 		
 	}
