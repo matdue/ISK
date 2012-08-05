@@ -25,6 +25,8 @@ import android.os.Bundle;
  */
 public abstract class SimpleCursorLoader extends AsyncTaskLoader<Cursor> {
 	
+	private final ForceLoadContentObserver mObserver;
+	
 	private Bundle args;
 	private Cursor mCursor;
 
@@ -34,10 +36,20 @@ public abstract class SimpleCursorLoader extends AsyncTaskLoader<Cursor> {
 	
 	public SimpleCursorLoader(Context context, Bundle args) {
 		super(context);
-		
+		mObserver = new ForceLoadContentObserver();
 		this.args = args;
 	}
 
+	/**
+     * Registers an observer to get notifications from the content provider
+     * when the cursor needs to be refreshed.
+     */
+    protected void registerContentObserver(Cursor cursor) {
+    	if (cursor != null) {
+            cursor.registerContentObserver(mObserver);
+    	}
+    }
+    
 	/**
 	 * Runs on the UI thread
 	 */

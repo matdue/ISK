@@ -87,7 +87,9 @@ public class EveAccessActivity extends IskActivity {
 			return new SimpleCursorLoader(getActivity()) {
 				@Override
 				public Cursor loadInBackground() {
-					return ((IskActivity)getActivity()).getDatabase().getEveApiHistoryCursor();
+					Cursor cursor = ((IskActivity)getActivity()).getDatabase().getEveApiHistoryCursor();
+					registerContentObserver(cursor);
+					return cursor;
 				}
 			};
 		}
@@ -121,7 +123,7 @@ public class EveAccessActivity extends IskActivity {
 		private DateFormat dateFormatter;
 
 		public HistoryAdapter(Context context, int layout, Cursor c) {
-			super(context, layout, c);
+			super(context, layout, c, 0);
 			dateFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 		}
 		

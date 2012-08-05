@@ -253,7 +253,9 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 					if (getArgs() != null && getArgs().getBoolean("setNotificationBit")) {
 						iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED_AND_READ);
 					}
-					return iskDatabase.queryOrderWatches(characterId, action, orderBy, searchFilter);
+					Cursor cursor = iskDatabase.queryOrderWatches(characterId, action, orderBy, searchFilter);
+					registerContentObserver(cursor);
+					return cursor;
 				}
 			};
 		}
@@ -348,7 +350,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		private MarketOrderListener marketOrderListener;
 		
 		public MarketOrderAdapter(Context context, int layout, Cursor c, BitmapManager bitmapManager) {
-			super(context, layout, c);
+			super(context, layout, c, 0);
 			
 			this.bitmapManager = bitmapManager;
 			

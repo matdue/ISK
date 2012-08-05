@@ -112,7 +112,9 @@ public class WalletActivity extends IskActivity {
 				@Override
 				public Cursor loadInBackground() {
 					String characterId = getActivity().getIntent().getStringExtra("characterID");
-					return ((IskActivity)getActivity()).getDatabase().getEveWallet(characterId, searchFilter);
+					Cursor cursor = ((IskActivity)getActivity()).getDatabase().getEveWallet(characterId, searchFilter);
+					registerContentObserver(cursor);
+					return cursor;
 				}
 			};
 		}
@@ -164,7 +166,7 @@ public class WalletActivity extends IskActivity {
 		private int negativeNumber;
 		
 		public WalletAdapter(Context context, int layout, Cursor c, BitmapManager bitmapManager) {
-			super(context, layout, c);
+			super(context, layout, c, 0);
 			
 			this.bitmapManager = bitmapManager;
 			
