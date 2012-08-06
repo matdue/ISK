@@ -17,7 +17,6 @@ package de.matdue.isk.database;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,7 +26,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
 
 public class EveDatabase extends SQLiteOpenHelper {
@@ -35,10 +33,11 @@ public class EveDatabase extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "eveInferno.db";
 	private static final int DATABASE_VERSION = 1;
 	
-	private Context context;
+	private Context context;  // non-null if hasChecked==false, otherwise null
+	private boolean hasChecked = false;
 	
 	public EveDatabase(Context context) {
-		super(context, context.getExternalFilesDir(null).getAbsolutePath() + "/" + DATABASE_NAME, null, DATABASE_VERSION);
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		this.context = context;
 	}
 
@@ -52,39 +51,42 @@ public class EveDatabase extends SQLiteOpenHelper {
 	
 	@Override
 	public synchronized SQLiteDatabase getReadableDatabase() {
-		checkDatabase();
+		if (!hasChecked) {
+			checkDatabase();
+		}
 		return super.getReadableDatabase();
 	}
 	
 	@Override
 	public synchronized SQLiteDatabase getWritableDatabase() {
-		checkDatabase();
+		if (!hasChecked) {
+			checkDatabase();
+		}
 		return super.getWritableDatabase();
 	}
 	
 	private void checkDatabase() {
-		// Check environment
-		String storageState = Environment.getExternalStorageState();
-		if (!Environment.MEDIA_MOUNTED.equals(storageState) && !(Environment.MEDIA_MOUNTED_READ_ONLY.equals(storageState))) {
-			// Not mounted => database file will not exists, and can't be copied to external storage
-			return;
-		}
-		
 		// Check if file exists
-		File externalFilesDir = context.getExternalFilesDir(null);
-		File databaseFile = new File(externalFilesDir, DATABASE_NAME);
+		File databaseFile = context.getDatabasePath(DATABASE_NAME);
 		if (databaseFile.canRead()) {
+			hasChecked = true;
+			context = null;
 			return;
 		}
 		
 		// Remove old files
-		File[] oldDatabaseFiles = externalFilesDir.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String filename) {
-				return filename.endsWith(".db");
+		String[] oldDatabases = context.databaseList();
+		for (String oldDatabase : oldDatabases) {
+			if (!oldDatabase.endsWith(".db")) {
+				continue;
 			}
-		});
-		for (File oldDatabaseFile : oldDatabaseFiles) {
+			if ("isk.db".equals(oldDatabase)) {
+				continue;
+			}
+			
+			File oldDatabaseFile = context.getDatabasePath(oldDatabase);
+			oldDatabaseFile.delete();
+			oldDatabaseFile = context.getDatabasePath(oldDatabase + "-journal");
 			oldDatabaseFile.delete();
 		}
 		
