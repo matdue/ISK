@@ -28,6 +28,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
@@ -36,6 +37,8 @@ public class EveAccessActivity extends IskActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		FragmentManager fm = getFragmentManager();

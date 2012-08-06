@@ -31,6 +31,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -57,6 +58,8 @@ public class PilotsActivity extends ExpandableListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		IskApplication iskApp = (IskApplication) getApplication();

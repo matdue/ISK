@@ -32,12 +32,15 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.view.MenuItem;
+import android.view.Window;
 
 public class PreferencesActivity extends IskActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		getFragmentManager().beginTransaction()

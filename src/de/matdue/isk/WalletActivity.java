@@ -34,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.SearchView;
@@ -45,6 +46,8 @@ public class WalletActivity extends IskActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		FragmentManager fm = getFragmentManager();

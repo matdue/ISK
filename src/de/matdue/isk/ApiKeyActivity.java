@@ -49,9 +49,10 @@ public class ApiKeyActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		setContentView(R.layout.apikey);
 		
+		setContentView(R.layout.apikey);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
 		Button button = (Button) findViewById(R.id.pilots_key_button_choose);
 		button.setOnClickListener(new OnClickListener() {
 			@Override
