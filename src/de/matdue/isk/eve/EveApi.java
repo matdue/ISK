@@ -591,4 +591,55 @@ public class EveApi {
 		return result;
 	}
 
+	public List<Character> queryCharacters(String keyID, String vCode) {
+		final String charactersURL = "/account/Characters.xml.aspx";
+		
+		// Lookup in cache
+		String cacheKey = CacheInformation.buildHashKey(charactersURL, keyID, vCode);
+		if (apiCache.isCached(cacheKey)) {
+			return null;
+		}
+		
+		// Prepare XML parser
+		CacheInformation cacheInformation = new CacheInformation();
+		ArrayList<Character> result = new ArrayList<Character>();
+		RootElement root = prepareCharactersXmlParser(result, cacheInformation);
+		
+		// Query API
+		if (!queryApi(root.getContentHandler(), charactersURL, keyID, vCode)) {
+			return null;
+		}
+		Log.d("EveApi", "Characters loaded: " + result.size());
+		
+		// Plausibility check
+		if (result.isEmpty()) {
+			return null;
+		}
+		
+		// Cache result
+		apiCache.cache(cacheKey, cacheInformation);
+		
+		return result;
+	}
+
+	private RootElement prepareCharactersXmlParser(final ArrayList<Character> result, CacheInformation cacheInformation) {
+		RootElement root = new RootElement("eveapi");
+		prepareCacheInformationXmlParser(root, cacheInformation);
+		
+		root.getChild("result").getChild("rowset").getChild("row").setStartElementListener(new StartElementListener() {
+			@Override
+			public void start(Attributes attributes) {
+				Character character = new Character();
+				character.characterID = attributes.getValue("characterID");
+				character.characterName = attributes.getValue("name");
+				character.corporationID = attributes.getValue("corporationID");
+				character.corporationName = attributes.getValue("corporationName");
+				
+				result.add(character);
+			}
+		});
+
+		return root;
+	}
+	
 }
