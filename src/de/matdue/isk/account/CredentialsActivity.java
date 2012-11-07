@@ -6,6 +6,7 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +14,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class CredentialsActivity extends AccountAuthenticatorActivity {
+	
+	private static final long ACCESS_MASK = 6295553;
+	private static final String CHOOSE_LINK = "https://support.eveonline.com/api/Key/ActivateInstallLinks";
+	private static final String CREATE_LINK = "https://support.eveonline.com/api/Key/CreatePredefined/" + ACCESS_MASK;
 	
 	private static final int ApiKeyFinishActivityRequestCode = 0;
 	
@@ -51,6 +56,18 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 		startActivityForResult(intent, ApiKeyFinishActivityRequestCode);
 	}
 	
+	public void onChooseClicked(View view) {
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(CHOOSE_LINK));
+		browserIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+		startActivity(browserIntent);
+	}
+	
+	public void onCreateClicked(View view) {
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(CREATE_LINK));
+		browserIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+		startActivity(browserIntent);
+	}
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -68,6 +85,7 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 				Toast.makeText(this, String.format("Das Konto für %1$s konnte nicht erstellt werden, da es bereits existiert.", characterName), Toast.LENGTH_LONG).show();
 				return;
 			}
+			Toast.makeText(this, String.format("Konto für %1$s wurde erstellt.", characterName), Toast.LENGTH_LONG).show();
 			
 			Intent intent = new Intent();
 	        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, characterName);
@@ -75,6 +93,22 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 	        setAccountAuthenticatorResult(intent.getExtras());
 	        setResult(RESULT_OK, intent);
 	        finish();
+		}
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		
+		Uri uri = intent.getData();
+		if (uri != null && uri.toString().startsWith("eve://api.eveonline.com/installKey")) {
+			String keyId = uri.getQueryParameter("keyID");
+			String vCode = uri.getQueryParameter("vCode");
+			
+			Intent finishIntent = new Intent(this, ApiKeyFinishActivity.class);
+			finishIntent.putExtra(Constants.PARAM_KEYID, keyId);
+			finishIntent.putExtra(Constants.PARAM_VCODE, vCode);
+			startActivityForResult(finishIntent, ApiKeyFinishActivityRequestCode);
 		}
 	}
 	

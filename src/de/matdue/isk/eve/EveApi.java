@@ -190,8 +190,7 @@ public class EveApi {
 		
 		// Plausibility check
 		if (result != null) {
-			if (result.accessMask == 0 ||
-				result.type == null ||
+			if (result.type == null ||
 				result.characters.size() == 0) {
 				return null;
 			}

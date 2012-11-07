@@ -32,14 +32,17 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
+        android:padding="16dip"
         android:visibility="gone" >
 
         <TextView
+            android:id="@+id/apikey_error_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Es ist ein Fehler aufgetreten." />
+            android:text="Der API-Key konnte nicht geprüft werden, weil die Verbindung zum EVE Online Server fehlschlug, die API-Key-Daten ungültig sind, oder der API-Key abgelaufen ist." />
 
         <Button
+            android:id="@+id/apikey_error_repeat_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dip"
@@ -51,6 +54,7 @@
         android:id="@+id/apikey_result_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:padding="16dip"
         android:visibility="gone" >
 
         <TextView
@@ -58,7 +62,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dip"
-            android:padding="16dip"
             android:text="Tippen Sie den gewünschten Piloten an:" />
 
         <ListView
