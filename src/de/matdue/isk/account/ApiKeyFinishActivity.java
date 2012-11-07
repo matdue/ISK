@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 
@@ -113,32 +114,25 @@ public class ApiKeyFinishActivity extends IskActivity {
 		}
 		
 		private void animateViewSwitch(final View viewToHide, final View viewToShow) {
-			ViewPropertyAnimator viewToHideAnimator = viewToHide.animate();
-			viewToHideAnimator.alpha(0);
-			viewToHideAnimator.setListener(new Animator.AnimatorListener() {
-				@Override
-				public void onAnimationStart(Animator animation) {
-				}
-				
-				@Override
-				public void onAnimationRepeat(Animator animation) {
-				}
-				
+			int animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+			
+			viewToHide.animate()
+					.alpha(0f)
+					.setDuration(animationDuration)
+					.setListener(new AnimatorListenerAdapter() {
 				@Override
 				public void onAnimationEnd(Animator animation) {
 					viewToHide.setVisibility(View.GONE);
-					viewToHide.setAlpha(1);
-				}
-				
-				@Override
-				public void onAnimationCancel(Animator animation) {
+					viewToHide.setAlpha(1f);
 				}
 			});
 
-			ViewPropertyAnimator viewToShowAnimator = viewToShow.animate();
-			viewToShow.setAlpha(0);
+			viewToShow.setAlpha(0f);
 			viewToShow.setVisibility(View.VISIBLE);
-			viewToShowAnimator.alpha(1);
+			viewToShow.animate()
+					.alpha(1f)
+					.setDuration(animationDuration)
+					.setListener(null);
 		}
     }
     
