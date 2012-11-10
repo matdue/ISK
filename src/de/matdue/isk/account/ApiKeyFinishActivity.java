@@ -29,6 +29,7 @@ public class ApiKeyFinishActivity extends IskActivity {
 
 	private String keyID;
 	private String vCode;
+	private String accountName;
 	private View progressContainer;
 	private View errorContainer;
 	private TextView errorMessage;
@@ -45,6 +46,7 @@ public class ApiKeyFinishActivity extends IskActivity {
         Intent intent = getIntent();
         keyID = intent.getStringExtra(Constants.PARAM_KEYID);
         vCode = intent.getStringExtra(Constants.PARAM_VCODE);
+        accountName = intent.getStringExtra(Constants.PARAM_ACCOUNTNAME);
         Log.v("ApiKeyFinishActivity", keyID + "/" + vCode);
 
         progressContainer = findViewById(R.id.apikey_progress_container);
@@ -81,16 +83,20 @@ public class ApiKeyFinishActivity extends IskActivity {
     
     public void onListItemClick(ListView listView, View view, int position, long id) {
     	Character selectedCharacter = (Character) listView.getAdapter().getItem(position);
-    	Intent resultIntent = new Intent();
+    	finishWithCharacter(selectedCharacter);
+    }
+
+	private void finishWithCharacter(Character character) {
+		Intent resultIntent = new Intent();
     	resultIntent.putExtra(Constants.PARAM_KEYID, keyID);
     	resultIntent.putExtra(Constants.PARAM_VCODE, vCode);
-    	resultIntent.putExtra(Constants.PARAM_CHAR_NAME, selectedCharacter.characterName);
-    	resultIntent.putExtra(Constants.PARAM_CHAR_ID, selectedCharacter.characterID);
-    	resultIntent.putExtra(Constants.PARAM_CORP_NAME, selectedCharacter.corporationName);
-    	resultIntent.putExtra(Constants.PARAM_CORP_ID, selectedCharacter.corporationID);
+    	resultIntent.putExtra(Constants.PARAM_CHAR_NAME, character.characterName);
+    	resultIntent.putExtra(Constants.PARAM_CHAR_ID, character.characterID);
+    	resultIntent.putExtra(Constants.PARAM_CORP_NAME, character.corporationName);
+    	resultIntent.putExtra(Constants.PARAM_CORP_ID, character.corporationID);
     	setResult(RESULT_OK, resultIntent);
     	finish();
-    }
+	}
     
     private class PilotLoadingTask extends AsyncTask<String, Void, Account> {
 
@@ -121,6 +127,24 @@ public class ApiKeyFinishActivity extends IskActivity {
 				animateViewSwitch(progressContainer, errorContainer);
 			} else {
 				resultAdapter.clear();
+				
+				// If 'accountName' is one of the pilots of this API key,
+				// return immediately
+				if (accountName != null) {
+					for (Character character : result.characters) {
+						if (accountName.equals(character.characterName)) {
+							finishWithCharacter(character);
+							return;
+						}
+					}
+					
+					// 'accountName' is not contained in API key
+					errorMessage.setText(String.format("Dieser API-Key gehört nicht zum Piloten %1$s. Bitte gehen Sie zurück und wählen einen anderen API-Key oder erstellen einen neuen.", accountName));
+					errorRepeatButton.setVisibility(View.GONE);
+					animateViewSwitch(progressContainer, errorContainer);
+					return;
+				}
+				
 				resultAdapter.addAll(result.characters);
 				animateViewSwitch(progressContainer, resultContainer);
 			}

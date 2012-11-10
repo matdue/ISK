@@ -15,10 +15,17 @@
  */
 package de.matdue.isk;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.ExpandableListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +33,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -90,6 +98,33 @@ public class PilotsActivity extends ExpandableListActivity {
 			intent.putExtra("hasNoPilots", true);
 			startActivityForResult(intent, ApiKeyActivityRequestCode);
 		}
+		
+		
+		AccountManager accountManager = AccountManager.get(this);
+        Account[] myAccounts = accountManager.getAccountsByType(de.matdue.isk.account.Constants.ACCOUNT_TYPE);
+        if (myAccounts.length != 0) {
+        	Account myAccount = myAccounts[0];
+        	accountManager.getAuthToken(myAccount, "", null, this, new AccountManagerCallback<Bundle>() {
+				@Override
+				public void run(AccountManagerFuture<Bundle> future) {
+					try {
+						Bundle result = future.getResult();
+						String authToken = result.getString(AccountManager.KEY_AUTHTOKEN);
+						Log.v("PilotsActivity", authToken != null ? authToken : "???");
+					} catch (OperationCanceledException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (AuthenticatorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+        	}, null);
+        	accountManager.getAuthToken(myAccount, "", true, null, null);
+        }
 	}
 	
 	@Override

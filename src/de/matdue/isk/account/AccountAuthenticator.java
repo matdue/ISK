@@ -1,5 +1,10 @@
 package de.matdue.isk.account;
 
+import java.util.List;
+
+import de.matdue.isk.eve.Character;
+import de.matdue.isk.eve.EveApi;
+import de.matdue.isk.eve.EveApiCacheDummy;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
@@ -48,8 +53,39 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	public Bundle getAuthToken(AccountAuthenticatorResponse response,
 			Account account, String authTokenType, Bundle options)
 			throws NetworkErrorException {
-		// TODO Auto-generated method stub
-		return null;
+		Log.v("AccountAuthenticator", "getAuthToken");
+		
+		// Check if current credentials are valid
+		AccountManager accountManager = AccountManager.get(context);
+		String characterID = accountManager.getUserData(account, Constants.ACCOUNT_CHARACTER_ID);
+		String keyID = accountManager.getUserData(account, Constants.ACCOUNT_KEY_ID);
+		String vCode = accountManager.getUserData(account, Constants.ACCOUNT_V_CODE);
+		
+		EveApi api = new EveApi(new EveApiCacheDummy());
+		List<Character> characters = api.queryCharacters(keyID, vCode);
+		api.close();
+		
+		if (characters != null && characterID != null) {
+			for (Character character : characters) {
+				if (characterID.equals(character.characterID) && account.name.equals(character.characterName)) {
+					String authToken = characterID + "|" + keyID + "|" + vCode;
+					
+					Bundle result = new Bundle();
+			        result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+			        result.putString(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
+			        result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+			        return result;
+				}
+			}
+		}
+		
+		// Credentials not valid
+		Intent intent = new Intent(context, CredentialsActivity.class);
+		intent.putExtra(Constants.PARAM_ACCOUNTNAME, account.name);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		Bundle bundle = new Bundle();
+        bundle.putParcelable(AccountManager.KEY_INTENT, intent);
+        return bundle;
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class CredentialsActivity extends AccountAuthenticatorActivity {
@@ -21,12 +22,22 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 	
 	private static final int ApiKeyFinishActivityRequestCode = 0;
 	
+	// Check a specific account/pilot only
+	private String accountName;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.credentials);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		accountName = getIntent().getStringExtra(Constants.PARAM_ACCOUNTNAME);
+		if (accountName != null) {
+			TextView introText = (TextView) findViewById(R.id.pilots_intro_specific_pilot);
+			introText.setText(String.format("Der gespeicherte API-Key für %1$s ist ungültig. Bitte wählen Sie einen gülten API-Key für diesen Piloten aus oder erstellen Sie einen neuen.", accountName));
+			introText.setVisibility(View.VISIBLE);
+		}
 	}
 	
 	@Override
@@ -53,6 +64,7 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 		Intent intent = new Intent(this, ApiKeyFinishActivity.class);
 		intent.putExtra(Constants.PARAM_KEYID, keyId);
 		intent.putExtra(Constants.PARAM_VCODE, vCode);
+		intent.putExtra(Constants.PARAM_ACCOUNTNAME, accountName);
 		startActivityForResult(intent, ApiKeyFinishActivityRequestCode);
 	}
 	
@@ -73,23 +85,38 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == ApiKeyFinishActivityRequestCode && resultCode == RESULT_OK) {
 			String characterName = data.getStringExtra(Constants.PARAM_CHAR_NAME);
+			String characterID = data.getStringExtra(Constants.PARAM_CHAR_ID);
+			String keyID = data.getStringExtra(Constants.PARAM_KEYID);
+			String vCode = data.getStringExtra(Constants.PARAM_VCODE);
+			String authToken = characterID + "|" + keyID + "|" + vCode;
 			
-			Bundle newAccountData = new Bundle();
-			newAccountData.putString("characterID", data.getStringExtra(Constants.PARAM_CHAR_ID));
-			newAccountData.putString("keyID", data.getStringExtra(Constants.PARAM_KEYID));
-			newAccountData.putString("vCode", data.getStringExtra(Constants.PARAM_VCODE));
-			
-			AccountManager accountManager = AccountManager.get(this);
-			Account newAccount = new Account(characterName, Constants.ACCOUNT_TYPE);
-			if (!accountManager.addAccountExplicitly(newAccount, null, newAccountData)) {
-				Toast.makeText(this, String.format("Das Konto für %1$s konnte nicht erstellt werden, da es bereits existiert.", characterName), Toast.LENGTH_LONG).show();
-				return;
+			if (accountName != null && accountName.equals(characterName)) {
+				// Request to validate credentials succeeded
+				AccountManager accountManager = AccountManager.get(this);
+				Account account = new Account(characterName, Constants.ACCOUNT_TYPE);
+				accountManager.setUserData(account, Constants.ACCOUNT_CHARACTER_ID, characterID);
+				accountManager.setUserData(account, Constants.ACCOUNT_KEY_ID, keyID);
+				accountManager.setUserData(account, Constants.ACCOUNT_V_CODE, vCode);
+			} else {
+				// Create new account
+				Bundle newAccountData = new Bundle();
+				newAccountData.putString(Constants.ACCOUNT_CHARACTER_ID, characterID);
+				newAccountData.putString(Constants.ACCOUNT_KEY_ID, keyID);
+				newAccountData.putString(Constants.ACCOUNT_V_CODE, vCode);
+				
+				AccountManager accountManager = AccountManager.get(this);
+				Account newAccount = new Account(characterName, Constants.ACCOUNT_TYPE);
+				if (!accountManager.addAccountExplicitly(newAccount, null, newAccountData)) {
+					Toast.makeText(this, String.format("Das Konto für %1$s konnte nicht erstellt werden, da es bereits existiert.", characterName), Toast.LENGTH_LONG).show();
+					return;
+				}
+				Toast.makeText(this, String.format("Konto für %1$s wurde erstellt.", characterName), Toast.LENGTH_LONG).show();
 			}
-			Toast.makeText(this, String.format("Konto für %1$s wurde erstellt.", characterName), Toast.LENGTH_LONG).show();
 			
 			Intent intent = new Intent();
 	        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, characterName);
 	        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
+	        intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
 	        setAccountAuthenticatorResult(intent.getExtras());
 	        setResult(RESULT_OK, intent);
 	        finish();
@@ -108,6 +135,7 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 			Intent finishIntent = new Intent(this, ApiKeyFinishActivity.class);
 			finishIntent.putExtra(Constants.PARAM_KEYID, keyId);
 			finishIntent.putExtra(Constants.PARAM_VCODE, vCode);
+			finishIntent.putExtra(Constants.PARAM_ACCOUNTNAME, accountName);
 			startActivityForResult(finishIntent, ApiKeyFinishActivityRequestCode);
 		}
 	}
