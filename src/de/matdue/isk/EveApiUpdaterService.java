@@ -489,7 +489,7 @@ public class EveApiUpdaterService extends WakefulIntentService {
     		inboxNotification.addLine(itemNames.get(i));
     	}
     	if (itemNames.size() > 5) {
-    		int additional = 5 - itemNames.size();
+    		int additional = itemNames.size() - 5;
     		inboxNotification.setSummaryText(getResources().getString(R.string.market_order_notification_summary, additional));
     	}
     	return inboxNotification.build();
