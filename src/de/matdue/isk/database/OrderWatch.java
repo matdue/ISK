@@ -47,8 +47,8 @@ public class OrderWatch {
 	public int stationID;
 	public String stationName;
 	public BigDecimal price;
-	public int volEntered;
-	public int volRemaining;
+	public long volEntered;
+	public long volRemaining;
 	public int fulfilled;  // 100 = 100% fulfilled, i.e. volRemaining=0, .., 0 = 0% fulfilled, i.e. volRemaining=volEntered
 	public Date expires;
 	public int action;  // 0 = sell, 1 = buy

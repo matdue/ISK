@@ -23,8 +23,8 @@ public class MarketOrder {
 	// No getters and setters to achive better performance
 	public long orderID;
 	public int stationID;
-	public int volEntered;
-	public int volRemaining;
+	public long volEntered;
+	public long volRemaining;
 	public int orderState;
 	public int typeID;
 	public int duration;
