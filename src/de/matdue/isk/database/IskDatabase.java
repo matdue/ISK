@@ -650,8 +650,8 @@ public class IskDatabase extends SQLiteOpenHelper {
 				orderWatch.stationID = cursor.getInt(5);
 				orderWatch.stationName = cursor.getString(6);
 				orderWatch.price = new BigDecimal(cursor.getString(7));
-				orderWatch.volEntered = cursor.getInt(8);
-				orderWatch.volRemaining = cursor.getInt(9);
+				orderWatch.volEntered = cursor.getLong(8);
+				orderWatch.volRemaining = cursor.getLong(9);
 				orderWatch.fulfilled = cursor.getInt(10);
 				orderWatch.expires = new Date(cursor.getLong(11));
 				orderWatch.action = cursor.getInt(12);

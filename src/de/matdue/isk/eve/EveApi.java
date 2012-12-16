@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.http.HttpEntity;
@@ -57,7 +58,7 @@ public class EveApi {
 	
 	static {
 		// EVE Online API always uses GMT
-		dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 		dateFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 	
@@ -539,8 +540,8 @@ public class EveApi {
 					MarketOrder marketOrder = new MarketOrder();
 					marketOrder.orderID = Long.parseLong(attributes.getValue("orderID"));
 					marketOrder.stationID = Integer.parseInt(attributes.getValue("stationID"));
-					marketOrder.volEntered = Integer.parseInt(attributes.getValue("volEntered"));
-					marketOrder.volRemaining = Integer.parseInt(attributes.getValue("volRemaining"));
+					marketOrder.volEntered = Long.parseLong(attributes.getValue("volEntered"));
+					marketOrder.volRemaining = Long.parseLong(attributes.getValue("volRemaining"));
 					marketOrder.orderState = Integer.parseInt(attributes.getValue("orderState"));
 					marketOrder.typeID = Integer.parseInt(attributes.getValue("typeID"));
 					marketOrder.duration = Integer.parseInt(attributes.getValue("duration"));
