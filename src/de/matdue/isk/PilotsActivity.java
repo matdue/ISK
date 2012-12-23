@@ -27,6 +27,7 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.ExpandableListActivity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -104,7 +105,7 @@ public class PilotsActivity extends ExpandableListActivity {
         Account[] myAccounts = accountManager.getAccountsByType(de.matdue.isk.account.Constants.ACCOUNT_TYPE);
         if (myAccounts.length != 0) {
         	Account myAccount = myAccounts[0];
-        	accountManager.getAuthToken(myAccount, "", null, this, new AccountManagerCallback<Bundle>() {
+        	/*accountManager.getAuthToken(myAccount, "", null, this, new AccountManagerCallback<Bundle>() {
 				@Override
 				public void run(AccountManagerFuture<Bundle> future) {
 					try {
@@ -123,7 +124,11 @@ public class PilotsActivity extends ExpandableListActivity {
 					}
 				}
         	}, null);
-        	accountManager.getAuthToken(myAccount, "", true, null, null);
+        	accountManager.getAuthToken(myAccount, "", true, null, null);*/
+        	/*ContentResolver.removePeriodicSync(myAccount, "de.matdue.isk.sync", new Bundle());
+        	ContentResolver.setSyncAutomatically(myAccount, "de.matdue.isk.sync", false);*/
+        	ContentResolver.addPeriodicSync(myAccount, "de.matdue.isk.sync", new Bundle(), 60);
+        	ContentResolver.setSyncAutomatically(myAccount, "de.matdue.isk.sync", true);
         }
 	}
 	

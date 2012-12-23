@@ -5,6 +5,7 @@ import de.matdue.isk.R;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -110,6 +111,9 @@ public class CredentialsActivity extends AccountAuthenticatorActivity {
 					Toast.makeText(this, String.format("Das Konto für %1$s konnte nicht erstellt werden, da es bereits existiert.", characterName), Toast.LENGTH_LONG).show();
 					return;
 				}
+				ContentResolver.setIsSyncable(newAccount, Constants.SYNC_AUTHORITY, 1);
+				ContentResolver.setSyncAutomatically(newAccount, Constants.SYNC_AUTHORITY, true);
+				ContentResolver.addPeriodicSync(newAccount, Constants.SYNC_AUTHORITY, new Bundle(), 1 * 60 * 60);
 				Toast.makeText(this, String.format("Konto für %1$s wurde erstellt.", characterName), Toast.LENGTH_LONG).show();
 			}
 			

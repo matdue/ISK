@@ -21,5 +21,7 @@ public class Constants {
 	public static final String ACCOUNT_V_CODE = "vCode";
 	public static final String ACCOUNT_KEY_ID = "keyID";
 	public static final String ACCOUNT_CHARACTER_ID = "characterID";
+	
+	public static final String SYNC_AUTHORITY = "de.matdue.isk.sync";
 
 }
