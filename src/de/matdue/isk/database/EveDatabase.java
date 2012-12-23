@@ -30,8 +30,8 @@ import android.util.Log;
 
 public class EveDatabase extends SQLiteOpenHelper {
 	
-	private static final String DATABASE_NAME = "eveInferno.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final String DATABASE_NAME = "eveRetribution.db";
+	private static final int DATABASE_VERSION = 2;
 	
 	private Context context;  // non-null if hasChecked==false, otherwise null
 	private boolean hasChecked = false;
