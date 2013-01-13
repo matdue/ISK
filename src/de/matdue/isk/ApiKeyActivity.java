@@ -167,12 +167,12 @@ public class ApiKeyActivity extends Activity {
 				Toast.makeText(parent, R.string.pilots_key_error_validate, Toast.LENGTH_LONG).show();
 				return;
 			}
-			if ((result.accessMask & ACCESS_MASK) != ACCESS_MASK) {
-				Toast.makeText(parent, R.string.pilots_key_error_accessmask, Toast.LENGTH_LONG).show();
+			if ("Corporation".equals(result.type)) {
+				Toast.makeText(parent, R.string.pilots_key_error_type, Toast.LENGTH_LONG).show();
 				return;
 			}
-			if (!"Account".equals(result.type)) {
-				Toast.makeText(parent, R.string.pilots_key_error_type, Toast.LENGTH_LONG).show();
+			if ((result.accessMask & ACCESS_MASK) != ACCESS_MASK) {
+				Toast.makeText(parent, R.string.pilots_key_error_accessmask, Toast.LENGTH_LONG).show();
 				return;
 			}
 			
