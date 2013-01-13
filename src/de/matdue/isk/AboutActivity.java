@@ -17,8 +17,11 @@ package de.matdue.isk;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class AboutActivity extends Activity {
 	
@@ -28,6 +31,15 @@ public class AboutActivity extends Activity {
 		
 		setContentView(R.layout.about);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		// Set correct version number
+		try {
+			PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			String versionNumber = getResources().getString(R.string.about_version) + " " + packageInfo.versionName;
+			((TextView)findViewById(R.id.about_version)).setText(versionNumber);
+		} catch (NameNotFoundException e) {
+			// Ignore any error
+		}
 	}
 
 	@Override
