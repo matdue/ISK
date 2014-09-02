@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight">
+    <ImageView
+        android:id="@+id/pilot_image"
+        android:layout_width="64dip"
+        android:layout_height="64dip"
+        android:maxHeight="64dip"
+        android:maxWidth="64dip"
+        android:layout_margin="3dip"
+        android:scaleType="centerInside"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/pilots_portrait"
+        android:focusable="false" />
+
+    <CheckBox 
+        android:id="@+id/pilot_checked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true" 
+        android:layout_centerVertical="true"
+        android:focusable="false" />
+
+    <TextView
+        android:id="@+id/pilot_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/pilot_checked"
+        android:layout_toRightOf="@id/pilot_image"
+        android:layout_centerVertical="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:lines="1"
+        android:scrollHorizontally="true"
+        android:ellipsize="end"
+        android:focusable="false" />
+    
+</RelativeLayout>

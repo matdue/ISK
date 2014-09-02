@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="10dip" >
+
+    <Spinner
+        android:id="@+id/main_pilot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="70dip" />
+    
+    <TableLayout 
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent" >
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+            
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:id="@+id/wallet"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_main_wallet"
+			        android:drawablePadding="10sp"
+			        android:padding="4dp"
+			        android:background="?android:attr/selectableItemBackground"
+			        android:text="@string/main_menu_wallet"
+			        android:textAppearance="?android:attr/textAppearanceLarge"
+			        android:textColor="@android:color/white"
+			        android:onClick="gotoWallet" />
+                
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:id="@+id/market_orders"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_main_market_orders"
+			        android:drawablePadding="10sp"
+			        android:padding="4dp"
+			        android:background="?android:attr/selectableItemBackground"
+			        android:text="@string/main_menu_market_orders"
+			        android:textAppearance="?android:attr/textAppearanceLarge"
+			        android:textColor="@android:color/white"
+			        android:onClick="gotoMarketOrders" />
+                
+            </FrameLayout>
+            
+        </TableRow>
+        
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" >
+            
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:visibility="invisible"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_launcher"
+			        android:background="@android:color/transparent"
+			        android:textColor="@android:color/white" />
+                
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.5" >
+			    
+                <Button 
+                    android:id="@+id/pilots"
+                    android:layout_width="wrap_content"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="center"
+			        android:drawableTop="@drawable/ic_main_pilots"
+			        android:drawablePadding="10sp"
+			        android:padding="4dp"
+			        android:background="?android:attr/selectableItemBackground"
+			        android:text="@string/main_menu_pilots"
+			        android:textAppearance="?android:attr/textAppearanceLarge"
+			        android:textColor="@android:color/white"
+			        android:onClick="gotoPilots" />
+                
+            </FrameLayout>
+            
+        </TableRow>
+        
+    </TableLayout>
+
+</LinearLayout>

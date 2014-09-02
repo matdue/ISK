@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="update_interval">
+		<item>Stündlich</item>
+		<item>Alle 2 Stunden</item>
+		<item>Alle 4 Stunden</item>
+		<item>Alle 8 Stunden</item>
+		<item>2x täglich</item>
+		<item>Täglich</item>
+		<item>Nur manuell</item>
+	</string-array>
+	<string-array name="notification_vibration">
+	    <item>Immer</item>
+	    <item>Nur im Lautlos-Modus</item>
+	    <item>Nie</item>
+	</string-array>
+	<string-array name="eve_reference_types">
+		<item>Unbekannt</item>
+		<item>Player Trading</item>
+		<item>Markt-Transaktion</item>
+		<item>GM Cash Transfer</item>
+		<item>ATM Withdraw</item>
+		<item>ATM Deposit</item>
+		<item>Backward Compatible</item>
+		<item>Mission Reward</item>
+		<item>Klon-Aktivierung</item>
+		<item>Inheritance</item>
+		<item>Spielerspende</item>
+		<item>Corporation Payment</item>
+		<item>Docking Fee</item>
+		<item>Office Rental Fee</item>
+		<item>Factory Slot Rental Fee</item>
+		<item>Reparatur-Rechnung</item>
+		<item>Bounty</item>
+		<item>Bounty Prize</item>
+		<item>Agents_temporary</item>
+		<item>Versicherung</item>
+		<item>Mission Expiration</item>
+		<item>Mission Completion</item>
+		<item>Shares</item>
+		<item>Courier Mission Escrow</item>
+		<item>Mission Cost</item>
+		<item>Agent Miscellaneous</item>
+		<item>LP Store</item>
+		<item>Agent Location Services</item>
+		<item>Agent Donation</item>
+		<item>Agent Security Services</item>
+		<item>Agent - Missions-Sicherheitszahlung</item>
+		<item>Agent - Missions-Sicherheitsrückzahlung</item>
+		<item>Agents_preward</item>
+		<item>Agent - Missions-Belohnung</item>
+		<item>Agent - Missions-Belohnung für Zeitbonus</item>
+		<item>CSPA</item>
+		<item>CSPAOfflineRefund</item>
+		<item>Corporation Account Withdrawal</item>
+		<item>Corporation Dividend Payment</item>
+		<item>Corporation Registration Fee</item>
+		<item>Corporation Logo Change Cost</item>
+		<item>Release Of Impounded Property</item>
+		<item>Markt-Hinterlegung</item>
+		<item>Agent Services Rendered</item>
+		<item>Market Fine Paid</item>
+		<item>Corporation Liquidation</item>
+		<item>Maklergebühr</item>
+		<item>Corporation Bulk Payment</item>
+		<item>Alliance Registration Fee</item>
+		<item>War Fee</item>
+		<item>Alliance Maintainance Fee</item>
+		<item>Contraband Fine</item>
+		<item>Clone Transfer</item>
+		<item>Acceleration Gate Fee</item>
+		<item>Transaktionssteuer</item>
+		<item>Jump Clone Installation Fee</item>
+		<item>Fertigung</item>
+		<item>Technologieforschung</item>
+		<item>Zeitproduktivitätsforschung</item>
+		<item>Materialproduktivitätsforschung</item>
+		<item>Kopieren</item>
+		<item>Duplicating</item>
+		<item>Reverse Engineering</item>
+		<item>Contract Auction Bid</item>
+		<item>Contract Auction Bid Refund</item>
+		<item>Contract Collateral</item>
+		<item>Contract Reward Refund</item>
+		<item>Contract Auction Sold</item>
+		<item>Contract Reward</item>
+		<item>Contract Collateral Refund</item>
+		<item>Contract Collateral Payout</item>
+		<item>Vertrag - Preis</item>
+		<item>Vertrag - Maklergebühr</item>
+		<item>Vertrag - Umsatzsteuer</item>
+		<item>Vertrag - Einlage</item>
+		<item>Contract Deposit Sales Tax</item>
+		<item>Secure EVE Time Code Exchange</item>
+		<item>Contract Auction Bid (corp)</item>
+		<item>Contract Collateral Deposited (corp)</item>
+		<item>Contract Price Payment (corp)</item>
+		<item>Contract Brokers Fee (corp)</item>
+		<item>Contract Deposit (corp)</item>
+		<item>Vertrag - Einlagenrückzahlung</item>
+		<item>Vertrag - Belohnung eingezahlt</item>
+		<item>Contract Reward Deposited (corp)</item>
+		<item>Kopfgeld-Auszahlungen</item>
+		<item>Advertisement Listing Fee</item>
+		<item>Medal Creation</item>
+		<item>Medal Issued</item>
+		<item>Betting</item>
+		<item>DNA Modification Fee</item>
+		<item>Sovereignity bill</item>
+		<item>Kopfgeld-Auszahlung Corporation-Steuer</item>
+		<item>Agent - Missions-Belohnung Corporation-Steuer</item>
+		<item>Agent - Missions-Belohnung für Zeitbonus-Corporation-Steuer</item>
+		<item>Upkeep adjustment fee</item>
+		<item>Planetarische Einfuhrsteuer</item>
+		<item>Planetarische Ausfuhrsteuer</item>
+		<item>Planetarische Konstruktion</item>
+		<item>Corporate Reward Payout</item>
+		<item>Bounty Surcharge</item><!-- 101 -->
+		<item>Contract Reversal</item><!-- 102 -->
+		<item>Corporate Reward Tax</item><!-- 103 -->
+		<item>Store Purchase</item><!-- 106 -->
+		<item>Store Purchase Refund</item><!-- 107 -->
+		<item>PLEX sold for Aurum</item><!-- 108 -->
+		<item>Lottery Give Away</item><!-- 109 -->
+		<item>Aurum Token exchanged for Aur</item><!-- 111 -->
+		<item>Datacore-Gebühr</item><!-- 112 -->
+		<item>War Surrender Fee</item><!-- 113 -->
+		<item>War Ally Contract</item><!-- 114 -->
+		<item>Modify ISK</item><!-- 10001 -->
+		<item>Primary Marketplace Purchase</item><!-- 10002 -->
+		<item>Battle Reward</item><!-- 10003 -->
+		<item>New Character Starting Funds</item><!-- 10004 -->
+		<item>Corporation Account Withdrawal</item><!-- 10005 -->
+		<item>Corporation Account Deposit</item><!-- 10006 -->
+		<item>Battle WP Win Reward</item><!-- 10007 -->
+		<item>Battle WP Loss Reward</item><!-- 10008 -->
+		<item>Battle Win Reward</item><!-- 10009 -->
+		<item>Battle Loss Reward</item><!-- 10010 -->
+		<item>Modify AUR</item><!-- 11001 -->
+		<item>Respec payment</item><!-- 11002 -->
+	</string-array>    
+</resources>

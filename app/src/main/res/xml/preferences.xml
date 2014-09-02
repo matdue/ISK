@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/preferences_cat_updating_data" >
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/update_interval"
+            android:entryValues="@array/update_interval_values"
+            android:key="updateInterval"
+            android:title="@string/preferences_update_interval" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="honorGlobalSync"
+            android:summary="@string/preferences_honor_gs_summary"
+            android:title="@string/preferences_honor_gs" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="requireWifi"
+            android:summary="@string/preferences_require_wifi_summary"
+            android:title="@string/preferences_require_wifi" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preferences_cat_notifications" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="notification"
+            android:title="@string/preferences_notifications"
+            android:summary="@string/preferences_notifications_summary" />
+
+        <RingtonePreference
+            android:dependency="notification"
+            android:key="ringtone"
+            android:ringtoneType="notification"
+            android:showDefault="true"
+            android:showSilent="true"
+            android:title="@string/preferences_ringtone" />
+
+        <ListPreference
+            android:defaultValue="1"
+            android:dependency="notification"
+            android:entries="@array/notification_vibration"
+            android:entryValues="@array/notification_vibration_values"
+            android:key="vibration"
+            android:title="@string/preferences_vibration" />
+        
+        <CheckBoxPreference 
+            android:defaultValue="true"
+            android:dependency="notification"
+            android:key="lights"
+            android:title="@string/preferences_phone_led" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

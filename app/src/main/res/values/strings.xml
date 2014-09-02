@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ISK for EVE Online</string>
+    <string name="app_name_launcher">ISK</string>
+    <string name="main_pilot_portrait">Pilot´s portrait</string>
+    <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet and market orders at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
+    <string name="main_dialog_welcome_close">Close</string>
+    <string name="main_optmenu_refresh">Refresh</string>
+    <string name="main_optmenu_eveaccess">Update history</string>
+    <string name="main_optmenu_preferences">Settings</string>
+    <string name="main_optmenu_info">About</string>
+    <string name="main_menu_wallet">Wallet</string>
+    <string name="main_menu_pilots">Pilots</string>
+    <string name="main_menu_market_orders">Orders</string>
+    <string name="main_refresh_error">Error while refreshing data: %1$s</string>
+
+    <string name="preferences_title">Settings</string>
+    <string name="preferences_cat_updating_data">Updating data</string>
+    <string name="preferences_update_interval">Update interval</string>
+    <string name="preferences_honor_gs">Honor global sync</string>
+    <string name="preferences_honor_gs_summary">Update with activated global sync only.</string>
+    <string name="preferences_require_wifi">Require WIFI connection</string>
+    <string name="preferences_require_wifi_summary">Data volume may be 250 KByte and more.</string>
+    <string name="preferences_cat_notifications">Notifications</string>
+    <string name="preferences_notifications">Notifications</string>
+    <string name="preferences_notifications_summary">Enable notifications (ended market orders)</string>
+    <string name="preferences_ringtone">Ringtone</string>
+    <string name="preferences_ringtone_silent">Silent</string>
+    <string name="preferences_vibration">Vibration</string>
+    <string name="preferences_phone_led">Phone LED</string>
+
+    <string name="about_title">About ISK</string>
+    <string name="about_version">ISK for EVE Online</string>
+    <string name="about_copyright">Copyright \u00A9 2012, 2013 Matthias Düsterhöft</string>
+    <string name="about_ccp">EVE Online and the EVE logo are the registered trademarks of CCP hf. All rights are reserved worldwide. All other trademarks are the property of their respective owners. EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf. All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf. CCP hf. has granted permission to Matthias Düsterhöft to use EVE Online and all associated logos and designs for promotional and information purposes in its app but does not endorse, and is not in any way affiliated with, Matthias Düsterhöft. CCP is in no way responsible for the content in or functioning of this app, nor can it be liable for any damage arising from the use of this app.</string>
+    <string name="about_icons">Some icons are designed by IconEden (http://www.iconeden.com/).</string>
+
+    <string name="eveaccess_title">Update history</string>
+    <string name="eveaccess_no_data">No data</string>
+    
+    <string name="pilots_portrait">Pilot´s portrait</string>
+    <string name="pilots_title">Pilots</string>
+    <string name="pilots_context_remove">Remove API key</string>
+    <string name="pilots_optmenu_add">Add</string>
+    <string name="pilots_key_title">Add key</string>
+    <string name="pilots_key_intro">You may add a key by choosing it from a list of your API keys, or enter its code manually. It is possible to create a new individual API key for this app.</string>
+    <string name="pilots_key_first">1. Choose a key\n\nA browser window will open, where you are able to choose one of your existing keys by touching the Install link. The web page is hosted by EVE Online, and you might have to login with your EVE Online account.</string>
+    <string name="pilots_key_second">2. Create a new key\n\nIf you want this app to use its own key, you are able to create a new one. Please do not modify the Access Mask. Once you have finished, go back to this app and choose the new key as described in step 1.</string>
+    <string name="pilots_key_third">3. Enter key manually\n\nPlease provide both ID and Verification Code, as printed on https://support.eveonline.com/api/Key</string>
+    <string name="pilots_key_button_choose">Choose key</string>
+    <string name="pilots_key_button_create">Create key</string>
+    <string name="pilots_key_button_add">Add key</string>
+    <string name="pilots_key_hint_id">ID</string>
+    <string name="pilots_key_hint_verificationcode">Verification Code</string>
+    <string name="pilots_key_checking">Checking key…</string>
+    <string name="pilots_key_empty_fields">Please enter both ID and Verification Code.</string>
+    <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
+    <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key.</string>
+    <string name="pilots_key_error_type">Character key only is allowed.</string>
+    
+    <string name="wallet_title">Wallet and transactions</string>
+    <string name="wallet_no_data">No data</string>
+    <string name="wallet_personal_buy">Buy from\u00A0</string>
+    <string name="wallet_personal_sell">Sell to\u00A0</string>
+    <string name="wallet_corp_buy">Corporation buy from\u00A0</string>
+    <string name="wallet_corp_sell">Corporation sell to\u00A0</string>
+    <string name="wallet_taxes">Tax</string>
+    <string name="wallet_quantity_symbol">\u00A0\u00D7\u00A0</string>
+    <string name="wallet_item_image">Item image</string>
+    <string name="wallet_optmenu_search">Search</string>
+    <string name="wallet_search_hint">Item name</string>
+    
+    <string name="market_order_title">Market orders</string>
+    <string name="market_order_unknown_item">Unknown item (%1$s)</string>
+    <string name="market_order_unknown_station">Unknown station (%1$s)</string>
+    <string name="market_order_price_per_unit">%1$s per unit</string>
+    <string name="market_order_orderstate_buy">Buy</string>
+    <string name="market_order_orderstate_sell">Sell</string>
+    <string name="market_order_orderstate_bought">Bought or expired</string>
+    <string name="market_order_orderstate_sold">Sold or expired</string>
+    <string name="market_order_fulfilled">%1$d%% fulfilled (%2$s/%3$s)</string>
+    <string name="market_order_expires">Expires %1$s</string>
+    <string name="market_order_watch">Watch</string>
+    <string name="market_order_tab_buy">Buy</string>
+    <string name="market_order_tab_sell">Sell</string>
+    <string name="market_order_no_data">No data</string>
+    <string name="market_order_optmenu_search">Search</string>
+    <string name="market_order_optmenu_sort">Sort order</string>
+    <string name="market_order_optmenu_sort_name">Sort by name</string>
+    <string name="market_order_optmenu_sort_fulfillment">Sort by fulfillment</string>
+    <string name="market_order_optmenu_sort_expiration">Sort by expiration date</string>
+    <string name="market_order_optmenu_help">Help</string>
+    <string name="market_order_helpdialog">Here you see all your active market orders.\n\nYou can watch an order by marking it. Orders which have completed or expired will be listed here, too. Remove them with a right or left swipe.</string>
+    <string name="market_order_helpdialog_close">Close</string>
+    <string name="market_order_search_hint">Item name</string>
+    <string name="market_order_notification_ticker">Market order has ended</string>
+    <string name="market_order_notification_title">Market order has ended</string>
+    <string name="market_order_notification_summary">+%1$d more</string>
+    
+</resources>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ISK für EVE Online</string>
+    <string name="app_name_launcher">ISK</string>
+    <string name="main_pilot_portrait">Piloten-Portrait</string>
+    <string name="main_dialog_welcome">Willkommen!\n\nMit ISK für EVE Online können Sie jederzeit den Kontostand und die Marktaufträge Ihrer Piloten einsehen.\n\nTippen Sie auf das Piloten-Icon und bestimmen Sie, welche Kapselpiloten Sie beobachten möchten.</string>
+    <string name="main_dialog_welcome_close">Schließen</string>
+    <string name="main_optmenu_refresh">Aktualisieren</string>
+    <string name="main_optmenu_eveaccess">Letzte Aktualisierungen</string>
+    <string name="main_optmenu_preferences">Einstellungen</string>
+    <string name="main_optmenu_info">Info</string>
+    <string name="main_menu_wallet">Konto</string>
+    <string name="main_menu_pilots">Piloten</string>
+    <string name="main_menu_market_orders">Aufträge</string>
+    <string name="main_refresh_error">Fehler beim Aktualisieren: %1$s</string>
+
+    <string name="preferences_title">Einstellungen</string>
+    <string name="preferences_cat_updating_data">Datenaktualisierung</string>
+    <string name="preferences_update_interval">Aktualisierungsintervall</string>
+    <string name="preferences_honor_gs">Berücksichtige Global Sync</string>
+    <string name="preferences_honor_gs_summary">Nur aktualisieren, wenn globale Synchronisierung eingeschaltet ist.</string>
+    <string name="preferences_require_wifi">Benötigt WLAN-Verbindung</string>
+    <string name="preferences_require_wifi_summary">Das Datenvolumen kann 250 KByte und mehr betragen.</string>
+    <string name="preferences_cat_notifications">Benachrichtigungen</string>
+    <string name="preferences_notifications">Benachrichtigungen</string>
+    <string name="preferences_notifications_summary">Benachrichtigungen einschalten (bei beendeten Marktaufträgen)</string>
+    <string name="preferences_ringtone">Klingelton</string>
+    <string name="preferences_ringtone_silent">Lautlos</string>
+    <string name="preferences_vibration">Vibration</string>
+    <string name="preferences_phone_led">Telefon-LED</string>
+    
+    <string name="about_title">ISK</string>
+    <string name="about_version">ISK für EVE Online</string>
+    <string name="about_copyright">Copyright \u00A9 2012, 2013 Matthias Düsterhöft</string>
+    <string name="about_ccp">EVE Online and the EVE logo are the registered trademarks of CCP hf. All rights are reserved worldwide. All other trademarks are the property of their respective owners. EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf. All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf. CCP hf. has granted permission to Matthias Düsterhöft to use EVE Online and all associated logos and designs for promotional and information purposes in its app but does not endorse, and is not in any way affiliated with, Matthias Düsterhöft. CCP is in no way responsible for the content in or functioning of this app, nor can it be liable for any damage arising from the use of this app.</string>
+    <string name="about_icons">Einige Icons wurden von IconEden (http://www.iconeden.com/) erstellt.</string>
+
+    <string name="eveaccess_title">Letzte Aktualisierungen</string>
+    <string name="eveaccess_no_data">Keine Daten</string>
+    
+    <string name="pilots_portrait">Piloten-Portrait</string>
+    <string name="pilots_title">Piloten</string>
+    <string name="pilots_context_remove">API-Key entfernen</string>
+    <string name="pilots_optmenu_add">Hinzufügen</string>
+    <string name="pilots_key_title">Key hinzufügen</string>
+    <string name="pilots_key_intro">Fügen Sie einen Key hinzu, indem Sie ihn aus der Liste der API-Keys auswählen, oder geben Sie die Daten manuell ein. Sie können auch einen neuen API-Key mit dieser App erstellen.</string>
+    <string name="pilots_key_first">1. Key auswählen\n\nIn einem Browser-Fenster können Sie einen bereits vorhandenen Key auswählen, indem sie den Install-Link antippen. Der Browser zeigt eine offizielle EVE Online-Seite an, wo Sie sich mit Ihren EVE Online-Logindaten anmelden müssen.</string>
+    <string name="pilots_key_second">2. Neuen Key erstellen\n\nWenn Sie für diese App einen eigenen Key benutzen möchten, können Sie hier einen neuen erstellen. Bitte verändern Sie nicht die Access Mask. Nach Abschluss gehen Sie zu dieser App zurück und wählen den neuen Key aus wie in Punkt 1 beschrieben.</string>
+    <string name="pilots_key_third">3. Key manuell eingeben\n\nGeben Sie ID und Verification Code ein, wie er auf https://support.eveonline.com/api/Key angezeigt wird.</string>
+    <string name="pilots_key_button_choose">Key auswählen</string>
+    <string name="pilots_key_button_create">Key erstellen</string>
+    <string name="pilots_key_button_add">Key hinzufügen</string>
+    <string name="pilots_key_hint_id">ID</string>
+    <string name="pilots_key_hint_verificationcode">Verification Code</string>
+    <string name="pilots_key_checking">Prüfe Key…</string>
+    <string name="pilots_key_empty_fields">Bitte geben sie ID und Verification Code ein.</string>
+    <string name="pilots_key_error_validate">API-Key konnte nicht geprüft werden, bitte wiederholen Sie den Vorgang.</string>
+    <string name="pilots_key_error_accessmask">API-Key hat nicht genügend Rechte. Bitte prüfen.</string>
+    <string name="pilots_key_error_type">Nur Character-Keys sind möglich.</string>
+    
+    <string name="wallet_title">Kontobewegungen</string>
+    <string name="wallet_no_data">Keine Daten</string>
+    <string name="wallet_personal_buy">Kauf von\u00A0</string>
+    <string name="wallet_personal_sell">Verkauf an\u00A0</string>
+    <string name="wallet_corp_buy">Corporation-Kauf von\u00A0</string>
+    <string name="wallet_corp_sell">Corporation-Verkauf an\u00A0</string>
+    <string name="wallet_taxes">Steuern</string>
+    <string name="wallet_quantity_symbol">\u00A0\u00D7\u00A0</string>
+    <string name="wallet_item_image">Item-Bild</string>
+    <string name="wallet_optmenu_search">Suchen</string>
+    <string name="wallet_search_hint">Gegenstand</string>
+    
+    <string name="market_order_title">Marktaufträge</string>
+    <string name="market_order_unknown_item">Unbekanntes Teil (%1$s)</string>
+    <string name="market_order_unknown_station">Unbekannte Station (%1$s)</string>
+    <string name="market_order_price_per_unit">%1$s/Stück</string>
+    <string name="market_order_orderstate_buy">Kauf</string>
+    <string name="market_order_orderstate_sell">Verkauf</string>
+    <string name="market_order_orderstate_bought">Gekauft oder ausgelaufen</string>
+    <string name="market_order_orderstate_sold">Verkauft oder ausgelaufen</string>
+    <string name="market_order_fulfilled">%1$d%% erfüllt (%2$s/%3$s)</string>
+    <string name="market_order_expires">Gültig bis %1$s</string>
+    <string name="market_order_watch">Beobachten</string>
+    <string name="market_order_tab_buy">Kauf</string>
+    <string name="market_order_tab_sell">Verkauf</string>
+    <string name="market_order_no_data">Keine Daten</string>
+    <string name="market_order_optmenu_search">Suchen</string>
+    <string name="market_order_optmenu_sort">Sortierung</string>
+    <string name="market_order_optmenu_sort_name">Sortieren nach Name</string>
+    <string name="market_order_optmenu_sort_fulfillment">Sortieren nach Erfüllungsgrad</string>
+    <string name="market_order_optmenu_sort_expiration">Sortieren nach Ablaufdatum</string>
+    <string name="market_order_optmenu_help">Hilfe</string>
+    <string name="market_order_helpdialog">Alle aktiven Marktaufträge werden hier aufgelistet.\n\nAufträge können zur Beobachtung markiert werden. Sie werden nach Ablauf oder vollständiger Erfüllung ebenfalls hier aufgelistet. Anschließend können sie mit einem Wisch nach links oder rechts entfernt werden.</string>
+    <string name="market_order_helpdialog_close">Schließen</string>
+    <string name="market_order_search_hint">Gegenstand</string>
+    <string name="market_order_notification_ticker">Marktauftrag beendet</string>
+    <string name="market_order_notification_title">Marktauftrag beendet</string>
+    <string name="market_order_notification_summary">+%1$d weitere</string>
+    
+</resources>

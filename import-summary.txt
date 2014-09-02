@@ -1,0 +1,109 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+* .gitignore
+* README.mediawiki
+* icons\
+* icons\add_pilot\
+* icons\add_pilot\1_128.jpg
+* icons\add_pilot\1_170.jpg
+* icons\add_pilot\1_170.xcf
+* icons\add_pilot\1_256.jpg
+* icons\add_pilot\1_85.jpg
+* icons\add_pilot\1_85.xcf
+* icons\add_pilot\hdpi-6-social-add-person-ok.png
+* icons\add_pilot\hdpi-6-social-add-person.png
+* icons\add_pilot\hdpi-6-social-add-person.xcf
+* icons\add_pilot\ic_main_pilots.xcf
+* icons\add_pilot\mdpi-6-social-add-person-ok.png
+* icons\add_pilot\mdpi-6-social-add-person.png
+* icons\add_pilot\mdpi-6-social-add-person.xcf
+* icons\add_pilot\xhdpi-6-social-add-person-ok.png
+* icons\add_pilot\xhdpi-6-social-add-person.png
+* icons\add_pilot\xhdpi-6-social-add-person.xcf
+* icons\background\
+* icons\background\1280x800.jpg
+* icons\background\800x1280.jpg
+* icons\background\B3.png
+* icons\coins\
+* icons\coins\128.png
+* icons\coins\16.png
+* icons\coins\170.png
+* icons\coins\170.xcf
+* icons\coins\24.png
+* icons\coins\256.png
+* icons\coins\32.png
+* icons\coins\32.xcf
+* icons\coins\36.xcf
+* icons\coins\48.png
+* icons\coins\48.xcf
+* icons\coins\512-eve.png
+* icons\coins\512.png
+* icons\coins\512.xcf
+* icons\coins\64.png
+* icons\coins\72.xcf
+* icons\coins\85.png
+* icons\coins\85.xcf
+* icons\coins\96.xcf
+* icons\coins\EVE-Logo-79_64_11.png
+* icons\coins\EVE-Logo-79_64_11.xcf
+* icons\coins\url.txt
+* icons\marketorders\
+* icons\marketorders\18_128_1-170.png
+* icons\marketorders\18_128_1-85.png
+* icons\marketorders\18_128_1.png
+* icons\screenshots\
+* icons\screenshots\main.png
+* icons\screenshots\main.xcf
+* icons\screenshots\main2.png
+* icons\screenshots\main2.xcf
+* icons\screenshots\marketorders.png
+* icons\screenshots\marketorders.xcf
+* icons\screenshots\notification.png
+* icons\screenshots\notification.xcf
+* icons\screenshots\pilots.png
+* icons\screenshots\pilots.xcf
+* icons\screenshots\wallet.png
+* icons\screenshots\wallet.xcf
+* proguard-project.txt
+* release\
+* release\ISK-1.1.apk
+* release\ISK-2.0.apk
+* release\ISK-2.1.apk
+* release\ISK-2.2.apk
+* release\ISK-2.3.apk
+* release\ISK-dev.apk
+* release\ISK.apk
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+* AndroidManifest.xml => app\src\main\AndroidManifest.xml
+* assets\ => app\src\main\assets\
+* libs\CWAC-WakefulIntentService.jar => app\libs\CWAC-WakefulIntentService.jar
+* lint.xml => app\lint.xml
+* res\ => app\src\main\res\
+* src\ => app\src\main\java\
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)
