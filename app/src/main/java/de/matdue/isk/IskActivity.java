@@ -101,7 +101,7 @@ public abstract class IskActivity extends Activity {
 		int[] keys = context.getResources().getIntArray(indexArrayId);
 		String[] values = context.getResources().getStringArray(stringArrayId);
 		int valueIdx = Arrays.binarySearch(keys, key);
-		return (valueIdx < values.length) ? values[valueIdx] : values[defaultValueIdx];
+		return (valueIdx >= 0 && valueIdx < values.length) ? values[valueIdx] : values[defaultValueIdx];
 	}
 	
 }
