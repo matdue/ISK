@@ -126,6 +126,12 @@
 		<item>Datacore-Gebühr</item><!-- 112 -->
 		<item>War Surrender Fee</item><!-- 113 -->
 		<item>War Ally Contract</item><!-- 114 -->
+        <item>Bounty Reimbursement</item><!-- 115 -->
+        <item>Kill Right</item><!-- 116 -->
+        <item>Fee for processing one or more security tags</item><!-- 117 -->
+        <item>Unbekannt</item><!-- 118 -->
+        <item>Unbekannt</item><!-- 119 -->
+        <item>Industrieanlagensteuer</item><!-- 120 -->
 		<item>Modify ISK</item><!-- 10001 -->
 		<item>Primary Marketplace Purchase</item><!-- 10002 -->
 		<item>Battle Reward</item><!-- 10003 -->
@@ -136,7 +142,25 @@
 		<item>Battle WP Loss Reward</item><!-- 10008 -->
 		<item>Battle Win Reward</item><!-- 10009 -->
 		<item>Battle Loss Reward</item><!-- 10010 -->
+        <item>Unbekannt</item><!-- 10011 -->
+        <item>District Contract Deposit</item><!-- 10012 -->
+        <item>District Contract Deposit Refund</item><!-- 10013 -->
+        <item>District Contract Collateral</item><!-- 10014 -->
+        <item>District Contract Collateral Refund</item><!-- 10015 -->
+        <item>District Contract Reward</item><!-- 10016 -->
+        <item>District Clone Transportation</item><!-- 10017 -->
+        <item>District Clone Transportation Refund</item><!-- 10018 -->
+        <item>District Infrastructure</item><!-- 10019 -->
+        <item>District Clone Sales</item><!-- 10020 -->
+        <item>District Clone Purchase</item><!-- 10021 -->
+        <item>Biomass Reward</item><!-- 10022 -->
+        <item>Unbekannt</item><!-- 10023 -->
+        <item>Unbekannt</item><!-- 10024 -->
+        <item>Unbekannt</item><!-- 10025 -->
 		<item>Modify AUR</item><!-- 11001 -->
 		<item>Respec payment</item><!-- 11002 -->
-	</string-array>    
+        <item>Unbekannt</item><!-- 11003 -->
+        <item>Unbekannt</item><!-- 11004 -->
+        <item>Unbekannt</item><!-- 11005 -->
+	</string-array>
 </resources>
