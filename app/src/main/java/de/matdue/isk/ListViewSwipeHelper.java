@@ -95,7 +95,7 @@ public class ListViewSwipeHelper implements View.OnTouchListener, AbsListView.On
 		NONE,
 		MOVING,
 		IGNORING
-	};
+	}
 	protected SwipeMode currentSwipeMode = SwipeMode.NONE;
 	
 	/**

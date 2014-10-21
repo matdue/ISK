@@ -102,13 +102,12 @@ public class EveApi {
 	}
 	
 	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode, String characterID, String rowCount, String fromID) {
-		HttpClient httpClient = null;
-		HttpEntity entity = null;
+        HttpEntity entity = null;
 		InputStream inputStream = null;
 		
 		try {
 			// Create request
-			httpClient = getHttpClient();
+            HttpClient httpClient = getHttpClient();
 			HttpPost request = new HttpPost(URL_BASE + url);
 			AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
 			

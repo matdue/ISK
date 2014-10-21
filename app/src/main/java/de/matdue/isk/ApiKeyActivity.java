@@ -43,8 +43,8 @@ public class ApiKeyActivity extends Activity {
 	private KeyCheckingTask keyCheckingTask;
 	
 	private static final long ACCESS_MASK = 6361217;
-	private static final String CHOOSE_LINK = "https://support.eveonline.com/api/Key/ActivateInstallLinks";
-	private static final String CREATE_LINK = "https://support.eveonline.com/api/Key/CreatePredefined/" + ACCESS_MASK;
+	private static final String CHOOSE_LINK = "https://community.eveonline.com/support/api-key/ActivateInstallLinks?activate=true";
+	private static final String CREATE_LINK = "https://community.eveonline.com/support/api-key/CreatePredefined?" + ACCESS_MASK;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

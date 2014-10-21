@@ -141,7 +141,7 @@ public class BitmapManager {
 			preferences
 				.edit()
 				.putLong("lastCleanup", now)
-				.commit();
+				.apply();
 		}
 	}
 	

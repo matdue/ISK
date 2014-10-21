@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 16
-    buildToolsVersion "20.0.0"
+    buildToolsVersion "21.0.1"
 
     defaultConfig {
         applicationId "de.matdue.isk"
         minSdkVersion 12
-        targetSdkVersion 17
+        targetSdkVersion 16
     }
 
     buildTypes {
