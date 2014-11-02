@@ -39,7 +39,7 @@
             android:contentDescription="@string/wallet_item_image"
             android:maxHeight="48dip"
             android:maxWidth="48dip"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:src="@android:color/white" />
 
         <TextView
