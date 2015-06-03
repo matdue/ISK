@@ -58,6 +58,7 @@
     <string name="pilots_key_error_validate">API-Key konnte nicht geprüft werden, bitte wiederholen Sie den Vorgang.</string>
     <string name="pilots_key_error_accessmask">API-Key hat nicht genügend Rechte. Bitte prüfen.</string>
     <string name="pilots_key_error_type">Nur Character-Keys sind möglich.</string>
+    <string name="pilots_select_dialog_intro">Der API-Key gilt für mehrere Kapselpiloten. Wählen sie die Piloten aus, die sie in dieser App verwenden möchten.</string>
     
     <string name="wallet_title">Kontobewegungen</string>
     <string name="wallet_no_data">Keine Daten</string>

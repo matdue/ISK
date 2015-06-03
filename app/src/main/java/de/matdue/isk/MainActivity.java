@@ -25,8 +25,11 @@ import java.util.List;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
+import de.matdue.isk.account.AccountAuthenticator;
 import de.matdue.isk.eve.EveApi;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -217,8 +220,45 @@ public class MainActivity extends IskActivity {
 		setRefreshActionItemState(false);
 	}
 	
-	
+
 	private void refreshPilots() {
+		String activeCharacterID = getPreferences().getString("startCharacterID", null);
+		List<PilotData> pilots = new ArrayList<PilotData>();
+
+		AccountManager accountManager = AccountManager.get(this);
+		Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		for (Account account : accounts) {
+			String apiAccountType = accountManager.getUserData(account, "api");
+			if (apiAccountType == null) {
+				continue;
+			}
+
+			PilotData pilotData = new PilotData();
+			pilotData.characterId = accountManager.getUserData(account, "characterID");
+			pilotData.name = account.name;
+			pilotData.corporation = apiAccountType.equals(AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION);
+			pilotData.balance = BigDecimal.ZERO;
+			pilots.add(pilotData);
+		}
+
+		// Find index of active pilot
+		int activePilot = 0;
+		for (int i = 0; i < pilots.size(); ++i) {
+			if (pilots.get(i).characterId.equals(activeCharacterID)) {
+				activePilot = i;
+				break;
+			}
+		}
+
+		// Update spinner and its adapter
+		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
+		PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
+		adapter.refresh(pilots);
+		adapter.notifyDataSetChanged();
+		spinner.setSelection(activePilot);
+	}
+
+	private void refreshPilotsOld() {
 		new AsyncTask<Void, Void, List<PilotData>>() {
 			
 			String characterID;
@@ -302,6 +342,7 @@ public class MainActivity extends IskActivity {
 		public String characterId;
 		public String name;
 		public BigDecimal balance;
+		public boolean corporation;
 	}
 	
 	private class PilotAdapter extends BaseAdapter {
@@ -358,7 +399,7 @@ public class MainActivity extends IskActivity {
 			TextView pilotBalance = (TextView) view.findViewById(R.id.main_pilot_balance);
 			
 			PilotData pilot = pilots.get(position);
-			getBitmapManager().setImageBitmap(pilotImage, EveApi.getCharacterUrl(pilot.characterId, 128), null, null);
+			getBitmapManager().setImageBitmap(pilotImage, (pilot.corporation ? EveApi.getCorporationUrl(pilot.characterId, 128) : EveApi.getCharacterUrl(pilot.characterId, 128)), null, null);
 			pilotName.setText(pilot.name);
 			if (pilotBalance != null) {
 				if (pilot.balance != null) {

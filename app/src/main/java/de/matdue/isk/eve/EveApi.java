@@ -18,6 +18,7 @@ package de.matdue.isk.eve;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,18 +28,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
-import android.net.http.AndroidHttpClient;
+import android.net.Uri;
 import android.sax.EndTextElementListener;
 import android.sax.RootElement;
 import android.sax.StartElementListener;
@@ -46,16 +39,16 @@ import android.util.Log;
 import android.util.Xml;
 import android.util.Xml.Encoding;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class EveApi {
 	
 	private static final SimpleDateFormat dateFormatter;
 	private static final String AGENT = "Android de.matdue.isk";
-	private static final String URL_BASE = "https://api.eveonline.com";
 	private static final String IMAGE_BASE = "https://image.eveonline.com/";
 
 	private EveApiCache apiCache;
-	private HttpClient apiHttpClient;
-	
+
 	static {
 		// EVE Online API always uses GMT
 		dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
@@ -66,31 +59,16 @@ public class EveApi {
 		this.apiCache = apiCache;
 	}
 	
-	public void close() {
-		if (apiHttpClient != null && apiHttpClient instanceof AndroidHttpClient) {
-			try {
-				((AndroidHttpClient) apiHttpClient).close();
-			} catch (Exception e) {
-				// Ignore error while closing, there's nothing we could do
-			} finally {
-				apiHttpClient = null;
-			}
-		}
-	}
-	
 	public static String getCharacterUrl(String characterId, int resolution) {
 		return IMAGE_BASE + "Character/" + characterId + "_" + resolution + ".jpg";
 	}
-	
+
+	public static String getCorporationUrl(String corporationId, int resolution) {
+		return IMAGE_BASE + "Corporation/" + corporationId + "_" + resolution + ".png";
+	}
+
 	public static String getTypeUrl(String typeID, int resolution) {
 		return IMAGE_BASE + "Type/" + typeID + "_" + resolution + ".png";
-	}
-	
-	private HttpClient getHttpClient() {
-		if (apiHttpClient == null) {
-			apiHttpClient = AndroidHttpClient.newInstance(AGENT);
-		}
-		return apiHttpClient;
 	}
 	
 	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode) {
@@ -102,45 +80,49 @@ public class EveApi {
 	}
 	
 	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode, String characterID, String rowCount, String fromID) {
-        HttpEntity entity = null;
 		InputStream inputStream = null;
+        HttpsURLConnection connection = null;
 		
 		try {
 			// Create request
-            HttpClient httpClient = getHttpClient();
-			HttpPost request = new HttpPost(URL_BASE + url);
-			AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
-			
+			Uri.Builder uriBuilder = new Uri.Builder()
+					.scheme("https")
+					.authority("api.eveonline.com")
+					.path(url)
+					.appendQueryParameter("keyID", keyID)
+					.appendQueryParameter("vCode", vCode);
+
 			// Prepare parameters
-			ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-			nameValuePairs.add(new BasicNameValuePair("keyID", keyID));
-			nameValuePairs.add(new BasicNameValuePair("vCode", vCode));
 			if (characterID != null) {
-				nameValuePairs.add(new BasicNameValuePair("characterID", characterID));
+				uriBuilder.appendQueryParameter("characterID", characterID);
 			}
 			if (rowCount != null) {
-				nameValuePairs.add(new BasicNameValuePair("rowCount", rowCount));
+				uriBuilder.appendQueryParameter("rowCount", rowCount);
 			}
 			if (fromID != null) {
-				nameValuePairs.add(new BasicNameValuePair("fromID", fromID));
+				uriBuilder.appendQueryParameter("fromID", fromID);
 			}
-			request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			
+
 			// Submit request
-			HttpResponse response = httpClient.execute(request);
-			
+			URL requestURL = new URL(uriBuilder.build().toString());
+			connection = (HttpsURLConnection) requestURL.openConnection();
+			// For debugging requests:
+			// connection = (HttpsURLConnection) requestURL.openConnection(HttpsURLConnectionUtils.buildProxy("10.0.2.2", 8888));
+			// HttpsURLConnectionUtils.trustAllCertificates(connection);
+            connection.setRequestProperty("User-Agent", AGENT);
+            connection.setDoOutput(true);
+
 			// Record access
-			int statusCode = response.getStatusLine().getStatusCode();
-			String reasonPhrase = response.getStatusLine().getReasonPhrase();
-			apiCache.urlAccessed(request.getURI().getPath(), keyID, statusCode + " " + reasonPhrase);
+            int statusCode = connection.getResponseCode();
+            String reasonPhrase = connection.getResponseMessage();
+            apiCache.urlAccessed(requestURL.getPath(), keyID, statusCode + " " + reasonPhrase);
 			
-			if (statusCode != HttpStatus.SC_OK) {
+			if (statusCode != HttpsURLConnection.HTTP_OK) {
 				Log.e(EveApi.class.toString(), "API returned with code " + statusCode);
 				return false;
 			}
 			
-			entity = response.getEntity();
-			inputStream = new BufferedInputStream(AndroidHttpClient.getUngzippedContent(entity));
+            inputStream = new BufferedInputStream(connection.getInputStream());
 			Xml.parse(inputStream, Encoding.UTF_8, xmlParser);
 			
 			return true;
@@ -149,16 +131,17 @@ public class EveApi {
 			apiCache.urlAccessed(url, keyID, message != null ? message : e.toString());
 			Log.e(EveApi.class.toString(), "Error in API communication", e);
 		} finally {
+            if (connection != null) {
+                try {
+                    connection.disconnect();
+                } catch (Exception e) {
+                    // Ignore error while closing, there's nothing we could do
+                }
+
+            }
 			if (inputStream != null) {
 				try {
 					inputStream.close();
-				} catch (Exception e) {
-					// Ignore error while closing, there's nothing we could do
-				}
-			}
-			if (entity != null) {
-				try {
-					entity.consumeContent();
 				} catch (Exception e) {
 					// Ignore error while closing, there's nothing we could do
 				}
@@ -167,7 +150,7 @@ public class EveApi {
 		
 		return false;
 	}
-	
+
 	public Account validateKey(String keyID, String vCode) {
 		final String URL = "/account/APIKeyInfo.xml.aspx";
 		
@@ -189,14 +172,12 @@ public class EveApi {
 		}
 		
 		// Plausibility check
-		if (result != null) {
-			if (result.accessMask == 0 ||
-				result.type == null ||
-				result.characters.size() == 0) {
-				return null;
-			}
+		if (result.accessMask == 0 ||
+			result.type == null ||
+			result.characters.size() == 0) {
+			return null;
 		}
-		
+
 		// Cache result
 		apiCache.cache(cacheKey, cacheInformation);
 		
@@ -282,12 +263,10 @@ public class EveApi {
 		}
 		
 		// Plausibility check
-		if (result != null) {
-			if (result.accountID == null || result.accountKey == null) {
-				return null;
-			}
+		if (result.accountID == null || result.accountKey == null) {
+			return null;
 		}
-		
+
 		// Cache result
 		apiCache.cache(cacheKey, cacheInformation);
 		
@@ -336,7 +315,7 @@ public class EveApi {
 		// Prepare XML parser
 		HashMap<Long, WalletTransaction> walletTransactionsByIdBatch = new HashMap<Long, WalletTransaction>();
 		HashMap<Long, WalletTransaction> walletTransactionsByJournalIdBatch = new HashMap<Long, WalletTransaction>();
-		RootElement root = prepareWalletTransactionXmlParser(walletTransactionsByIdBatch, walletTransactionsByJournalIdBatch, cacheInformation);
+		RootElement root = prepareWalletTransactionXmlParser(walletTransactionsByIdBatch, walletTransactionsByJournalIdBatch);
 		
 		// Query in batches of 2560 entries
 		if (!queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", null)) {
@@ -492,8 +471,7 @@ public class EveApi {
 	}
 	
 	private RootElement prepareWalletTransactionXmlParser(final HashMap<Long, WalletTransaction> resultById,
-			final HashMap<Long, WalletTransaction> resultByJournalId,
-			final CacheInformation cacheInformation) {
+			final HashMap<Long, WalletTransaction> resultByJournalId) {
 		RootElement root = new RootElement("eveapi");
 		// Do not catch cache information, this has been done in wallet journal already
 		

@@ -18,9 +18,13 @@ package de.matdue.isk;
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
+
+import android.app.Activity;
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
+import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 
 public class IskApplication extends Application {
 	
@@ -47,6 +51,42 @@ public class IskApplication extends Application {
 					.detectActivityLeaks()
 					.penaltyLog()
 					.build());
+            registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+                @Override
+                public void onActivityCreated(Activity activity, Bundle bundle) {
+                    Log.v("ActivityCreated", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityStarted(Activity activity) {
+                    Log.v("ActivityStarted", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityResumed(Activity activity) {
+                    Log.v("ActivityResumed", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityPaused(Activity activity) {
+                    Log.v("ActivityPaused", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityStopped(Activity activity) {
+                    Log.v("ActivityStopped", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+                    Log.v("ActivitySaveInstanceState", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityDestroyed(Activity activity) {
+                    Log.v("ActivityDestroyed", activity.toString() + "#" + activity.getTaskId());
+                }
+            });
 		}
 		
 		iskDatabase = new IskDatabase(this);

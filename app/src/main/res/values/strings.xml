@@ -58,6 +58,7 @@
     <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
     <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key.</string>
     <string name="pilots_key_error_type">Character key only is allowed.</string>
+    <string name="pilots_select_dialog_intro">This API key supports multiple capsuleers. Please choose the pilots you would like to use in this app.</string>
     
     <string name="wallet_title">Wallet and transactions</string>
     <string name="wallet_no_data">No data</string>

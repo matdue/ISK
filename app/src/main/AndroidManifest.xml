@@ -5,13 +5,15 @@
     android:versionName="2.6"
     android:installLocation="auto" xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk android:minSdkVersion="12" android:targetSdkVersion="16" />
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="16" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
     <application
         android:name=".IskApplication"
@@ -66,7 +68,7 @@
             android:label="@string/market_order_title">
         </activity>
         
-        <activity 
+        <!--<activity
             android:name=".ApiCallbackActivity" 
             android:exported="true"
             tools:ignore="ExportedActivity">
@@ -76,7 +78,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="eve" android:host="api.eveonline.com" android:path="/installKey"/>
             </intent-filter>
-        </activity>
+        </activity>-->
         
         <activity 
             android:name=".ApiKeyActivity"
@@ -97,6 +99,28 @@
         </receiver>
         <service android:name=".NotificationDeletedService" android:exported="false">
         </service>
+
+        <service android:name=".account.IskAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator" />
+        </service>
+
+        <activity
+            android:name=".account.AuthenticatorActivity"
+            android:label="Authenticate account"
+            android:launchMode="singleInstance">
+        </activity>
+
+        <activity android:name=".account.ApiCallbackActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="eve" android:host="api.eveonline.com" android:path="/installKey"/>
+            </intent-filter>
+        </activity>
         
     </application>
 

@@ -152,7 +152,6 @@ public class ApiKeyActivity extends Activity {
 			
 			EveApi api = new EveApi(new EveApiCacheDummy());
 			Account account = api.validateKey(id, code);
-			api.close();
 			return account;
 		}
 		

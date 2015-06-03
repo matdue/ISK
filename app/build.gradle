@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 16
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "22.0.1"
 
     defaultConfig {
         applicationId "de.matdue.isk"
-        minSdkVersion 12
+        minSdkVersion 14
         targetSdkVersion 16
     }
 
@@ -16,8 +16,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    compileOptions {
+        encoding "UTF-8"
+    }
 }
 
 dependencies {
     compile files('libs/CWAC-WakefulIntentService.jar')
+    testCompile 'org.testng:testng:6.8'
 }
