@@ -1,366 +1,291 @@
+/**
+ * Copyright 2015 Matthias Düsterhöft
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.matdue.isk.account;
 
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.CheckedTextView;
-import android.widget.ImageView;
-import android.widget.ListView;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import de.matdue.isk.IskApplication;
 import de.matdue.isk.MainActivity;
 import de.matdue.isk.R;
-import de.matdue.isk.bitmap.BitmapManager;
-import de.matdue.isk.eve.EveApi;
-import de.matdue.isk.eve.EveApiCacheDummy;
-import de.matdue.isk.widget.ResourceListAdapter;
 
 /**
- * Created by Matthias on 09.02.2015.
+ * The authentication activity.
+ *
+ * Called by authenticator to do all UI stuff.
+ *
+ * For API key, the Android account has the following user data:
+ * <ul>
+ *     <li>id: API key id</li>
+ *     <li>api: {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CORPORATION} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CHARACTER}</li>
+ *     <li>characterID: EVE Online charactor or corporation ID</li>
+ * </ul>
+ * Account's property {@link Account#name} is the name of the charactor or corporation.
+ * Property {@link Account#type} is always <code>de.matdue.isk</code>.
+ * An account has either a charactor or corporation token. The token type is either
+ * {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CORPORATION} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CHARACTER}.
+ * For CREST account, another token will be added of a different type.
  */
 public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
+    /**
+     * Argument key for account type id; always de.matdue.isk
+     */
     public final static String ARG_ACCOUNT_TYPE = "ACCOUNT_TYPE";
-    public final static String ARG_AUTH_TYPE = "AUTH_TYPE";
-    public final static String ARG_ACCOUNT_NAME = "ACCOUNT_NAME";
-    public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
-    public static final int ACCESS_MASK = 6361217;
 
-    private AccountManager accountManager;
+    /**
+     * Argument key for token type; one of AccountAuthenticator.AUTHTOKEN_TYPE...
+     */
+    public final static String ARG_AUTH_TYPE = "AUTH_TYPE";
+
+    /**
+     * Argument key for account name; this is the charactor or coporation name
+     */
+    public final static String ARG_ACCOUNT_NAME = "ACCOUNT_NAME";
+
+    /**
+     * Argument key for indicator whether this activity is called for a new or an existing account
+     */
+    public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
+
+    private final static int CHECK_API_KEY_REQUEST_CODE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+        String accountType = getIntent().getStringExtra(ARG_ACCOUNT_TYPE);
+        if (accountType == null) {
+            // Not called from AccountAuthenticator => behave as normal activity
+            // and allow link to home page on action bar
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         setContentView(R.layout.authenticator);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        accountManager = AccountManager.get(getBaseContext());
 
         boolean isNewAccount = getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false);
-        ((TextView)findViewById(R.id.key_text_is_new)).setText("Account ist " + (isNewAccount ? "neu" : "nicht neu"));
+        if (!isNewAccount) {
+            // Authentication failed; display appropriate intro text
+            String accountName = getIntent().getStringExtra(ARG_ACCOUNT_NAME);
+            String introText = getString(R.string.account_authentication_failed_intro, accountName);
+            TextView introTextView = (TextView) findViewById(R.id.key_authentication_failed_intro);
+            introTextView.setText(introText);
 
-        String accountType = getIntent().getStringExtra(ARG_ACCOUNT_TYPE);
-        ((TextView)findViewById(R.id.key_text_account_type)).setText(accountType);
+            findViewById(R.id.key_authentication_intro).setVisibility(View.GONE);
+            introTextView.setVisibility(View.VISIBLE);
+        }
+    }
 
-        String authType = getIntent().getStringExtra(ARG_AUTH_TYPE);
-        ((TextView)findViewById(R.id.key_text_auth_type)).setText(authType);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // Handle back button on action bar
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
 
-        findViewById(R.id.key_submit_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                submit();
-            }
-        });
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-        findViewById(R.id.key_ask_api_key).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://community.eveonline.com/support/api-key/ActivateInstallLinks?activate=true"));
-                browserIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(browserIntent);
-            }
-        });
+    /**
+     * User wants to use an existing API key.
+     *
+     * @param view Button clicked
+     */
+    public void gotoAskKey(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://community.eveonline.com/support/api-key/ActivateInstallLinks?activate=true"));
+        browserIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(browserIntent);
+    }
 
-        findViewById(R.id.key_goto_home).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent homeIntent = new Intent(AuthenticatorActivity.this, MainActivity.class);
-                homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(homeIntent);
-            }
-        });
+    /**
+     * User wants to create a new API key.
+     *
+     * @param view Button clicked
+     */
+    public void gotoCreateKey(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://community.eveonline.com/support/api-key/CreatePredefined?accessMask=" + CheckApiKeyActivity.ACCESS_MASK));
+        browserIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(browserIntent);
+    }
+
+    /**
+     * User entered ID and verification code of an API key.
+     *
+     * @param view Button clicked
+     */
+    public void gotoSubmitKey(View view) {
+        String keyID = ((TextView)findViewById(R.id.key_input_id)).getText().toString();
+        String vCode = ((TextView)findViewById(R.id.key_input_vCode)).getText().toString();
+        validateApiKey(keyID, vCode);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        // User selected an API key on EVE Online web site.
+        // It is called by ApiCallbackActivity.
+        // AuthenticatorActivity must be a singleton, otherwise onNewIntent() won't be called.
         Uri uri = intent.getData();
         if (uri != null && uri.toString().startsWith("eve://api.eveonline.com/installKey")) {
             String id = uri.getQueryParameter("keyID");
             String code = uri.getQueryParameter("vCode");
-
             validateApiKey(id, code);
         }
     }
 
+    /**
+     * Validate an API key by handing over to {@link CheckApiKeyActivity}.
+     *
+     * @param id API key ID
+     * @param code Verification code
+     */
     private void validateApiKey(String id, String code) {
         if ("".equals(id) || "".equals(code)) {
             Toast.makeText(this, R.string.pilots_key_empty_fields, Toast.LENGTH_LONG).show();
             return;
         }
 
-        new ApiKeyCheckingTask(this).execute(id, code);
+        Intent checkApiKeyIntent = new Intent(this, CheckApiKeyActivity.class);
+        checkApiKeyIntent.putExtra("keyID", id);
+        checkApiKeyIntent.putExtra("vCode", code);
+        checkApiKeyIntent.putExtra("name", getIntent().getStringExtra(ARG_ACCOUNT_NAME));
+        startActivityForResult(checkApiKeyIntent, CHECK_API_KEY_REQUEST_CODE);
     }
 
-    public void submit() {
-        String name = ((TextView)findViewById(R.id.key_input_name)).getText().toString();
-        String keyID = ((TextView)findViewById(R.id.key_input_id)).getText().toString();
-        String vCode = ((TextView)findViewById(R.id.key_input_vCode)).getText().toString();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        Bundle data = new Bundle();
-        data.putString(AccountManager.KEY_ACCOUNT_NAME, name);
-        data.putString(AccountManager.KEY_ACCOUNT_TYPE, getIntent().getStringExtra(ARG_ACCOUNT_TYPE));
-        data.putString(AccountManager.KEY_AUTHTOKEN, vCode);
-
-        Account account = new Account(name, data.getString(AccountManager.KEY_ACCOUNT_TYPE));
-        if (getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false)) {
-            Bundle userData = new Bundle();
-            userData.putString("keyID", keyID);
-            accountManager.addAccountExplicitly(account, null, userData);
-
-            String authTokenType = getIntent().getStringExtra(ARG_AUTH_TYPE);
-            if (authTokenType == null) {
-                authTokenType = AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER;
-            }
-            accountManager.setAuthToken(account, authTokenType, vCode);
-        }
-
-        setAccountAuthenticatorResult(data);
-        Intent intent = new Intent();
-        intent.putExtras(data);
-        setResult(RESULT_OK, intent);
-        finish();
-    }
-
-    private static class ApiKeyCheckingTask extends AsyncTask<String, Void, de.matdue.isk.eve.Account> {
-
-        private AuthenticatorActivity parent;
-        private ProgressDialog waitDialog;
-        private String id;
-        private String vCode;
-
-        private static class SelectedCharacter {
-            public de.matdue.isk.eve.Character eveCharacter;
-            public boolean corporation;
-            public boolean selected;
-        }
-
-        private static class SelectCharacterAdapter extends ResourceListAdapter<SelectedCharacter> {
-            private BitmapManager bitmapManager;
-
-            public SelectCharacterAdapter(Context context, BitmapManager bitmapManager, List<SelectedCharacter> selectedCharacters) {
-                super(context, R.layout.account_api_select_dialog_item, selectedCharacters);
-
-                this.bitmapManager = bitmapManager;
-            }
-
-            @Override
-            public void bindView(View view, Context context, SelectedCharacter item, boolean checked) {
-                // ViewHolder pattern
-                ViewHolder viewHolder = (ViewHolder) view.getTag();
-                if (viewHolder == null) {
-                    viewHolder = new ViewHolder();
-                    viewHolder.image = (ImageView) view.findViewById(R.id.account_api_select_dialog_item_image);
-                    viewHolder.text = (CheckedTextView) view.findViewById(R.id.account_api_select_dialog_item_text);
-
-                    view.setTag(viewHolder);
-                }
-
-                bitmapManager.setImageBitmap(viewHolder.image,
-                        item.corporation ? EveApi.getCorporationUrl(item.eveCharacter.corporationID, 128) : EveApi.getCharacterUrl(item.eveCharacter.characterID, 128),
-                        null, null);
-
-                viewHolder.text.setText(item.corporation ? item.eveCharacter.corporationName : item.eveCharacter.characterName);
-                viewHolder.text.setChecked(checked);
-            }
-
-            static class ViewHolder {
-                ImageView image;
-                CheckedTextView text;
-            }
-        }
-
-        public ApiKeyCheckingTask(AuthenticatorActivity parent) {
-            this.parent = parent;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            waitDialog = ProgressDialog.show(parent, "", parent.getString(R.string.pilots_key_checking), true, true, new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialogInterface) {
-                    cancel(false);
-                    dialogInterface.dismiss();
-                }
-            });
-        }
-
-        @Override
-        protected de.matdue.isk.eve.Account doInBackground(String... params) {
-            id = params[0];
-            vCode = params[1];
-
-            EveApi api = new EveApi(new EveApiCacheDummy());
-            de.matdue.isk.eve.Account apiAccount = api.validateKey(id, vCode);
-            return apiAccount;
-        }
-
-        @Override
-        protected void onPostExecute(de.matdue.isk.eve.Account apiAccount) {
-            waitDialog.dismiss();
-
-            if (isCancelled()) {
-                return;
-            }
-
-            if (apiAccount == null) {
-                Toast.makeText(parent, R.string.pilots_key_error_validate, Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if ((apiAccount.accessMask & ACCESS_MASK) != ACCESS_MASK) {
-                Toast.makeText(parent, R.string.pilots_key_error_accessmask, Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            selectAccounts(apiAccount);
-        }
-
-        private void selectAccounts(de.matdue.isk.eve.Account apiAccount) {
-            final ArrayList<SelectedCharacter> selectedCharacters = new ArrayList<SelectedCharacter>(apiAccount.characters.size());
-            for (de.matdue.isk.eve.Character eveCharacter : apiAccount.characters) {
-                SelectedCharacter selectedCharacter = new SelectedCharacter();
-                selectedCharacter.eveCharacter = eveCharacter;
-                selectedCharacter.corporation = "Corporation".equals(apiAccount.type);
-                selectedCharacter.selected = true;
-                selectedCharacters.add(selectedCharacter);
-            }
-
-            if (selectedCharacters.size() <= 1) {
-                createAccountsAndFinish(selectedCharacters);
-                return;
-            }
-
-            SelectCharacterAdapter adapter = new SelectCharacterAdapter(parent, ((IskApplication) parent.getApplication()).getBitmapManager(), selectedCharacters);
-
-            View dialogView = parent.getLayoutInflater().inflate(R.layout.account_api_select_dialog, null);
-            final ListView dialogListView = (ListView) dialogView.findViewById(R.id.account_api_select_dialog_pilots);
-            dialogListView.setAdapter(adapter);
-            for (int i = 0; i < selectedCharacters.size(); ++i) {
-                dialogListView.setItemChecked(i, true);
-            }
-
-            AlertDialog dialog = new AlertDialog.Builder(parent)
-                    .setTitle("Piloten")
-                    .setPositiveButton("Konto/Konten erstellen", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            for (i = 0; i < selectedCharacters.size(); ++i) {
-                                selectedCharacters.get(i).selected = dialogListView.isItemChecked(i);
-                            }
-
-                            createAccountsAndFinish(selectedCharacters);
-                        }
-                    })
-                    .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            parent.finish();
-                        }
-                    })
-                    .setView(dialogView)
-                    .create();
-
-            dialog.show();
-        }
-
-        private void createAccountsAndFinish(List<SelectedCharacter> selectedCharacters) {
-            Bundle accountData = createAccounts(selectedCharacters);
+        if (requestCode == CHECK_API_KEY_REQUEST_CODE && resultCode == RESULT_OK) {
+            // CheckApiKeyActivity has finished. Create API key for all selected characters
+            // or corporations and return to authenticator.
+            de.matdue.isk.eve.Account account = (de.matdue.isk.eve.Account) data.getSerializableExtra("account");
+            String keyID = data.getStringExtra("keyID");
+            String vCode = data.getStringExtra("vCode");
+            Bundle accountData = createApiKeys(account, keyID, vCode);
             if (accountData != null) {
-                parent.setAccountAuthenticatorResult(accountData);
+                setAccountAuthenticatorResult(accountData);
                 Intent intent = new Intent();
                 intent.putExtras(accountData);
-                parent.setResult(RESULT_OK, intent);
+                setResult(RESULT_OK, intent);
             }
-            parent.finish();
+            finish();
         }
+    }
 
-        private Bundle createAccounts(List<SelectedCharacter> selectedCharacters) {
-            AccountManager accountManager = AccountManager.get(parent);
-            Bundle firstAccountData = null;
-            ArrayList<String> createdAccounts = new ArrayList<String>();
-            ArrayList<String> failedAccounts = new ArrayList<String>();
+    /**
+     * Creates Android accounts for each charactor or corporation.
+     *
+     * @param account EVE Online account with character(s) or corporation(s)
+     * @param keyID API key ID
+     * @param vCode API key verification code
+     * @return Data bundle as AccountAuthenticatorActivity expects, for the first created or updated Android account
+     */
+    private Bundle createApiKeys(de.matdue.isk.eve.Account account, String keyID, String vCode) {
+        AccountManager accountManager = AccountManager.get(this);
+        Bundle firstAccountData = null;
+        ArrayList<String> createdAccounts = new ArrayList<>();
+        ArrayList<String> updatedAccounts = new ArrayList<>();
+        ArrayList<String> failedAccounts = new ArrayList<>();
 
-            for (SelectedCharacter character : selectedCharacters) {
-                if (!character.selected) {
-                    continue;
+        for (de.matdue.isk.eve.Character character : account.characters) {
+            Account newAccount = new Account(account.isCorporation() ? character.corporationName : character.characterName, AccountAuthenticator.ACCOUNT_TYPE);
+            Bundle userData = new Bundle();
+            userData.putString("id", keyID);
+            userData.putString("api", account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER);
+            userData.putString("characterID", account.isCorporation() ? character.corporationID : character.characterID);
+
+            if (accountManager.addAccountExplicitly(newAccount, null, userData)) {
+                // Account created, it didn't exist before
+                accountManager.setAuthToken(newAccount, account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, vCode);
+                createdAccounts.add(newAccount.name);
+
+                if (firstAccountData == null) {
+                    firstAccountData = new Bundle();
+                    firstAccountData.putString(AccountManager.KEY_ACCOUNT_NAME, newAccount.name);
+                    firstAccountData.putString(AccountManager.KEY_ACCOUNT_TYPE, newAccount.type);
+                    firstAccountData.putString(AccountManager.KEY_AUTHTOKEN, vCode);
                 }
+            } else {
+                // Account creation failed, does it exist already?
+                boolean accountExists = false;
+                Account[] accountsByType = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+                for (Account existingAccount : accountsByType) {
+                    if (newAccount.name.equals(existingAccount.name)) {
+                        accountExists = true;
 
-                Account newAccount = new Account(character.corporation ? character.eveCharacter.corporationName : character.eveCharacter.characterName, AccountAuthenticator.ACCOUNT_TYPE);
-                Bundle userData = new Bundle();
-                userData.putString("id", id);
-                userData.putString("vCode", vCode);
-                userData.putString("api", character.corporation ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER);
-                userData.putString("characterID", character.corporation ? character.eveCharacter.corporationID : character.eveCharacter.characterID);
+                        // Update account
+                        accountManager.setUserData(existingAccount, "id", userData.getString("id"));
+                        accountManager.setUserData(existingAccount, "api", userData.getString("api"));
+                        accountManager.setUserData(existingAccount, "characterID", userData.getString("characterID"));
+                        accountManager.setAuthToken(existingAccount, account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, vCode);
 
-                if (accountManager.addAccountExplicitly(newAccount, null, userData)) {
-                    accountManager.setAuthToken(newAccount, character.corporation ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, vCode);
-                    createdAccounts.add(newAccount.name);
-
-                    if (firstAccountData == null) {
-                        firstAccountData = new Bundle();
-                        firstAccountData.putString(AccountManager.KEY_ACCOUNT_NAME, newAccount.name);
-                        firstAccountData.putString(AccountManager.KEY_ACCOUNT_TYPE, newAccount.type);
-                        firstAccountData.putString(AccountManager.KEY_AUTHTOKEN, vCode);
-                    }
-                } else {
-                    // Account creation failed, does it exist already?
-                    boolean accountExists = false;
-                    Account[] accountsByType = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
-                    for (Account existingAccount : accountsByType) {
-                        if (newAccount.name.equals(existingAccount.name)) {
-                            accountExists = true;
-
-                            // Update account
-                            accountManager.setUserData(existingAccount, "id", userData.getString("id"));
-                            accountManager.setUserData(existingAccount, "vCode", userData.getString("vCode"));
-                            accountManager.setUserData(existingAccount, "api", userData.getString("api"));
-                            accountManager.setUserData(existingAccount, "characterID", userData.getString("characterID"));
-
-                            break;
+                        if (firstAccountData == null) {
+                            firstAccountData = new Bundle();
+                            firstAccountData.putString(AccountManager.KEY_ACCOUNT_NAME, existingAccount.name);
+                            firstAccountData.putString(AccountManager.KEY_ACCOUNT_TYPE, existingAccount.type);
+                            firstAccountData.putString(AccountManager.KEY_AUTHTOKEN, vCode);
                         }
-                    }
 
-                    if (accountExists) {
-                        createdAccounts.add(newAccount.name);
-                    } else {
-                        failedAccounts.add(newAccount.name);
+                        break;
                     }
                 }
-            }
 
-            String toastMessage = "";
-            if (!createdAccounts.isEmpty()) {
-                toastMessage += String.format("Created: %1$s", TextUtils.join(", ", createdAccounts));
-            }
-            if (!failedAccounts.isEmpty()) {
-                if (!toastMessage.isEmpty()) {
-                    toastMessage += "\n";
+                if (accountExists) {
+                    updatedAccounts.add(newAccount.name);
+                } else {
+                    failedAccounts.add(newAccount.name);
                 }
-                toastMessage += String.format("Failed to create: %1$s", TextUtils.join(", ", failedAccounts));
             }
-            Toast.makeText(parent, toastMessage, Toast.LENGTH_LONG).show();
-
-            return firstAccountData;
         }
+
+        // Prepare notice with results
+        ArrayList<String> toastMessages = new ArrayList<>(3);
+        if (!createdAccounts.isEmpty()) {
+            toastMessages.add(String.format("Created: %1$s", TextUtils.join(", ", createdAccounts)));
+        }
+        if (!updatedAccounts.isEmpty()) {
+            toastMessages.add(String.format("Updated: %1$s", TextUtils.join(", ", updatedAccounts)));
+        }
+        if (!failedAccounts.isEmpty()) {
+            toastMessages.add(String.format("Failed to create: %1$s", TextUtils.join(", ", failedAccounts)));
+        }
+        // Display notice, if there is anything to show
+        if (!toastMessages.isEmpty()) {
+            Toast.makeText(this, TextUtils.join("\n", toastMessages), Toast.LENGTH_LONG).show();
+        }
+
+        return firstAccountData;
     }
 
 }

@@ -56,10 +56,9 @@
     <string name="pilots_key_checking">Prüfe Key…</string>
     <string name="pilots_key_empty_fields">Bitte geben sie ID und Verification Code ein.</string>
     <string name="pilots_key_error_validate">API-Key konnte nicht geprüft werden, bitte wiederholen Sie den Vorgang.</string>
-    <string name="pilots_key_error_accessmask">API-Key hat nicht genügend Rechte. Bitte prüfen.</string>
+    <string name="pilots_key_error_accessmask">API-Key hat nicht genügend Rechte. Bitte prüfen Sie den Key oder wählen Sie einen anderen.</string>
     <string name="pilots_key_error_type">Nur Character-Keys sind möglich.</string>
-    <string name="pilots_select_dialog_intro">Der API-Key gilt für mehrere Kapselpiloten. Wählen sie die Piloten aus, die sie in dieser App verwenden möchten.</string>
-    
+
     <string name="wallet_title">Kontobewegungen</string>
     <string name="wallet_no_data">Keine Daten</string>
     <string name="wallet_personal_buy">Kauf von\u00A0</string>
@@ -98,5 +97,20 @@
     <string name="market_order_notification_ticker">Marktauftrag beendet</string>
     <string name="market_order_notification_title">Marktauftrag beendet</string>
     <string name="market_order_notification_summary">+%1$d weitere</string>
-    
+
+    <string name="account_authenticator_title">Authentifizierung</string>
+    <string name="account_api_title">API-Key</string>
+    <string name="account_label_api_character">EVE Online Character API-Key</string>
+    <string name="account_label_api_corporation">EVE Online Corporation API-Key</string>
+    <string name="account_label_crest">EVE Online CREST-Zugangsdaten</string>
+    <string name="account_checkapi_multiple_pilots">Der API-Key gilt für mehrere Kapselpiloten. Wählen Sie die Piloten aus, die sie in dieser App verwenden möchten.</string>
+    <string name="account_checkapi_missing_pilot">Der API-Key gilt nicht für den Kapselpiloten %1$s. Haben Sie den richtigen API-Key gewählt?</string>
+    <string name="account_checkapi_no_pilots">Dieser API-Key hat keine Kapselpiloten. Bitte wählen Sie einen anderen.</string>
+    <string name="account_checkapi_select_button_create">Konto/Konten erstellen</string>
+    <string name="account_checkapi_select_button_cancel">Abbrechen</string>
+    <string name="account_checkapi_error_button_cancel">Abbrechen</string>
+    <string name="account_authentication_failed_intro">Für den Piloten %1$s schlug das Login mit dem API-Key fehl. Bitte wähle den korrekten API-Key aus, erstelle einen neuen oder gebe die Daten manuell ein.</string>
+    <string name="account_authentication_aborted">Authentifizierung wurde abgebrochen</string>
+    <string name="account_authentication_failed">Authentifizierung fehlgeschlagen</string>
+
 </resources>

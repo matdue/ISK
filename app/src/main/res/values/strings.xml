@@ -56,10 +56,9 @@
     <string name="pilots_key_checking">Checking key…</string>
     <string name="pilots_key_empty_fields">Please enter both ID and Verification Code.</string>
     <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
-    <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key.</string>
+    <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key or choose a different one.</string>
     <string name="pilots_key_error_type">Character key only is allowed.</string>
-    <string name="pilots_select_dialog_intro">This API key supports multiple capsuleers. Please choose the pilots you would like to use in this app.</string>
-    
+
     <string name="wallet_title">Wallet and transactions</string>
     <string name="wallet_no_data">No data</string>
     <string name="wallet_personal_buy">Buy from\u00A0</string>
@@ -98,5 +97,20 @@
     <string name="market_order_notification_ticker">Market order has ended</string>
     <string name="market_order_notification_title">Market order has ended</string>
     <string name="market_order_notification_summary">+%1$d more</string>
-    
+
+    <string name="account_authenticator_title">Authentification</string>
+    <string name="account_api_title">API Key</string>
+    <string name="account_label_api_character">EVE Online character API key</string>
+    <string name="account_label_api_corporation">EVE Online corporation API key</string>
+    <string name="account_label_crest">EVE Online CREST account</string>
+    <string name="account_checkapi_multiple_pilots">This API key supports multiple capsuleers. Please choose the pilots you would like to use in this app.</string>
+    <string name="account_checkapi_no_pilots">This API key does not support any capsuleers. Please choose another API key.</string>
+    <string name="account_checkapi_missing_pilot">This API key does not support capsuleer %1$s. Did you choose the right API key?</string>
+    <string name="account_checkapi_select_button_create">Create account(s)</string>
+    <string name="account_checkapi_select_button_cancel">Cancel</string>
+    <string name="account_checkapi_error_button_cancel">Cancel</string>
+    <string name="account_authentication_failed_intro">Login with API key failed for capsuleer or corporation %1$s. Please choose the correct key, create a new one or enter the data manually.</string>
+    <string name="account_authentication_aborted">Authentification aborted</string>
+    <string name="account_authentication_failed">Authentification failed</string>
+
 </resources>

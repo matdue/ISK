@@ -15,11 +15,12 @@
  */
 package de.matdue.isk.eve;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Account {
+public class Account implements Serializable {
 	
 	// No getters and setters to achive better performance
 	public long accessMask;
@@ -29,6 +30,15 @@ public class Account {
 	
 	public Account() {
 		characters = new ArrayList<Character>();
+	}
+
+	/**
+	 * Checks whether this account is a corporation or a character account.
+	 *
+	 * @return <code>true</code> for corporation account, else <code>false</code>
+	 */
+	public boolean isCorporation() {
+		return "Corporation".equals(type);
 	}
 
 }

@@ -15,6 +15,7 @@
  */
 package de.matdue.isk;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.Collator;
 import java.text.NumberFormat;
@@ -26,10 +27,16 @@ import java.util.List;
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
 import de.matdue.isk.account.AccountAuthenticator;
+import de.matdue.isk.account.AuthenticatorActivity;
+import de.matdue.isk.account.CheckApiKeyActivity;
 import de.matdue.isk.eve.EveApi;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -44,6 +51,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -125,7 +133,31 @@ public class MainActivity extends IskActivity {
     }
     
     public void gotoPilots(View view) {
-    	startActivity(new Intent(this, PilotsActivity.class));
+    	/*startActivity(new Intent(this, PilotsActivity.class));*/
+		//startActivity(new Intent(this, AuthenticatorActivity.class));
+
+		final AccountManager accountManager = AccountManager.get(this);
+		Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		for (final Account account : accounts) {
+			if ("Quaax".equals(account.name)) {
+				accountManager.getAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, null, this, new AccountManagerCallback<Bundle>() {
+					@Override
+					public void run(AccountManagerFuture<Bundle> future) {
+						try {
+							Bundle bundle = future.getResult();
+							String authtoken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+							Log.d("MainActivity", authtoken);
+
+							accountManager.invalidateAuthToken(account.type, authtoken);
+						} catch (OperationCanceledException e) {
+							Toast.makeText(MainActivity.this, R.string.account_authentication_aborted, Toast.LENGTH_LONG).show();
+						} catch (Exception e) {
+							Toast.makeText(MainActivity.this, R.string.account_authentication_failed, Toast.LENGTH_LONG).show();
+						}
+					}
+				}, null);
+			}
+		}
     }
     
     /**

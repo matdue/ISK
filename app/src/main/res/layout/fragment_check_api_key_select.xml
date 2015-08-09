@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/account_checkapi_multiple_pilots"
+        android:padding="16dip" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@android:id/list"
+        android:choiceMode="multipleChoice"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonBarStyle"
+        android:layout_gravity="end">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_checkapi_select_button_cancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/fragment_check_api_key_button_cancel" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_checkapi_select_button_create"
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/fragment_check_api_key_button_create" />
+    </LinearLayout>
+
+</LinearLayout>

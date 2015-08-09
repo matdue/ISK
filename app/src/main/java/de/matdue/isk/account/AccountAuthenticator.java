@@ -1,3 +1,18 @@
+/**
+ * Copyright 2015 Matthias Düsterhöft
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.matdue.isk.account;
 
 import android.accounts.AbstractAccountAuthenticator;
@@ -9,10 +24,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
 /**
- * Created by Matthias on 09.02.2015.
+ * The Authenticator.
+ *
+ * Called by Android Authenticator to do user authentification.
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
@@ -37,8 +53,6 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-        Log.v("AccountAuthenticator", "addAccount");
-
         Intent intent = new Intent(context, AuthenticatorActivity.class);
         intent.putExtra(AuthenticatorActivity.ARG_ACCOUNT_TYPE, accountType);
         intent.putExtra(AuthenticatorActivity.ARG_AUTH_TYPE, authTokenType);
@@ -52,8 +66,6 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-        Log.v("AccountAuthenticator", "getAuthToken");
-
         // If the caller requested an authToken type we don't support, then
         // return an error
         if (!AUTHTOKEN_TYPE_API_CHARACTER.equals(authTokenType) &&
@@ -68,7 +80,6 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
         // the server for an appropriate AuthToken.
         AccountManager accountManager = AccountManager.get(context);
         String authToken = accountManager.peekAuthToken(account, authTokenType);
-        Log.v("AccountAuthenticator", "peekAuthToken returned - " + authToken);
 
         // Try to get new token using the refresh token
         if (TextUtils.isEmpty(authToken) && AUTHTOKEN_TYPE_CREST.equals(authTokenType)) {
@@ -100,11 +111,11 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public String getAuthTokenLabel(String authTokenType) {
         if (AUTHTOKEN_TYPE_API_CHARACTER.equals(authTokenType))
-            return AUTHTOKEN_TYPE_API_CHARACTER;  // TODO: l10n
+            return "EVE Online character API key";
         else if (AUTHTOKEN_TYPE_API_CORPORATION.equals(authTokenType))
-            return AUTHTOKEN_TYPE_API_CORPORATION;
+            return "EVE Online corporation API key";
         else if (AUTHTOKEN_TYPE_CREST.equals(authTokenType))
-            return AUTHTOKEN_TYPE_CREST;
+            return "EVE Online CREST account";
 
         return null;
     }

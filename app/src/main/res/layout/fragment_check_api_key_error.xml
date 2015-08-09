@@ -1,0 +1,31 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="de.matdue.isk.account.CheckApiKeyActivityWaitFragment"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:id="@+id/fragment_check_api_key_error_text"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonBarStyle"
+        android:layout_gravity="end">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_checkapi_error_button_cancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/fragment_check_api_key_button_cancel"/>
+    </LinearLayout>
+
+</LinearLayout>

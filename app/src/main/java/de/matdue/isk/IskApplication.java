@@ -51,7 +51,8 @@ public class IskApplication extends Application {
 					.detectActivityLeaks()
 					.penaltyLog()
 					.build());
-            registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+
+            /*registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
                 @Override
                 public void onActivityCreated(Activity activity, Bundle bundle) {
                     Log.v("ActivityCreated", activity.toString() + "#" + activity.getTaskId());
@@ -79,14 +80,14 @@ public class IskApplication extends Application {
 
                 @Override
                 public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
-                    Log.v("ActivitySaveInstanceState", activity.toString() + "#" + activity.getTaskId());
+                    Log.v("ActivitySaveInstance", activity.toString() + "#" + activity.getTaskId());
                 }
 
                 @Override
                 public void onActivityDestroyed(Activity activity) {
                     Log.v("ActivityDestroyed", activity.toString() + "#" + activity.getTaskId());
                 }
-            });
+            });*/
 		}
 		
 		iskDatabase = new IskDatabase(this);
