@@ -73,6 +73,8 @@ public class CheckApiKeyActivityWaitFragment extends Fragment {
         setRetainInstance(true);
 
         // Start task to check API key in background
+        // Don't use the default executor because only one async task will be executed then.
+        // This would be a race condition if below task would be called from another async task.
         new AsyncTask<Bundle, Void, de.matdue.isk.eve.Account>() {
             @Override
             protected de.matdue.isk.eve.Account doInBackground(Bundle... params) {
@@ -89,7 +91,7 @@ public class CheckApiKeyActivityWaitFragment extends Fragment {
                     callback.onCheckApiKeyFinished(account);
                 }
             }
-        }.execute(getArguments());
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, getArguments());
     }
 
     @Override
