@@ -96,24 +96,13 @@ public class FileCache {
 	}
 	
 	public void cleanup() {
-		Runnable cleanupTask = new Runnable() {
-			
-			@Override
-			public void run() {
-				long expires = System.currentTimeMillis() - MAXIMUM_AGE;
-				File[] cachedFiles = cacheDir.listFiles();
-				for (File cachedFile : cachedFiles) {
-					if (cachedFile.isFile() && cachedFile.lastModified() < expires) {
-						cachedFile.delete();
-					}
-				}
+		long expires = System.currentTimeMillis() - MAXIMUM_AGE;
+		File[] cachedFiles = cacheDir.listFiles();
+		for (File cachedFile : cachedFiles) {
+			if (cachedFile.isFile() && cachedFile.lastModified() < expires) {
+				cachedFile.delete();
 			}
-			
-		};
-		Thread backgroundWorker = new Thread(cleanupTask, "CacheManager.cleanup");
-		backgroundWorker.setDaemon(true);
-		backgroundWorker.setPriority(Thread.MIN_PRIORITY);
-		backgroundWorker.start();
+		}
 	}
 	
 	private String createMd5Hash(String url) {

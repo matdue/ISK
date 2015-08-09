@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Matthias Düsterhöft
+ * Copyright 2015 Matthias Düsterhöft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 package de.matdue.isk.bitmap;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -28,30 +23,45 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * This class downloads an image from an URL and sets the bitmap as image.
+ * Download may occur synchron or asynchron. Each bitmap will be cached in a file and memory cache.
+ * Multiple images having the same URL will not cause the bitmap being downloaded multiple times.
+ */
 public class BitmapManager {
-	
+
 	// Memory cache
 	private LruCache<String, Bitmap> memoryCache;
-	
+
 	// File cache
 	private FileCache fileCache;
-	
+
 	// Cleanup cache at most every 24h
 	private static final long CLEANUP_DELAY = 24l*60*60*1000;
-	
-	// Bitmap downloader
-	private BitmapDownloader bitmapDownloader;
-	
+
+	// Currently running downloads
+	private final HashMap<String, List<WeakReference<ImageView>>> todoList = new HashMap<>();
+
 	private Context context;
 
 	public BitmapManager(Context context, File cacheDir) {
 		this.context = context;
 		fileCache = new FileCache(cacheDir);
-		bitmapDownloader = new BitmapDownloader(fileCache);
-		
+
 		// Use 1/8th of the available memory for memory cache
 		int memClass = ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
 		int cacheSize = memClass * 1024 * 1024 / 8;
@@ -62,19 +72,45 @@ public class BitmapManager {
 				return value.getByteCount();
 			}
 		};
-		
+
 		fileCacheCleanup();
 	}
-	
-	public void shutdown() {
-		bitmapDownloader.shutdown();
+
+	/**
+	 * Cleanup file cache, if not done so in the last 24 hours.
+	 * This method starts a background task using {@link AsyncTask} and returns immediately.
+	 */
+	private void fileCacheCleanup() {
+		// Disk I/O => do cleanup in background thread
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				SharedPreferences preferences = context.getSharedPreferences("de.matdue.isk.bitmap.BitmapManager", Context.MODE_PRIVATE);
+				long lastCleanup = preferences.getLong("lastCleanup", 0);
+				long now = System.currentTimeMillis();
+				if (lastCleanup + CLEANUP_DELAY < now) {
+					// Last cleanup more than 24h ago => cleanup and save time
+					fileCache.cleanup();
+					preferences
+							.edit()
+							.putLong("lastCleanup", now)
+							.apply();
+				}
+
+				return null;
+			}
+		}.execute();
 	}
-	
+
 	/**
 	 * Load an image asynchronously.
-	 * This method returns immediately. If the image is in memory cache, 
+	 * This method returns immediately. If the image is in memory cache,
 	 * all work is done. Otherwise, a background thread will load the image.
-	 * 
+	 *
+	 * All threads are running concurrently. There is no guarantee that requests are handled
+	 * in sequence. If you set multiple URLs for the same image, the final URL may not correspond
+	 * to the last call of this method.
+	 *
 	 * @param imageView ImageView which will receive the bitmap
 	 * @param imageUrl URL of bitmap
 	 * @param loadingBitmap Show this resource bitmap while loading
@@ -84,18 +120,53 @@ public class BitmapManager {
 		// Bitmap cached in memory?
 		Bitmap cachedBitmap = memoryCache.get(imageUrl);
 		if (cachedBitmap != null) {
+			Log.d("BitmapManager", "In memory cache: " + imageUrl);
 			imageView.setImageBitmap(cachedBitmap);
 			return;
 		}
 
+		// Show loading image
+		Drawable downloadingDrawable;
+		if (loadingBitmap != null) {
+			Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), loadingBitmap);
+			downloadingDrawable = new DownloadingBitmapDrawable(this, context.getResources(), bitmap);
+		} else if (loadingColor != null) {
+			downloadingDrawable = new DownloadingColorDrawable(this, loadingColor);
+		} else {
+			downloadingDrawable = new DownloadingColorDrawable(this, Color.TRANSPARENT);
+		}
+		imageView.setImageDrawable(downloadingDrawable);
+
+		// Register URL for download. There is a list of images for each URL.
+		// As soon as the images has been downloaded, all registered images will receive the
+		// downladed bitmap. This prevents multiple downloads of the same URL.
+		boolean urlIsDownloading = false;
+		synchronized (todoList) {
+			List<WeakReference<ImageView>> imageReferences = todoList.get(imageUrl);
+			if (imageReferences == null) {
+				imageReferences = new ArrayList<>();
+				todoList.put(imageUrl, imageReferences);
+				Log.d("BitmapManager", "Initiate loading: " + imageUrl);
+			} else {
+				urlIsDownloading = true;
+				Log.d("BitmapManager", "Already loading: " + imageUrl);
+			}
+
+			// Wrap image with a WeakReference. A long lasting download should not prevent the
+			// garbage collector from removing a meanwhile unused ImageView and its context.
+			imageReferences.add(new WeakReference<>(imageView));
+		}
+
 		// Download bitmap and set ImageView
-		new DownloadTask(imageView, loadingBitmap, loadingColor).execute(imageUrl);
+		if (!urlIsDownloading) {
+			new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageUrl);
+		}
 	}
-	
+
 	/**
 	 * Load an image synchronously.
 	 * This method blocks until the image has been loaded.
-	 * 
+	 *
 	 * @param imageUrl URL of bitmap
 	 * @return Loaded bitmap, or <code>null</code>
 	 */
@@ -105,12 +176,13 @@ public class BitmapManager {
 		if (cachedBitmap != null) {
 			return cachedBitmap;
 		}
-		
+
 		// In file cache?
 		InputStream cachedImage = fileCache.getStream(imageUrl);
 		if (cachedImage != null) {
 			Bitmap bitmap = BitmapFactory.decodeStream(cachedImage);
 			if (bitmap != null) {
+				// Cache in memory
 				memoryCache.put(imageUrl, bitmap);
 			}
 			try {
@@ -120,98 +192,116 @@ public class BitmapManager {
 			}
 			return bitmap;
 		}
-		
-		Bitmap bitmap = bitmapDownloader.downloadBitmap(imageUrl);
+
+		// Download and cache in memory
+		Bitmap bitmap = downloadBitmap(imageUrl);
 		if (bitmap != null) {
 			memoryCache.put(imageUrl, bitmap);
 		}
+
 		return bitmap;
 	}
-	
+
 	/**
-	 * Cleanup file cache, if not done so in the last 24 hours
+	 * Download an image URL.
+	 *
+	 * @param url URL
+	 * @return Image, or <code>null</code> if download failed.
 	 */
-	private void fileCacheCleanup() {
-		SharedPreferences preferences = context.getSharedPreferences("de.matdue.isk.bitmap.BitmapManager", Context.MODE_PRIVATE);
-		long lastCleanup = preferences.getLong("lastCleanup", 0);
-		long now = System.currentTimeMillis();
-		if (lastCleanup + CLEANUP_DELAY < now) {
-			// Last cleanup more than 24h ago => cleanup and save time
-			fileCache.cleanup();
-			preferences
-				.edit()
-				.putLong("lastCleanup", now)
-				.apply();
+	private Bitmap downloadBitmap(String url) {
+		try {
+			Log.d("BitmapManager", "Downloading: " + url);
+			URL downloadUrl = new URL(url);
+			HttpURLConnection connection = (HttpURLConnection) downloadUrl.openConnection();
+			connection.setRequestProperty("User-Agent", "blubb");
+
+			int statusCode = connection.getResponseCode();
+			if (statusCode != HttpURLConnection.HTTP_OK) {
+				Log.e("BitmapManager", url + ": " + statusCode);
+				return null;
+			}
+
+			InputStream inputStream = null;
+			try {
+				inputStream = connection.getInputStream();
+				InputStream cachedStream = fileCache.storeStream(url, inputStream, true);
+				if (cachedStream != null) {
+					// 'inputStream' cached successfully
+					Bitmap bitmap = BitmapFactory.decodeStream(cachedStream);
+					cachedStream.close();
+
+					memoryCache.put(url, bitmap);
+
+					Log.d("BitmapManager", "Download finished: " + url);
+					return bitmap;
+				}
+			} finally {
+				if (inputStream != null) {
+					inputStream.close();
+				}
+			}
+		} catch (Exception e) {
+			Log.e("BitmapManager", "Error downloading " + url, e);
 		}
+
+		return null;
 	}
-	
+
 	/**
 	 * AsyncTask which will download bitmap from file cache or internet
 	 * and store it in file cache, memory cache and ImageView.
 	 */
 	private class DownloadTask extends AsyncTask<String, Void, Bitmap> {
-		
-		private WeakReference<ImageView> imageViewReference;
-		
-		public DownloadTask(ImageView imageView, Integer loadingBitmap, Integer loadingColor) {
-			imageViewReference = new WeakReference<ImageView>(imageView);
-			
-			// Show loading image
-			Drawable downloadingDrawable;
-			if (loadingBitmap != null) {
-				Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), loadingBitmap);
-				downloadingDrawable = new DownloadingBitmapDrawable(this, context.getResources(), bitmap);
-			} else if (loadingColor != null) {
-				downloadingDrawable = new DownloadingColorDrawable(this, loadingColor);
-			} else {
-				downloadingDrawable = new DownloadingColorDrawable(this, Color.TRANSPARENT);
-			}
-			imageView.setImageDrawable(downloadingDrawable);
-		}
+
+		private String url;
 
 		@Override
 		protected Bitmap doInBackground(String... params) {
-			InputStream cachedImage = fileCache.getStream(params[0]);
+			url = params[0];
+			InputStream cachedImage = fileCache.getStream(url);
 			if (cachedImage != null) {
 				Bitmap bitmap = BitmapFactory.decodeStream(cachedImage);
 				if (bitmap != null) {
-					memoryCache.put(params[0], bitmap);
+					memoryCache.put(url, bitmap);
 				}
 				try {
 					cachedImage.close();
 				} catch (IOException e) {
 					// Ignore errors
 				}
+				Log.d("BitmapManager", "Got from file cache: " + url);
 				return bitmap;
 			}
-			
-			Bitmap bitmap = bitmapDownloader.downloadBitmap(params[0]);
-			if (bitmap != null) {
-				memoryCache.put(params[0], bitmap);
-			}
-			return bitmap;
+
+			return downloadBitmap(url);
 		}
-		
+
 		@Override
 		protected void onPostExecute(Bitmap result) {
 			if (isCancelled()) {
 				result = null;
 			}
 
-			if (imageViewReference != null) {
-				ImageView imageView = imageViewReference.get();
-				if (imageView != null) {
-					Drawable current = imageView.getDrawable();
-					if (current instanceof IDownloadingDrawable) {
-						IDownloadingDrawable currentDownloadingDrawable = (IDownloadingDrawable) current;
-						if (currentDownloadingDrawable.getDownloadingTask() == this) {
-							imageView.setImageBitmap(result);
-						}
+			if (result == null) {
+				return;
+			}
+
+			// Get list of images which should receive the fresh loaded bitmap
+			List<WeakReference<ImageView>> imageReferences;
+			synchronized (todoList) {
+				imageReferences = todoList.remove(url);
+			}
+
+			// Set bitmap
+			Log.d("BitmapManager", "Setting " + (imageReferences != null ? imageReferences.size() : 0) + " image(s) for: " + url);
+			if (imageReferences != null) {
+				for (WeakReference<ImageView> imageReference : imageReferences) {
+					ImageView image = imageReference.get();
+					if (image != null) {
+						image.setImageBitmap(result);
 					}
 				}
 			}
 		}
-		
 	}
-
 }
