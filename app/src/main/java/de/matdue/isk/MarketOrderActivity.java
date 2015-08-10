@@ -343,7 +343,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 	static class MarketOrderAdapter extends ResourceCursorAdapter {
 		
 		public interface MarketOrderListener {
-			public void onWatchChanged(long seqId, boolean isChecked);
+			void onWatchChanged(long seqId, boolean isChecked);
 		}
 		
 		private BitmapManager bitmapManager;
@@ -378,7 +378,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			// Swipe-out action modified the view too much...
 			if (convertView != null) {
 				Boolean shallAbandon = (Boolean) convertView.getTag(R.id.market_order_abandon);
-				if (shallAbandon != null && shallAbandon.booleanValue()) {
+				if (shallAbandon != null && shallAbandon) {
 					convertView = null;
 				}
 			}

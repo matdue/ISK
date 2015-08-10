@@ -20,6 +20,7 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,7 +85,7 @@ public class CheckApiKeyActivitySelectFragment extends ListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_check_api_key_select, container, false);
 
         Button button = (Button) view.findViewById(R.id.fragment_check_api_key_button_cancel);

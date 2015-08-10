@@ -67,7 +67,7 @@ public class ListViewSwipeHelper implements View.OnTouchListener, AbsListView.On
 		 * @param position Position
 		 * @param direction Swipe direction
 		 */
-		public void onSwipe(View listView, int position, Direction direction);
+		void onSwipe(View listView, int position, Direction direction);
 	}
 	
 	/**

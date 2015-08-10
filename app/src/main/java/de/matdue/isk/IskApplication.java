@@ -19,12 +19,9 @@ import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
-import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 
 public class IskApplication extends Application {
 	

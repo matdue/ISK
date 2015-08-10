@@ -589,7 +589,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		String orderingTerm = OrderWatchTable.SORT_KEY;
 		if (orderBy != null) {
-			switch (orderBy.intValue()) {
+			switch (orderBy) {
 			case OrderWatch.ORDER_BY_FULFILLMENT:
 				orderingTerm += ", " + OrderWatchTable.FULFILLED + " DESC";
 				break;
@@ -626,7 +626,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 						OrderWatchTable.SEQ_ID
 					}, 
 					selection, 
-					selectionArgs.toArray(new String[0]), 
+					selectionArgs.toArray(new String[selectionArgs.size()]),
 					null, 
 					null, 
 					orderingTerm);  // order by
