@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:name=".IskApplication"
@@ -125,6 +126,21 @@
             android:name=".account.CheckApiKeyActivity"
             android:label="@string/account_api_title" >
         </activity>
+
+        <provider
+            android:authorities="de.matdue.isk.content.provider"
+            android:name=".content.StubContentProvider"
+            android:exported="false"
+            android:syncable="true" />
+        <service
+            android:name=".account.SyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_adapter" />
+        </service>
     </application>
 
 </manifest>

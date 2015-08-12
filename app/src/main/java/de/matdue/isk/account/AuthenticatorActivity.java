@@ -18,6 +18,7 @@ package de.matdue.isk.account;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -71,6 +72,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * Argument key for indicator whether this activity is called for a new or an existing account
      */
     public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
+
+    /**
+     * Sync provider
+     */
+    private final static String SYNC_AUTHORITY = "de.matdue.isk.content.provider";
 
     private final static int CHECK_API_KEY_REQUEST_CODE = 0;
 
@@ -229,6 +235,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                 // Account created, it didn't exist before
                 accountManager.setAuthToken(newAccount, account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, vCode);
                 createdAccounts.add(newAccount.name);
+
+                // Enable syncing, hourly
+                ContentResolver.setIsSyncable(newAccount, SYNC_AUTHORITY, 1);
+                ContentResolver.setSyncAutomatically(newAccount, SYNC_AUTHORITY, true);
+                ContentResolver.addPeriodicSync(newAccount, SYNC_AUTHORITY, Bundle.EMPTY, 60 * 60);
 
                 if (firstAccountData == null) {
                     firstAccountData = new Bundle();
