@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <!-- The main content view -->
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- The navigation drawer -->
+    <ScrollView
+        android:id="@+id/navdrawer"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/navdrawer_background"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/chosen_account_view"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="#081810"
+                android:onClick="toggleNavAccountView">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingTop="16dp">
+
+                    <ImageView
+                        android:id="@+id/profile_image"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_main_pilots"/>
+                    
+                    <ImageView
+                        android:id="@+id/expand_account_box_indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentBottom="true"
+                        android:src="@drawable/ic_drawer_accounts_expand"/>
+
+                    <TextView
+                        android:id="@+id/profile_email_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignLeft="@id/profile_image"
+                        android:layout_toLeftOf="@id/expand_account_box_indicator"
+                        android:layout_alignParentBottom="true"
+                        android:paddingBottom="16dp"
+                        android:textSize="14sp"
+                        android:textColor="#8affffff"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:text="Quaax' Company"/>
+
+                    <TextView
+                        android:id="@+id/profile_name_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/profile_email_text"
+                        android:layout_alignLeft="@id/profile_image"
+                        android:layout_toLeftOf="@id/expand_account_box_indicator"
+                        android:textSize="18sp"
+                        android:textColor="#deffffff"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:text="Quaax"/>
+
+                </RelativeLayout>
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Account items -->
+                <LinearLayout
+                    android:id="@+id/navdrawer_account_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical"
+                    android:visibility="invisible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:gravity="start|center_vertical"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:tag="#AddAccount"
+                        android:clickable="true">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginRight="32dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="start|center_vertical"
+                            android:gravity="start|center_vertical"
+                            android:textSize="14sp"
+                            android:textColor="#ffffffff"
+                            android:text="Konto hinzufügen"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:gravity="start|center_vertical"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:tag="#GotoAccounts"
+                        android:onClick="selectAccount">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginRight="32dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="start|center_vertical"
+                            android:gravity="start|center_vertical"
+                            android:textSize="14sp"
+                            android:textColor="#ffffffff"
+                            android:text="Konten verwalten"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/navdrawer_items_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_01"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_02"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_03"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_04"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_05"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_06"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_07"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_08"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_09"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_10"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_11"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                    <TextView
+                        android:id="@+id/navdrawer_text_12"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Klick mich!"/>
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</android.support.v4.widget.DrawerLayout>

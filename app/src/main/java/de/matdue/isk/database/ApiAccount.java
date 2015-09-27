@@ -13,27 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.matdue.isk.bitmap;
+package de.matdue.isk.database;
 
-import java.lang.ref.WeakReference;
+public class ApiAccount extends BaseModel {
 
-import android.graphics.drawable.ColorDrawable;
-
-/**
- * Downloading drawable, which will show just a color.
- */
-public class DownloadingColorDrawable extends ColorDrawable implements IDownloadingDrawable {
-	
-	private final WeakReference<Object> bitmapDownloadTaskReference;
-	
-	public DownloadingColorDrawable(Object downloadTask, int color) {
-		super(color);
-		bitmapDownloadTaskReference = new WeakReference<Object>(downloadTask);
-	}
-
-	@Override
-	public Object getDownloadingTask() {
-		return bitmapDownloadTaskReference.get();
-	}
+    public String characterId;
+    public String characterName;
+    public String corporationId;
+    public String corporationName;
 
 }

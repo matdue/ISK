@@ -24,6 +24,8 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
 
+import de.matdue.isk.EveApiUpdater;
+
 /**
  * Sync adapter performing updating our accounts
  */
@@ -40,8 +42,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         AccountManager accountManager = AccountManager.get(context);
         try {
-            String token = accountManager.blockingGetAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, true);
-            Log.d("SyncAdapter", token != null ? token : "<null>");
+            Boolean isCharacter = accountManager.hasFeatures(account, new String[]{"apiCharacter"}, null, null).getResult();
+            if (isCharacter != null && isCharacter) {
+                String token = accountManager.blockingGetAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API, true);
+                Log.d("SyncAdapter", "Character " + account.name + "; " + (token != null ? token : "<null>"));
+                if (token != null) {
+                    ApiKey apiKey = new ApiKey(token);
+                    Log.d("SyncAdapter", apiKey.toString());
+
+                    EveApiUpdater eveApiUpdater = new EveApiUpdater(context, true);
+                    eveApiUpdater.updateBalance(apiKey);
+                }
+            }
+
+            Boolean isCorporation = accountManager.hasFeatures(account, new String[]{"apiCorporation"}, null, null).getResult();
+            if (isCorporation != null && isCorporation) {
+                String token = accountManager.blockingGetAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API, true);
+                Log.d("SyncAdapter", "Corporation " + account.name + "; " + (token != null ? token : "<null>"));
+                if (token != null) {
+                    ApiKey apiKey = new ApiKey(token);
+                    Log.d("SyncAdapter", apiKey.toString());
+
+                    EveApiUpdater eveApiUpdater = new EveApiUpdater(context, true);
+                    eveApiUpdater.updateCorporationBalance(apiKey);
+                }
+            }
+
+            syncResult.stats.numAuthExceptions = 0;  // Hard error
+            syncResult.stats.numIoExceptions = 0;  // Soft error
+            syncResult.stats.numUpdates = 0;
         } catch (Exception e) {
             e.printStackTrace();
         }

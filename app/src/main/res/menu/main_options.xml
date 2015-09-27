@@ -1,29 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     
     <item
         android:id="@+id/menu_refresh"
         android:title="@string/main_optmenu_refresh"
         android:icon="@drawable/ic_menu_refresh"
-        android:showAsAction="ifRoom">
-    </item>
-    <item
-        android:id="@+id/main_optmenu_eveaccess"
-        android:title="@string/main_optmenu_eveaccess"
-        android:icon="@android:drawable/ic_menu_recent_history"
-        android:showAsAction="never">
-    </item>
-    <item 
-        android:id="@+id/main_optmenu_preferences" 
-        android:title="@string/main_optmenu_preferences" 
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:showAsAction="never" >
-    </item>
-    <item
-        android:id="@+id/main_optmenu_info"
-        android:title="@string/main_optmenu_info"
-        android:icon="@android:drawable/ic_menu_info_details"
-        android:showAsAction="never" >
+        app:showAsAction="ifRoom">
     </item>
 
 </menu>

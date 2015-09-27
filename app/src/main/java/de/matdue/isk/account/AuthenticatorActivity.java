@@ -21,7 +21,11 @@ import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,27 +35,33 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import de.matdue.isk.IskApplication;
 import de.matdue.isk.MainActivity;
 import de.matdue.isk.R;
+import de.matdue.isk.database.ApiAccount;
 
 /**
  * The authentication activity.
  *
  * Called by authenticator to do all UI stuff.
  *
- * For API key, the Android account has the following user data:
- * <ul>
- *     <li>id: API key id</li>
- *     <li>api: {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CORPORATION} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CHARACTER}</li>
- *     <li>characterID: EVE Online charactor or corporation ID</li>
- * </ul>
  * Account's property {@link Account#name} is the name of the charactor or corporation.
  * Property {@link Account#type} is always <code>de.matdue.isk</code>.
- * An account has either a charactor or corporation token. The token type is either
- * {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CORPORATION} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CHARACTER}.
- * For CREST account, another token will be added of a different type.
+ * An account has either an API or CREST token. The token type is either
+ * {@link AccountAuthenticator#AUTHTOKEN_TYPE_API} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_CREST}.
+ * <p>
+ *     An account can have these features:
+ *     <ul>
+ *         <li><code>apiCharacter</code>: Account has an character API key</li>
+ *         <li><code>apiCorporation</code>: Account has an corporation API key</li>
+ *     </ul>
+ *     <code>apiCharacter</code> and <code>apiCorporation</code> exclude mutually, i.e.
+ *     an API key can be either for a character or a corporation, but not for both.
+ *     An API token has the form <code>KeyID</code>|<code>CharacterID</code>|<code>verificationCode</code>
+ *     respectively <code>KeyID</code>|<code>CorporationID</code>|<code>verificationCode</code>.
+ * </p>
  */
-public class AuthenticatorActivity extends AccountAuthenticatorActivity {
+public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity {
 
     /**
      * Argument key for account type id; always de.matdue.isk
@@ -80,18 +90,24 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
     private final static int CHECK_API_KEY_REQUEST_CODE = 0;
 
+    public static void navigate(AppCompatActivity activity) {
+        Intent intent = new Intent(activity, AuthenticatorActivity.class);
+        intent.putExtra(ARG_IS_ADDING_NEW_ACCOUNT, true);
+        ActivityCompat.startActivity(activity, intent, null);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+        setContentView(R.layout.authenticator);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         String accountType = getIntent().getStringExtra(ARG_ACCOUNT_TYPE);
         if (accountType == null) {
             // Not called from AccountAuthenticator => behave as normal activity
             // and allow link to home page on action bar
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        setContentView(R.layout.authenticator);
 
         boolean isNewAccount = getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false);
         if (!isNewAccount) {
@@ -227,19 +243,21 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         for (de.matdue.isk.eve.Character character : account.characters) {
             Account newAccount = new Account(account.isCorporation() ? character.corporationName : character.characterName, AccountAuthenticator.ACCOUNT_TYPE);
             Bundle userData = new Bundle();
-            userData.putString("id", keyID);
-            userData.putString("api", account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER);
-            userData.putString("characterID", account.isCorporation() ? character.corporationID : character.characterID);
+            userData.putString("api", account.isCorporation() ? AccountAuthenticator.EVE_ACCOUNT_TYPE_CORPORATION : AccountAuthenticator.EVE_ACCOUNT_TYPE_CHARACTER);
+            String token = keyID + "|" + (account.isCorporation() ? character.corporationID : character.characterID) + "|" + vCode;
 
             if (accountManager.addAccountExplicitly(newAccount, null, userData)) {
                 // Account created, it didn't exist before
-                accountManager.setAuthToken(newAccount, account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, vCode);
+                accountManager.setAuthToken(newAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API, token);
                 createdAccounts.add(newAccount.name);
 
                 // Enable syncing, hourly
                 ContentResolver.setIsSyncable(newAccount, SYNC_AUTHORITY, 1);
                 ContentResolver.setSyncAutomatically(newAccount, SYNC_AUTHORITY, true);
                 ContentResolver.addPeriodicSync(newAccount, SYNC_AUTHORITY, Bundle.EMPTY, 60 * 60);
+
+                //storeAccountInDatabase(account.isCorporation() ? character.corporationID : character.characterID, newAccount.name, account.isCorporation());
+                storeAccountInDatabase(character, account);
 
                 if (firstAccountData == null) {
                     firstAccountData = new Bundle();
@@ -256,10 +274,11 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                         accountExists = true;
 
                         // Update account
-                        accountManager.setUserData(existingAccount, "id", userData.getString("id"));
                         accountManager.setUserData(existingAccount, "api", userData.getString("api"));
-                        accountManager.setUserData(existingAccount, "characterID", userData.getString("characterID"));
-                        accountManager.setAuthToken(existingAccount, account.isCorporation() ? AccountAuthenticator.AUTHTOKEN_TYPE_API_CORPORATION : AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, vCode);
+                        accountManager.setAuthToken(existingAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API, token);
+
+                        //storeAccountInDatabase(account.isCorporation() ? character.corporationID : character.characterID, existingAccount.name, account.isCorporation());
+                        storeAccountInDatabase(character, account);
 
                         if (firstAccountData == null) {
                             firstAccountData = new Bundle();
@@ -297,6 +316,26 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         }
 
         return firstAccountData;
+    }
+
+    private void storeAccountInDatabase(de.matdue.isk.eve.Character character, de.matdue.isk.eve.Account account) {
+        ApiAccount apiAccount = new ApiAccount();
+        if (!account.isCorporation()) {
+            apiAccount.characterId = character.characterID;
+            apiAccount.characterName = character.characterName;
+        }
+        apiAccount.corporationId = character.corporationID;
+        apiAccount.corporationName = character.corporationName;
+
+        new AsyncTask<ApiAccount, Void, Void>() {
+            @Override
+            protected Void doInBackground(ApiAccount... params) {
+                IskApplication iskApplication = (IskApplication) getApplicationContext();
+                iskApplication.getIskDatabase().storeApiAccount(params[0]);
+
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, apiAccount);
     }
 
 }

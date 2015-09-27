@@ -21,8 +21,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
@@ -30,12 +32,13 @@ import android.widget.ImageView;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class downloads an image from an URL and sets the bitmap as image.
@@ -54,7 +57,7 @@ public class BitmapManager {
 	private static final long CLEANUP_DELAY = 24l*60*60*1000;
 
 	// Currently running downloads
-	private final HashMap<String, List<WeakReference<ImageView>>> todoList = new HashMap<>();
+	private final HashMap<String, List<BitmapReceiver>> todoList = new HashMap<>();
 
 	private Context context;
 
@@ -74,6 +77,10 @@ public class BitmapManager {
 		};
 
 		fileCacheCleanup();
+	}
+
+	public void clearMemoryCache() {
+		memoryCache.evictAll();
 	}
 
 	/**
@@ -111,56 +118,89 @@ public class BitmapManager {
 	 * in sequence. If you set multiple URLs for the same image, the final URL may not correspond
 	 * to the last call of this method.
 	 *
-	 * @param imageView ImageView which will receive the bitmap
+	 * @param bitmapReceiver FIXME: ImageView which will receive the bitmap
 	 * @param imageUrl URL of bitmap
 	 * @param loadingBitmap Show this resource bitmap while loading
 	 * @param loadingColor Show this color while loading
 	 */
-	public void setImageBitmap(ImageView imageView, String imageUrl, Integer loadingBitmap, Integer loadingColor) {
+	public void setImageBitmap(BitmapReceiver bitmapReceiver, String imageUrl, Integer loadingBitmap, Integer loadingColor) {
 		// Bitmap cached in memory?
 		Bitmap cachedBitmap = memoryCache.get(imageUrl);
 		if (cachedBitmap != null) {
 			Log.d("BitmapManager", "In memory cache: " + imageUrl);
-			imageView.setImageBitmap(cachedBitmap);
+			bitmapReceiver.onReceive(cachedBitmap);
 			return;
 		}
 
 		// Show loading image
 		Drawable downloadingDrawable;
 		if (loadingBitmap != null) {
-			Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), loadingBitmap);
-			downloadingDrawable = new DownloadingBitmapDrawable(this, context.getResources(), bitmap);
+			downloadingDrawable = ContextCompat.getDrawable(context, loadingBitmap);
 		} else if (loadingColor != null) {
-			downloadingDrawable = new DownloadingColorDrawable(this, loadingColor);
+			downloadingDrawable = new ColorDrawable(loadingColor);
 		} else {
-			downloadingDrawable = new DownloadingColorDrawable(this, Color.TRANSPARENT);
+			downloadingDrawable = new ColorDrawable(Color.TRANSPARENT);
 		}
-		imageView.setImageDrawable(downloadingDrawable);
+		bitmapReceiver.onLoading(downloadingDrawable);
 
 		// Register URL for download. There is a list of images for each URL.
 		// As soon as the images has been downloaded, all registered images will receive the
 		// downladed bitmap. This prevents multiple downloads of the same URL.
 		boolean urlIsDownloading = false;
 		synchronized (todoList) {
-			List<WeakReference<ImageView>> imageReferences = todoList.get(imageUrl);
-			if (imageReferences == null) {
-				imageReferences = new ArrayList<>();
-				todoList.put(imageUrl, imageReferences);
+			// Make sure there is only one BitmapReceiver for a particular destination.
+			// This ensures that only the last of multiple requests for the same destination
+			// will deliver the bitmap.
+			removeDestinationFromTodoList(bitmapReceiver.getDestination());
+
+			// Add URL, unless it is already being downloaded
+			List<BitmapReceiver> bitmapReceivers = todoList.get(imageUrl);
+			if (bitmapReceivers == null) {
+				bitmapReceivers = new ArrayList<>();
+				todoList.put(imageUrl, bitmapReceivers);
 				Log.d("BitmapManager", "Initiate loading: " + imageUrl);
 			} else {
 				urlIsDownloading = true;
 				Log.d("BitmapManager", "Already loading: " + imageUrl);
 			}
 
-			// Wrap image with a WeakReference. A long lasting download should not prevent the
-			// garbage collector from removing a meanwhile unused ImageView and its context.
-			imageReferences.add(new WeakReference<>(imageView));
+			// Add BitmapReceiver to list of receivers
+			bitmapReceivers.add(bitmapReceiver);
 		}
 
 		// Download bitmap and set ImageView
 		if (!urlIsDownloading) {
 			new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageUrl);
 		}
+	}
+
+	/**
+	 * Remove any entry from {@link #todoList} with destination <code>destination</code>.
+	 * Do nothing if <code>destination</code> is <code>null</code>.
+	 *
+	 * @param destination Destination element
+	 */
+	private void removeDestinationFromTodoList(Object destination) {
+		if (destination != null) {
+			for (Iterator<Map.Entry<String, List<BitmapReceiver>>> todoListIterator = todoList.entrySet().iterator(); todoListIterator.hasNext(); ) {
+				Map.Entry<String, List<BitmapReceiver>> entry = todoListIterator.next();
+				List<BitmapReceiver> receivers = entry.getValue();
+				for (Iterator<BitmapReceiver> receiverIterator = receivers.iterator(); receiverIterator.hasNext(); ) {
+					BitmapReceiver receiver = receiverIterator.next();
+					if (receiver.getDestination() == destination) {
+						receiverIterator.remove();
+					}
+				}
+
+				if (receivers.isEmpty()) {
+					todoListIterator.remove();
+				}
+			}
+		}
+	}
+
+	public void setImageBitmap(ImageView imageView, String imageUrl, Integer loadingBitmap, Integer loadingColor) {
+		setImageBitmap(new BitmapReceiverForImageView(imageView), imageUrl, loadingBitmap, loadingColor);
 	}
 
 	/**
@@ -282,23 +322,20 @@ public class BitmapManager {
 				result = null;
 			}
 
-			if (result == null) {
-				return;
-			}
-
 			// Get list of images which should receive the fresh loaded bitmap
-			List<WeakReference<ImageView>> imageReferences;
+			List<BitmapReceiver> bitmapReceivers;
 			synchronized (todoList) {
-				imageReferences = todoList.remove(url);
+				bitmapReceivers = todoList.remove(url);
 			}
 
 			// Set bitmap
-			Log.d("BitmapManager", "Setting " + (imageReferences != null ? imageReferences.size() : 0) + " image(s) for: " + url);
-			if (imageReferences != null) {
-				for (WeakReference<ImageView> imageReference : imageReferences) {
-					ImageView image = imageReference.get();
-					if (image != null) {
-						image.setImageBitmap(result);
+			Log.d("BitmapManager", "Setting " + (bitmapReceivers != null ? bitmapReceivers.size() : 0) + " image(s) for: " + url);
+			if (bitmapReceivers != null) {
+				for (BitmapReceiver bitmapReceiver : bitmapReceivers) {
+					if (result != null) {
+						bitmapReceiver.onReceive(result);
+					} else {
+						bitmapReceiver.onError();
 					}
 				}
 			}

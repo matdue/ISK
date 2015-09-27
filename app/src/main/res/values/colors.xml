@@ -2,4 +2,19 @@
 <resources>
     <color name="wallet_entry_number_positive">#ff00ff00</color>
     <color name="wallet_entry_number_negative">#ffff0000</color>
+
+    <color name="theme_primary_dark">#303f9f</color>
+
+    <color name="navdrawer_background">#ff303030</color>
+
+    <!-- Material colors: https://www.materialpalette.com/teal/grey -->
+    <color name="primary">#009688</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#B2DFDB</color>
+    <color name="accent">#9E9E9E</color>
+    <color name="accent_translucent">#809E9E9E</color>
+    <color name="primary_text">#FFFFFF</color>
+    <color name="secondary_text">#B3B3B3</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
 </resources>

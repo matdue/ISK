@@ -28,13 +28,14 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
 import android.util.Log;
 
 public class IskDatabase extends SQLiteOpenHelper {
 	
 	private static final String DATABASE_NAME = "isk.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	
 	public IskDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,16 +52,22 @@ public class IskDatabase extends SQLiteOpenHelper {
 		db.execSQL(WalletTable.IDX_CREATE);
 		db.execSQL(OrderWatchTable.SQL_CREATE);
 		db.execSQL(OrderWatchItemTable.SQL_CREATE);
+		db.execSQL(CorporationBalanceTable.SQL_CREATE);
+		db.execSQL(ApiAccountTable.SQL_CREATE);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		switch (oldVersion) {
-		case 1:
+		if (oldVersion <= 1) {
 			// 1 -> 2: New tables 'orderWatch' and 'orderWatchItem'
 			db.execSQL(OrderWatchTable.SQL_CREATE);
 			db.execSQL(OrderWatchItemTable.SQL_CREATE);
-			break;
+		}
+
+		if (oldVersion <= 2) {
+			// 2 -> 3: New tables 'corporationBalance' and 'apiAccount'
+			db.execSQL(CorporationBalanceTable.SQL_CREATE);
+			db.execSQL(ApiAccountTable.SQL_CREATE);
 		}
 	}
 
@@ -160,13 +167,13 @@ public class IskDatabase extends SQLiteOpenHelper {
 			try {
 				db.beginTransaction();
 				String idStr = Long.toString(id);
-				db.delete(BalanceTable.TABLE_NAME, 
-						BalanceTable.CHARACTER_ID + " IN " + subselect, 
-						new String[] { idStr });
+				db.delete(BalanceTable.TABLE_NAME,
+						BalanceTable.CHARACTER_ID + " IN " + subselect,
+						new String[]{idStr});
 				
-				db.delete(WalletTable.TABLE_NAME, 
-						WalletTable.CHARACTER_ID + " IN " + subselect, 
-						new String[] { idStr });
+				db.delete(WalletTable.TABLE_NAME,
+						WalletTable.CHARACTER_ID + " IN " + subselect,
+						new String[]{idStr});
 				
 				db.delete(OrderWatchTable.TABLE_NAME, 
 						OrderWatchTable.CHARACTER_ID + " IN " + subselect, 
@@ -261,13 +268,13 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		try {
 			SQLiteDatabase db = getReadableDatabase();
-			Cursor cursor = db.query(CharacterTable.TABLE_NAME, 
-					new String[] { CharacterTable.NAME }, 
-					CharacterTable.CHARACTER_ID + "=?", 
-					new String[] { characterId }, 
-					null, 
-					null, 
-					null, 
+			Cursor cursor = db.query(CharacterTable.TABLE_NAME,
+					new String[]{CharacterTable.NAME},
+					CharacterTable.CHARACTER_ID + "=?",
+					new String[]{characterId},
+					null,
+					null,
+					null,
 					null);
 			if (cursor.moveToNext()) {
 				result = new Character();
@@ -287,13 +294,13 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		try {
 			SQLiteDatabase db = getReadableDatabase();
-			Cursor cursor = db.query(BalanceTable.TABLE_NAME, 
-					new String[] { BalanceTable.BALANCE }, 
-					BalanceTable.CHARACTER_ID + "=?", 
-					new String[] { characterId }, 
-					null, 
-					null, 
-					null, 
+			Cursor cursor = db.query(BalanceTable.TABLE_NAME,
+					new String[]{BalanceTable.BALANCE},
+					BalanceTable.CHARACTER_ID + "=?",
+					new String[]{characterId},
+					null,
+					null,
+					null,
 					null);
 			if (cursor.moveToNext()) {
 				result = new Balance();
@@ -307,11 +314,87 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		return result;
 	}
-	
+
+	public List<ApiAccount> queryAllApiAccounts() {
+		ArrayList<ApiAccount> result = new ArrayList<>();
+
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(ApiAccountTable.TABLE_NAME,
+					new String[]{ApiAccountTable.CHARACTER_ID, ApiAccountTable.CHARACTER_NAME, ApiAccountTable.CORPORATION_ID, ApiAccountTable.CORPORATION_NAME},
+					null,
+					null,
+					null,
+					null,
+					null);
+			while (cursor.moveToNext()) {
+				ApiAccount apiAccount = new ApiAccount();
+				if (!cursor.isNull(0)) {
+					apiAccount.characterId = cursor.getString(0);
+					apiAccount.characterName = cursor.getString(1);
+				}
+				if (!cursor.isNull(2)) {
+					apiAccount.corporationId = cursor.getString(2);
+					apiAccount.corporationName = cursor.getString(3);
+				}
+
+				result.add(apiAccount);
+			}
+			cursor.close();
+		}catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryAllApiAccounts", e);
+		}
+
+		return result;
+	}
+
+	public void storeApiAccount(ApiAccount apiAccount) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			SQLiteStatement insertApiAccount = db.compileStatement("INSERT INTO " + ApiAccountTable.TABLE_NAME
+					+ " (" + ApiAccountTable.CHARACTER_ID + "," + ApiAccountTable.CHARACTER_NAME + "," + ApiAccountTable.CORPORATION_ID + "," + ApiAccountTable.CORPORATION_NAME + ")"
+					+ " VALUES (?,?,?,?)");
+			try {
+				db.beginTransaction();
+
+				if (apiAccount.characterName != null) {
+					db.delete(ApiAccountTable.TABLE_NAME,
+							ApiAccountTable.CHARACTER_NAME + "=?",
+							new String[]{apiAccount.characterName});
+
+					insertApiAccount.bindString(1, apiAccount.characterId);
+					insertApiAccount.bindString(2, apiAccount.characterName);
+					if (apiAccount.corporationId != null) {
+						insertApiAccount.bindString(3, apiAccount.corporationId);
+						insertApiAccount.bindString(4, apiAccount.corporationName);
+					}
+					insertApiAccount.executeInsert();
+				} else {
+					db.delete(ApiAccountTable.TABLE_NAME,
+							ApiAccountTable.CORPORATION_NAME + "=? AND " + ApiAccountTable.CHARACTER_NAME + " IS NULL",
+							new String[]{apiAccount.corporationName});
+
+					insertApiAccount.bindString(3, apiAccount.corporationId);
+					insertApiAccount.bindString(4, apiAccount.corporationName);
+					insertApiAccount.executeInsert();
+				}
+
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+				insertApiAccount.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeApiAccount", e);
+		}
+	}
+
 	public void storeBalance(Balance balance) {
 		try {
 			SQLiteDatabase db = getWritableDatabase();
-			InsertHelper balanceInsertHelper = new InsertHelper(db, BalanceTable.TABLE_NAME);
+			SQLiteStatement insertBalance = db.compileStatement("INSERT INTO " + BalanceTable.TABLE_NAME
+					+ " (" + BalanceTable.CHARACTER_ID + "," + BalanceTable.BALANCE + ")"
+					+ " VALUES (?,?)");
 			try {
 				db.beginTransaction();
 				
@@ -319,18 +402,49 @@ public class IskDatabase extends SQLiteOpenHelper {
 						BalanceTable.CHARACTER_ID + "=?", 
 						new String[] { balance.characterId });
 				
-				ContentValues values = new ContentValues();
-				values.put(BalanceTable.CHARACTER_ID, balance.characterId);
-				values.put(BalanceTable.BALANCE, balance.balance.toString());
-				balanceInsertHelper.insert(values);
-				
+				insertBalance.bindString(1, balance.characterId);
+				insertBalance.bindString(2, balance.balance.toString());
+				insertBalance.executeInsert();
+
 				db.setTransactionSuccessful();
 			} finally {
 				db.endTransaction();
-				balanceInsertHelper.close();
+				insertBalance.close();
 			}
 		} catch (SQLiteException e) {
 			Log.e("IskDatabase", "storeBalance", e);
+		}
+	}
+
+	public void storeCorporationBalance(List<CorporationBalance> balances) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			SQLiteStatement insertBalance = db.compileStatement("INSERT INTO " + CorporationBalanceTable.TABLE_NAME
+					+ " (" + CorporationBalanceTable.CORPORATION_ID + "," + CorporationBalanceTable.BALANCE + "," + CorporationBalanceTable.ACCOUNT_KEY + "," + CorporationBalanceTable.DESCRIPTION + ")"
+					+ " VALUES (?,?,?,?)");
+			try {
+				db.beginTransaction();
+
+				db.delete(CorporationBalanceTable.TABLE_NAME,
+						CorporationBalanceTable.CORPORATION_ID + "=?",
+						new String[]{balances.get(0).corporationId});
+
+				for (CorporationBalance balance : balances) {
+					insertBalance.clearBindings();
+					insertBalance.bindString(1, balance.corporationId);
+					insertBalance.bindString(2, balance.balance.toString());
+					insertBalance.bindString(3, balance.accountKey);
+					insertBalance.bindString(4, balance.accountDescription);
+					insertBalance.executeInsert();
+				}
+
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+				insertBalance.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeCorporationBalance", e);
 		}
 	}
 	

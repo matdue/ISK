@@ -20,6 +20,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 
 import java.util.ArrayList;
 
@@ -44,6 +45,10 @@ public class CheckApiKeyActivity extends IskActivity implements CheckApiKeyActiv
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.check_api_key);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         // At first, check the key using EVE Online API. As this step may take a while,
         // a please wait animation is shown. The fragment will call us back when finished.
         FragmentManager fm = getFragmentManager();
@@ -51,7 +56,7 @@ public class CheckApiKeyActivity extends IskActivity implements CheckApiKeyActiv
             String keyID = getIntent().getStringExtra("keyID");
             String vCode = getIntent().getStringExtra("vCode");
             CheckApiKeyActivityWaitFragment fragment = CheckApiKeyActivityWaitFragment.newInstance(keyID, vCode);
-            fm.beginTransaction().add(android.R.id.content, fragment).commit();
+            fm.beginTransaction().replace(R.id.content, fragment).commit();
         }
     }
 
@@ -105,7 +110,7 @@ public class CheckApiKeyActivity extends IskActivity implements CheckApiKeyActiv
         }
 
         FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(android.R.id.content, fragment).commit();
+        fm.beginTransaction().replace(R.id.content, fragment).commit();
     }
 
     @Override

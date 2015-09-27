@@ -15,11 +15,11 @@
  */
 package de.matdue.isk;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.Collator;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -28,15 +28,13 @@ import com.commonsware.cwac.wakeful.WakefulIntentService;
 
 import de.matdue.isk.account.AccountAuthenticator;
 import de.matdue.isk.account.AuthenticatorActivity;
-import de.matdue.isk.account.CheckApiKeyActivity;
+import de.matdue.isk.database.ApiAccount;
 import de.matdue.isk.eve.EveApi;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -48,29 +46,77 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends IskActivity {
+public class MainActivity extends IskActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	private BroadcastReceiver eveApiUpdaterReceiver;
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
+	private boolean drawerShowAccounts;
+	private NavigationView navigationView;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main3);
+
+		// Init toolbar
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+
+		// Init navigation drawer
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		navigationView = (NavigationView) findViewById(R.id.drawer_navigation_view);
+		navigationView.setNavigationItemSelectedListener(this);
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.app_name, R.string.app_name) {
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
+				super.onDrawerSlide(drawerView, 0);  // this disables the arrow @ completed state
+			}
+
+			@Override
+			public void onDrawerSlide(View drawerView, float slideOffset) {
+				super.onDrawerSlide(drawerView, 0);  // this disables the animation
+			}
+		};
+		drawerLayout.setDrawerListener(drawerToggle);
+
+
+		/*getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+		setContentView(R.layout.main2);
+
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		drawerLayout.setStatusBarBackground(R.color.theme_primary_dark);
+		drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.app_name, R.string.app_name);
+		drawerLayout.setDrawerListener(drawerToggle);
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setHomeButtonEnabled(true);
+		*/
+        /*super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
         Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
@@ -110,11 +156,164 @@ public class MainActivity extends IskActivity {
         
         // Make sure update service to be called regularly
      	WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), false);
-     		
+     	*/
         showWelcomeDialog();
     }
-    
-    public void gotoWallet(View view) {
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		drawerToggle.syncState();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public boolean onNavigationItemSelected(MenuItem menuItem) {
+		drawerLayout.closeDrawers();
+		switch (menuItem.getItemId()) {
+			case R.id.navdrawer_history:
+				EveAccessActivity.navigate(this);
+				return true;
+
+			case R.id.navdrawer_preferences:
+				PreferencesActivity.navigate(this);
+				return true;
+
+			case R.id.navdrawer_help:
+				AboutActivity.navigate(this);
+				return true;
+
+			case R.id.navdrawer_account_manage:
+				String[] authorities = {"de.matdue.isk.content.provider"};
+				Intent intent = new Intent(Settings.ACTION_SYNC_SETTINGS);
+				intent.putExtra(Settings.EXTRA_AUTHORITIES, authorities);
+				startActivity(intent);
+				toggleNavAccountView(false);
+				return true;
+
+			case R.id.navdrawer_account_add:
+				AuthenticatorActivity.navigate(this);
+				toggleNavAccountView(false);
+				return true;
+
+			case Menu.NONE:
+				if (menuItem.getGroupId() == R.id.navdrawer_menu_accounts) {
+					switchToAccount(menuItem.getTitle());
+					toggleNavAccountView(false);
+					return true;
+				}
+		}
+
+		return false;
+	}
+
+	public void toggleNavAccountView(View view) {
+		toggleNavAccountView(!drawerShowAccounts);
+	}
+
+	public void toggleNavAccountView(boolean showAccounts) {
+		if (drawerShowAccounts == showAccounts) {
+			return;
+		}
+
+		drawerShowAccounts = showAccounts;
+		ImageView expandIndicator = ((ImageView) findViewById(R.id.expand_account_box_indicator));
+		expandIndicator.setImageResource(drawerShowAccounts ? R.drawable.ic_arrow_drop_up_white_24dp : R.drawable.ic_arrow_drop_down_white_24dp);
+
+		Menu navigationViewMenu = navigationView.getMenu();
+		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu, !drawerShowAccounts);
+		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu_accounts, drawerShowAccounts);
+		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu_accountmgmt, drawerShowAccounts);
+
+		navigationViewMenu.removeGroup(R.id.navdrawer_menu_accounts);
+		if (drawerShowAccounts) {
+			AccountManager accountManager = AccountManager.get(this);
+			Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+			final Collator collator = Collator.getInstance();
+			Arrays.sort(accounts, new Comparator<Account>() {
+				@Override
+				public int compare(Account x, Account y) {
+					return collator.compare(x.name, y.name);
+				}
+			});
+
+			int order = Menu.FIRST;
+			for (Account account : accounts) {
+				navigationViewMenu.add(R.id.navdrawer_menu_accounts, Menu.NONE, order++, account.name)
+						.setIcon(R.drawable.ic_person_white_24dp);
+			}
+		}
+	}
+
+	private void switchToAccount(CharSequence name) {
+		final TextView nameTextView = (TextView) findViewById(R.id.profile_name_text);
+		nameTextView.setVisibility(View.INVISIBLE);
+		final TextView corpTextView = (TextView) findViewById(R.id.profile_email_text);
+		corpTextView.setVisibility(View.INVISIBLE);
+		final ImageView profileImage = (ImageView) findViewById(R.id.profile_image);
+		profileImage.setImageResource(R.drawable.ic_main_pilots);
+
+		new AsyncTask<CharSequence, Void, ApiAccount>() {
+			@Override
+			protected ApiAccount doInBackground(CharSequence... params) {
+				CharSequence name = params[0];
+				List<ApiAccount> allApiAccounts = getDatabase().queryAllApiAccounts();
+
+				// Character matching?
+				for (ApiAccount apiAccount : allApiAccounts) {
+					if (name.equals(apiAccount.characterName)) {
+						return apiAccount;
+					}
+				}
+
+				// Corporation matching?
+				for (ApiAccount apiAccount : allApiAccounts) {
+					if (apiAccount.characterName == null && name.equals(apiAccount.corporationName)) {
+						return apiAccount;
+					}
+				}
+
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(ApiAccount apiAccount) {
+				if (apiAccount == null) {
+					// TODO: Was tun?
+					return;
+				}
+
+				if (apiAccount.characterName == null) {
+					// Corporation
+					nameTextView.setText(apiAccount.corporationName);
+					nameTextView.setVisibility(View.VISIBLE);
+
+					getBitmapManager().setImageBitmap(profileImage, EveApi.getCorporationUrl(apiAccount.corporationId, 128), null, null);
+					profileImage.setVisibility(View.VISIBLE);
+				} else {
+					// Character
+					nameTextView.setText(apiAccount.characterName);
+					nameTextView.setVisibility(View.VISIBLE);
+
+					corpTextView.setText(apiAccount.corporationName);
+					corpTextView.setVisibility(View.VISIBLE);
+
+					getBitmapManager().setImageBitmap(profileImage, EveApi.getCharacterUrl(apiAccount.characterId, 128), null, null);
+				}
+			}
+		}.execute(name);
+	}
+
+	public void selectAccount(View view) {
+		Log.d("MainActivity", "Select account " + view.getTag());
+	}
+
+	public void gotoWallet(View view) {
     	String characterID = getPreferences().getString("startCharacterID", null);
 		if (characterID != null) {
 			Intent intent = new Intent(this, WalletActivity.class);
@@ -137,10 +336,10 @@ public class MainActivity extends IskActivity {
 		//startActivity(new Intent(this, AuthenticatorActivity.class));
 
 		final AccountManager accountManager = AccountManager.get(this);
-		Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		final Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
 		for (final Account account : accounts) {
 			if ("Quaax".equals(account.name)) {
-				accountManager.getAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, null, this, new AccountManagerCallback<Bundle>() {
+				/*accountManager.getAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, null, this, new AccountManagerCallback<Bundle>() {
 					@Override
 					public void run(AccountManagerFuture<Bundle> future) {
 						try {
@@ -155,10 +354,54 @@ public class MainActivity extends IskActivity {
 							Toast.makeText(MainActivity.this, R.string.account_authentication_failed, Toast.LENGTH_LONG).show();
 						}
 					}
-				}, null);
+				}, null);*/
+				/*accountManager.getAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHARACTER, null, false, new AccountManagerCallback<Bundle>() {
+					@Override
+					public void run(AccountManagerFuture<Bundle> future) {
+						try {
+							Bundle bundle = future.getResult();
+							String authtoken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+							if (authtoken != null) {
+								Log.d("MainActivity", authtoken);
+								accountManager.invalidateAuthToken(account.type, authtoken);
+							} else {
+								Log.d("MainActivity", "Got no auth token");
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}, null);*/
 			}
 		}
-    }
+
+		accountManager.getAccountsByTypeAndFeatures(AccountAuthenticator.ACCOUNT_TYPE, new String[]{"apiCharacter"}, new AccountManagerCallback<Account[]>() {
+			@Override
+			public void run(AccountManagerFuture<Account[]> future) {
+				try {
+					Account[] aa = future.getResult();
+					for (Account a : aa) {
+						Log.d("MainActivity", "Char: " + a.name);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}, null);
+		accountManager.getAccountsByTypeAndFeatures(AccountAuthenticator.ACCOUNT_TYPE, new String[]{"apiCorporation"}, new AccountManagerCallback<Account[]>() {
+			@Override
+			public void run(AccountManagerFuture<Account[]> future) {
+				try {
+					Account[] aa = future.getResult();
+					for (Account a : aa) {
+						Log.d("MainActivity", "Corp: " + a.name);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}, null);
+	}
     
     /**
 	 * Show a Welcome! dialog
@@ -185,12 +428,19 @@ public class MainActivity extends IskActivity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (drawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
 		switch (item.getItemId()) {
+		/*case android.R.id.home:
+			drawerLayout.openDrawer(GravityCompat.START);
+			return true;*/
+
 		case R.id.menu_refresh:
 			refreshCurrentCharacter();
 			return true;
 		
-		case R.id.main_optmenu_eveaccess:
+		/*case R.id.main_optmenu_eveaccess:
 			startActivity(new Intent(this, EveAccessActivity.class));
 			return true;
 			
@@ -199,8 +449,9 @@ public class MainActivity extends IskActivity {
 			return true;
 			
 		case R.id.main_optmenu_info:
-			startActivity(new Intent(this, AboutActivity.class));
-			return true;
+			//startActivity(new Intent(this, AboutActivity.class));
+			AboutActivity.navigate(this);
+			return true;*/
 			
 		default:
 			return super.onOptionsItemSelected(item);
@@ -254,10 +505,51 @@ public class MainActivity extends IskActivity {
 	
 
 	private void refreshPilots() {
-		String activeCharacterID = getPreferences().getString("startCharacterID", null);
-		List<PilotData> pilots = new ArrayList<PilotData>();
+		/*new AsyncTask<Void, Void, List<PilotData>>() {
+			@Override
+			protected List<PilotData> doInBackground(Void... params) {
+				List<ApiAccount> apiAccounts = getDatabase().queryAllApiAccounts();
+				ArrayList<PilotData> pilots = new ArrayList<>();
+				for (ApiAccount apiAccount : apiAccounts) {
+					PilotData pilot = new PilotData();
+					pilot.balance = BigDecimal.ZERO;
+					pilot.name = apiAccount.characterName != null ? apiAccount.characterName : apiAccount.corporationName;
+					pilot.characterId = apiAccount.characterId != null ? apiAccount.characterId : apiAccount.corporationId;
+					pilot.corporation = apiAccount.corporationName != null;
 
-		AccountManager accountManager = AccountManager.get(this);
+					pilots.add(pilot);
+				}
+
+				// Sort by name, characters first
+				final Collator collator = Collator.getInstance();
+				Collections.sort(pilots, new Comparator<PilotData>() {
+					@Override
+					public int compare(PilotData x, PilotData y) {
+						if (!x.corporation && y.corporation) {
+							return -1;
+						} else if (x.corporation && !y.corporation) {
+							return 1;
+						}
+
+						return collator.compare(x.name, y.name);
+					}
+				});
+
+				return pilots;
+			}
+
+			@Override
+			protected void onPostExecute(List<PilotData> result) {
+				// Update spinner and its adapter
+				Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
+				PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
+				adapter.refresh(result);
+				adapter.notifyDataSetChanged();
+			}
+		}.execute();
+		return;*/
+
+		/*AccountManager accountManager = AccountManager.get(this);
 		Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
 		for (Account account : accounts) {
 			String apiAccountType = accountManager.getUserData(account, "api");
@@ -287,7 +579,7 @@ public class MainActivity extends IskActivity {
 		PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
 		adapter.refresh(pilots);
 		adapter.notifyDataSetChanged();
-		spinner.setSelection(activePilot);
+		spinner.setSelection(activePilot);*/
 	}
 
 	private void refreshPilotsOld() {
@@ -354,7 +646,7 @@ public class MainActivity extends IskActivity {
 	 * Refreshes current character
 	 */
 	private void refreshCurrentCharacter() {
-		String currentCharacterID = getPreferences().getString("startCharacterID", null);
+		/*String currentCharacterID = getPreferences().getString("startCharacterID", null);
 		if (currentCharacterID == null) {
 			return;
 		}
@@ -363,10 +655,22 @@ public class MainActivity extends IskActivity {
 		Intent msgIntent = new Intent(this, EveApiUpdaterService.class);
 		msgIntent.putExtra("characterId", currentCharacterID);
 		msgIntent.putExtra("force", true);
-		WakefulIntentService.sendWakefulWork(this, msgIntent);
+		WakefulIntentService.sendWakefulWork(this, msgIntent);*/
 		
 		// Show refresh animation
 		setRefreshActionItemState(true);
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				android.os.SystemClock.sleep(3000);
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void aVoid) {
+				setRefreshActionItemState(false);
+			}
+		}.execute();
 	}
 	
 	

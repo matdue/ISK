@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="172dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:background="#081810"
+    android:paddingTop="25dp"
+    android:onClick="toggleNavAccountView">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp">
+
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_main_pilots"/>
+
+        <ImageView
+            android:id="@+id/profile_image_2nd"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="16dp"/>
+
+        <ImageView
+            android:id="@+id/profile_image_3rd"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toLeftOf="@id/profile_image_2nd"
+            android:layout_marginLeft="16dp"/>
+
+        <ImageView
+            android:id="@+id/profile_image_4th"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toLeftOf="@id/profile_image_3rd"
+            android:layout_marginLeft="16dp"/>
+
+        <ImageView
+            android:id="@+id/profile_image_5th"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toLeftOf="@id/profile_image_4th"
+            android:layout_marginLeft="16dp"/>
+
+        <ImageView
+            android:id="@+id/expand_account_box_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:paddingBottom="16dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/ic_arrow_drop_down_white_24dp"/>
+
+        <TextView
+            android:id="@+id/profile_email_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/profile_image"
+            android:layout_toLeftOf="@id/expand_account_box_indicator"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="16dp"
+            android:textSize="14sp"
+            android:textColor="#8affffff"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/profile_name_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/profile_email_text"
+            android:layout_alignLeft="@id/profile_image"
+            android:layout_toLeftOf="@id/expand_account_box_indicator"
+            android:textSize="18sp"
+            android:textColor="#deffffff"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+    </RelativeLayout>
+
+</FrameLayout>
