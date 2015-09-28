@@ -125,8 +125,6 @@ public class EveApiUpdaterService extends WakefulIntentService {
 			sendBroadcast(new Intent(ACTION_RESP)
 				.addCategory(Intent.CATEGORY_DEFAULT)
 				.putExtra("error", message));
-		} finally {
-			eveApi.close();
 		}
 	}
 	

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Matthias Düsterhöft
+ * Copyright 2015 Matthias Düsterhöft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package de.matdue.isk.bitmap;
 
-/**
- * A Drawable, which is currently being downloaded.
- */
-public interface IDownloadingDrawable {
-	
-	Object getDownloadingTask();
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+
+public interface BitmapReceiver {
+
+    Object getDestination();
+    void onLoading(Drawable loadingImage);
+    void onReceive(Bitmap bitmap);
+    void onError();
 
 }

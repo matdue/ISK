@@ -53,6 +53,14 @@ public class IskApplication extends Application {
 		eveDatabase = new EveDatabase(this);
 		bitmapManager = new BitmapManager(this, getCacheDir());
 	}
+
+	@Override
+	public void onTrimMemory(int level) {
+		super.onTrimMemory(level);
+		if (level >= TRIM_MEMORY_BACKGROUND) {
+			bitmapManager.clearMemoryCache();
+		}
+	}
 	
 	public IskDatabase getIskDatabase() {
 		return iskDatabase;
