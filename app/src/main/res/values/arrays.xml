@@ -123,7 +123,7 @@
 		<item>Medal Issued</item>
 		<item>Betting</item>
 		<item>DNA Modification Fee</item>
-		<item>Sovereignity bill</item>
+		<item>Sovereignty bill</item>
 		<item>Bounty Prize Corporation Tax</item>
 		<item>Agent Mission Reward Corporation Tax</item>
 		<item>Agent Mission Time Bonus Reward Corporation Tax</item>
@@ -171,7 +171,7 @@
         <item>District Clone Sales</item><!-- 10020 -->
         <item>District Clone Purchase</item><!-- 10021 -->
         <item>Biomass Reward</item><!-- 10022 -->
-        <item>Unknown</item><!-- 10023 -->
+        <item>ISK Swap Reward</item><!-- 10023 -->
         <item>Unknown</item><!-- 10024 -->
         <item>Unknown</item><!-- 10025 -->
 		<item>Modify AUR</item><!-- 11001 -->

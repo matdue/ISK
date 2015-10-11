@@ -112,7 +112,7 @@ public class BitmapManager {
 	 * in sequence. If you set multiple URLs for the same image, the final URL may not correspond
 	 * to the last call of this method.
 	 *
-	 * @param bitmapReceiver FIXME: ImageView which will receive the bitmap
+	 * @param bitmapReceiver Bitmap receiver callback interface
 	 * @param imageUrl URL of bitmap
 	 * @param loadingBitmap Show this resource bitmap while loading
 	 * @param loadingColor Show this color while loading
@@ -122,6 +122,10 @@ public class BitmapManager {
 		Bitmap cachedBitmap = memoryCache.get(imageUrl);
 		if (cachedBitmap != null) {
 			Log.d("BitmapManager", "In memory cache: " + imageUrl);
+			synchronized (todoList) {
+				// Ignore any outstanding downloads for this destination
+				removeDestinationFromTodoList(bitmapReceiver.getDestination());
+			}
 			bitmapReceiver.onReceive(cachedBitmap);
 			return;
 		}

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.matdue.isk"
-    android:versionCode="9"
-    android:versionName="2.6"
+    android:versionCode="10"
+    android:versionName="2.7"
     android:installLocation="auto" xmlns:tools="http://schemas.android.com/tools">
 
     <uses-sdk android:minSdkVersion="12" android:targetSdkVersion="16" />
