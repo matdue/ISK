@@ -18,11 +18,40 @@ package de.matdue.isk.bitmap;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
+/**
+ * {@link BitmapManager} will call methods of this interface while loading and when an image has
+ * been downloaded.
+ */
 public interface BitmapReceiver {
 
+    /**
+     * BitmapManager needs something to detect if more than one request was issued for the same
+     * item which will display the image. Provide any object as identifier, e.g. the
+     * <code>ImageView</code> object.
+     *
+     * @return identifier object.
+     */
     Object getDestination();
+
+    /**
+     * The image needs to be downloaded which may take some time. In the meantime,
+     * <code>loadingImage</code> should be displayed. This method will not be called if the image
+     * is already available in cache.
+     *
+     * @param loadingImage image to show while downloading. Optional (maybe null).
+     */
     void onLoading(Drawable loadingImage);
+
+    /**
+     * The image is ready for display.
+     *
+     * @param bitmap bitmap for display.
+     */
     void onReceive(Bitmap bitmap);
+
+    /**
+     * An error occurred while downloading.
+     */
     void onError();
 
 }

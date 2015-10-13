@@ -26,6 +26,7 @@ import java.lang.ref.WeakReference;
 public class BitmapReceiverForImageView implements BitmapReceiver {
 
     private WeakReference<ImageView> imageViewReference;
+    private boolean displayLoadingImage;
 
     public BitmapReceiverForImageView(ImageView imageView) {
         // Wrap image with a WeakReference. A long lasting download should not prevent the
@@ -43,6 +44,7 @@ public class BitmapReceiverForImageView implements BitmapReceiver {
         ImageView imageView = imageViewReference.get();
         if (imageView != null) {
             imageView.setImageDrawable(loadingImage);
+            displayLoadingImage = true;
         }
     }
 
@@ -51,6 +53,12 @@ public class BitmapReceiverForImageView implements BitmapReceiver {
         ImageView imageView = imageViewReference.get();
         if (imageView == null) {
             // ImageView has already been garbage collected and is not visible any more.
+            return;
+        }
+
+        if (!displayLoadingImage) {
+            // Show image at once if there was no loading time
+            imageView.setImageBitmap(bitmap);
             return;
         }
 
