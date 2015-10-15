@@ -15,9 +15,6 @@
  */
 package de.matdue.isk;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.app.LoaderManager;
@@ -26,6 +23,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -123,11 +121,8 @@ public class EveAccessActivity extends IskActivity {
 	
 	static class HistoryAdapter extends ResourceCursorAdapter {
 		
-		private DateFormat dateFormatter;
-
 		public HistoryAdapter(Context context, int layout, Cursor c) {
 			super(context, layout, c, 0);
-			dateFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 		}
 		
 		@Override
@@ -145,7 +140,7 @@ public class EveAccessActivity extends IskActivity {
 			}
 			
 			// Date and time
-			viewHolder.datetime.setText(dateFormatter.format(new Date(cursor.getLong(1))));
+			viewHolder.datetime.setText(DateUtils.formatDateTime(context, cursor.getLong(1), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME));
 			
 			// URL
 			viewHolder.url.setText(cursor.getString(2));

@@ -16,9 +16,7 @@
 package de.matdue.isk;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.Date;
 
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.eve.EveApi;
@@ -30,6 +28,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -162,7 +161,6 @@ public class WalletActivity extends IskActivity {
 	static class WalletAdapter extends ResourceCursorAdapter {
 		
 		private BitmapManager bitmapManager;
-		private DateFormat dateFormatter;
 		private NumberFormat numberFormatter;
 		private NumberFormat integerFormatter;
 		private int positiveNumber;
@@ -172,8 +170,6 @@ public class WalletActivity extends IskActivity {
 			super(context, layout, c, 0);
 			
 			this.bitmapManager = bitmapManager;
-			
-			dateFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 			
 			numberFormatter = NumberFormat.getInstance();
 			numberFormatter.setMinimumFractionDigits(2);
@@ -216,7 +212,7 @@ public class WalletActivity extends IskActivity {
 			}
 			
 			// Date and time
-			viewHolder.date.setText(dateFormatter.format(new Date(cursor.getLong(1))));
+			viewHolder.date.setText(DateUtils.formatDateTime(context, cursor.getLong(1), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME));
 
 			viewHolder.defaultInclude.setVisibility(View.GONE);
 			viewHolder.marketInclude.setVisibility(View.GONE);

@@ -16,9 +16,7 @@
 package de.matdue.isk;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.Date;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
@@ -38,6 +36,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -343,11 +342,10 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 	static class MarketOrderAdapter extends ResourceCursorAdapter {
 		
 		public interface MarketOrderListener {
-			public void onWatchChanged(long seqId, boolean isChecked);
+			void onWatchChanged(long seqId, boolean isChecked);
 		}
 		
 		private BitmapManager bitmapManager;
-		private DateFormat dateFormatter;
 		private NumberFormat numberFormatter;
 		private NumberFormat integerFormatter;
 		private MarketOrderListener marketOrderListener;
@@ -356,8 +354,6 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			super(context, layout, c, 0);
 			
 			this.bitmapManager = bitmapManager;
-			
-			dateFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
 			
 			numberFormatter = NumberFormat.getInstance();
 			numberFormatter.setMinimumFractionDigits(2);
@@ -378,7 +374,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 			// Swipe-out action modified the view too much...
 			if (convertView != null) {
 				Boolean shallAbandon = (Boolean) convertView.getTag(R.id.market_order_abandon);
-				if (shallAbandon != null && shallAbandon.booleanValue()) {
+				if (shallAbandon != null && shallAbandon) {
 					convertView = null;
 				}
 			}
@@ -441,7 +437,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 				String sVolume = resources.getString(R.string.market_order_fulfilled, fulfilled, integerFormatter.format(volEntered - volRemaining), integerFormatter.format(volEntered));
 				viewHolder.volume.setText(sVolume);
 				
-				String sExpires = resources.getString(R.string.market_order_expires, dateFormatter.format(new Date(cursor.getLong(11))));
+				String sExpires = resources.getString(R.string.market_order_expires, DateUtils.formatDateTime(context, cursor.getLong(11), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME));
 				viewHolder.expires.setText(sExpires);
 				
 				viewHolder.watch.setOnCheckedChangeListener(null);
