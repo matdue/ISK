@@ -1,4 +1,5 @@
 # Android Studio
-.idea/workspace.xml
+.idea/
 .gradle/
 build/
+/local.properties
