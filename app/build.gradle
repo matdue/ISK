@@ -1,13 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 16
+    compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
     defaultConfig {
         applicationId "de.matdue.isk"
         minSdkVersion 12
-        targetSdkVersion 16
+        targetSdkVersion 23
+    }
+
+    compileOptions {
+        encoding "UTF-8"
     }
 
     buildTypes {
@@ -20,4 +24,5 @@ android {
 
 dependencies {
     compile files('libs/CWAC-WakefulIntentService.jar')
+    testCompile 'org.testng:testng:6.8'
 }
