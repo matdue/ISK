@@ -35,6 +35,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
@@ -133,7 +134,7 @@ public class BitmapManager {
 		// Show loading image
 		Drawable downloadingDrawable;
 		if (loadingBitmap != null) {
-			downloadingDrawable = context.getResources().getDrawable(loadingBitmap);
+			downloadingDrawable = ContextCompat.getDrawable(context, loadingBitmap);
 		} else if (loadingColor != null) {
 			downloadingDrawable = new ColorDrawable(loadingColor);
 		} else {
