@@ -20,13 +20,13 @@ import java.util.Arrays;
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public abstract class IskActivity extends Activity {
+public abstract class IskActivity extends AppCompatActivity {
 	
 	private Menu optionsMenu;
 	

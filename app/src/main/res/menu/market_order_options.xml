@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/search"
           android:title="@string/market_order_optmenu_search"
           android:icon="@drawable/ic_menu_search"
-          android:showAsAction="collapseActionView|ifRoom"
+          app:showAsAction="collapseActionView|ifRoom"
           android:actionViewClass="android.widget.SearchView" />
     <item
         android:id="@+id/market_order_optmenu_sort"
         android:icon="@drawable/ic_menu_sort"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/market_order_optmenu_sort">
         <menu>
             <item
@@ -30,7 +31,7 @@
         android:id="@+id/market_order_optmenu_help"
         android:icon="@drawable/ic_menu_help"
         android:onClick="showHelp"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/market_order_optmenu_help"/>
 
 </menu>

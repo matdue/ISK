@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/navdrawer_menu">
+
+        <item
+            android:id="@+id/navdrawer_history"
+            android:icon="@drawable/ic_history_white_24dp"
+            android:title="@string/main_optmenu_eveaccess"
+            android:checkable="false"/>
+
+        <item
+            android:id="@+id/navdrawer_preferences"
+            android:icon="@drawable/ic_settings_white_24dp"
+            android:title="@string/main_optmenu_preferences"
+            android:checkable="false"/>
+        <item
+            android:id="@+id/navdrawer_help"
+            android:icon="@drawable/ic_help_white_24dp"
+            android:title="@string/main_optmenu_info"
+            android:checkable="false"/>
+
+    </group>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/navdrawer_menu_accounts"
+        android:visible="false"/>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/navdrawer_menu_accountmgmt"
+        android:visible="false">
+
+        <item
+            android:id="@+id/navdrawer_account_add"
+            android:icon="@drawable/ic_add_white_24dp"
+            android:title="Konto hinzufügen"
+            android:checkable="false"
+            android:orderInCategory="100"/>
+        <item
+            android:id="@+id/navdrawer_account_manage"
+            android:icon="@drawable/ic_settings_white_24dp"
+            android:title="Konten verwalten"
+            android:checkable="false"
+            android:orderInCategory="100"/>
+
+    </group>
+
+</menu>

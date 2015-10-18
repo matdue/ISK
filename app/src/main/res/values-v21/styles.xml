@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--style name="IskTheme" parent="@android:style/Theme.Material">
+        <item name="android:windowBackground">@drawable/background_image</item>
+    </style-->
+
+    <style name="IskTheme" parent="IskBaseTheme">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:colorControlHighlight">@color/accent_translucent</item> 
+        <item name="android:windowSharedElementsUseOverlay">false</item>
+    </style>
+</resources>

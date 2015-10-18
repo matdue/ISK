@@ -31,20 +31,29 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
 
 public class PreferencesActivity extends IskActivity {
-	
+
+	public static void navigate(AppCompatActivity activity) {
+		Intent intent = new Intent(activity, PreferencesActivity.class);
+		ActivityCompat.startActivity(activity, intent, null);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		setContentView(R.layout.preferences);
+		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		getFragmentManager().beginTransaction()
-	        .replace(android.R.id.content, new SettingsFragment())
+			.replace(R.id.content, new SettingsFragment())
 	        .commit();
 	}
 	

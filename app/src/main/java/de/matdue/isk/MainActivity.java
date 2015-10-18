@@ -38,9 +38,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,16 +60,42 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends IskActivity {
+public class MainActivity extends IskActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	private BroadcastReceiver eveApiUpdaterReceiver;
-	
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
+	private boolean drawerShowAccounts;
+	private NavigationView navigationView;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
-        Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
+        setContentView(R.layout.main3);
+
+		// Init toolbar
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+
+		// Init navigation drawer
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		navigationView = (NavigationView) findViewById(R.id.drawer_navigation_view);
+		navigationView.setNavigationItemSelectedListener(this);
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.app_name, R.string.app_name) {
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
+				super.onDrawerSlide(drawerView, 0);  // this disables the arrow @ completed state
+			}
+
+			@Override
+			public void onDrawerSlide(View drawerView, float slideOffset) {
+				super.onDrawerSlide(drawerView, 0);  // this disables the animation
+			}
+		};
+		drawerLayout.setDrawerListener(drawerToggle);
+
+		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -102,22 +135,112 @@ public class MainActivity extends IskActivity {
      		
         showWelcomeDialog();
     }
-    
-    public void gotoWallet(View view) {
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		drawerToggle.syncState();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public boolean onNavigationItemSelected(MenuItem menuItem) {
+		drawerLayout.closeDrawers();
+		switch (menuItem.getItemId()) {
+			case R.id.navdrawer_history:
+				EveAccessActivity.navigate(this);
+				return true;
+
+			case R.id.navdrawer_preferences:
+				PreferencesActivity.navigate(this);
+				return true;
+
+			case R.id.navdrawer_help:
+				AboutActivity.navigate(this);
+				return true;
+
+			case R.id.navdrawer_account_manage:
+				String[] authorities = {"de.matdue.isk.content.provider"};
+				Intent intent = new Intent(Settings.ACTION_SYNC_SETTINGS);
+				intent.putExtra(Settings.EXTRA_AUTHORITIES, authorities);
+				startActivity(intent);
+				toggleNavAccountView(false);
+				return true;
+
+			case R.id.navdrawer_account_add:
+				/*AuthenticatorActivity.navigate(this);*/
+				toggleNavAccountView(false);
+				return true;
+
+			case Menu.NONE:
+				if (menuItem.getGroupId() == R.id.navdrawer_menu_accounts) {
+					/*switchToAccount(menuItem.getTitle());*/
+					toggleNavAccountView(false);
+					return true;
+				}
+		}
+
+		return false;
+	}
+
+	public void toggleNavAccountView(View view) {
+		toggleNavAccountView(!drawerShowAccounts);
+	}
+
+	public void toggleNavAccountView(boolean showAccounts) {
+		if (drawerShowAccounts == showAccounts) {
+			return;
+		}
+
+		drawerShowAccounts = showAccounts;
+		ImageView expandIndicator = ((ImageView) findViewById(R.id.expand_account_box_indicator));
+		expandIndicator.setImageResource(drawerShowAccounts ? R.drawable.ic_arrow_drop_up_white_24dp : R.drawable.ic_arrow_drop_down_white_24dp);
+
+		Menu navigationViewMenu = navigationView.getMenu();
+		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu, !drawerShowAccounts);
+		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu_accounts, drawerShowAccounts);
+		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu_accountmgmt, drawerShowAccounts);
+
+		navigationViewMenu.removeGroup(R.id.navdrawer_menu_accounts);
+		if (drawerShowAccounts) {
+			/*AccountManager accountManager = AccountManager.get(this);
+			Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+			final Collator collator = Collator.getInstance();
+			Arrays.sort(accounts, new Comparator<Account>() {
+				@Override
+				public int compare(Account x, Account y) {
+					return collator.compare(x.name, y.name);
+				}
+			});
+
+			int order = Menu.FIRST;
+			for (Account account : accounts) {
+				navigationViewMenu.add(R.id.navdrawer_menu_accounts, Menu.NONE, order++, account.name)
+						.setIcon(R.drawable.ic_person_white_24dp);
+			}*/
+		}
+	}
+
+	public void selectAccount(View view) {
+		Log.d("MainActivity", "Select account " + view.getTag());
+	}
+
+	public void gotoWallet(View view) {
     	String characterID = getPreferences().getString("startCharacterID", null);
 		if (characterID != null) {
-			Intent intent = new Intent(this, WalletActivity.class);
-			intent.putExtra("characterID", characterID);
-			startActivity(intent);
+			WalletActivity.navigate(this, characterID);
 		}
     }
     
     public void gotoMarketOrders(View view) {
     	String characterID = getPreferences().getString("startCharacterID", null);
 		if (characterID != null) {
-			Intent intent = new Intent(this, MarketOrderActivity.class);
-			intent.putExtra("characterID", characterID);
-			startActivity(intent);
+			MarketOrderActivity.navigate(this, characterID);
 		}
     }
     
@@ -150,23 +273,14 @@ public class MainActivity extends IskActivity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (drawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
 			refreshCurrentCharacter();
 			return true;
 		
-		case R.id.main_optmenu_eveaccess:
-			startActivity(new Intent(this, EveAccessActivity.class));
-			return true;
-			
-		case R.id.main_optmenu_preferences:
-			startActivity(new Intent(this, PreferencesActivity.class));
-			return true;
-			
-		case R.id.main_optmenu_info:
-			startActivity(new Intent(this, AboutActivity.class));
-			return true;
-			
 		default:
 			return super.onOptionsItemSelected(item);
 		}

@@ -47,6 +47,43 @@ public class IskApplication extends Application {
 					.detectActivityLeaks()
 					.penaltyLog()
 					.build());
+
+			/*registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+                @Override
+                public void onActivityCreated(Activity activity, Bundle bundle) {
+                    Log.v("ActivityCreated", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityStarted(Activity activity) {
+                    Log.v("ActivityStarted", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityResumed(Activity activity) {
+                    Log.v("ActivityResumed", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityPaused(Activity activity) {
+                    Log.v("ActivityPaused", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityStopped(Activity activity) {
+                    Log.v("ActivityStopped", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+                    Log.v("ActivitySaveInstance", activity.toString() + "#" + activity.getTaskId());
+                }
+
+                @Override
+                public void onActivityDestroyed(Activity activity) {
+                    Log.v("ActivityDestroyed", activity.toString() + "#" + activity.getTaskId());
+                }
+            });*/
 		}
 		
 		iskDatabase = new IskDatabase(this);

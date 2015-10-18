@@ -20,7 +20,6 @@ import java.text.NumberFormat;
 
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.eve.EveApi;
-import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -28,12 +27,15 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.SearchView;
@@ -41,19 +43,24 @@ import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
 public class WalletActivity extends IskActivity {
-	
+
+	public static void navigate(AppCompatActivity activity, String characterID) {
+		Intent intent = new Intent(activity, WalletActivity.class);
+		intent.putExtra("characterID", characterID);
+		ActivityCompat.startActivity(activity, intent, null);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		
-		FragmentManager fm = getFragmentManager();
-		if (fm.findFragmentById(android.R.id.content) == null) {
-            CursorLoaderListFragment list = new CursorLoaderListFragment();
-            fm.beginTransaction().add(android.R.id.content, list).commit();
-        }
+
+		setContentView(R.layout.preferences);
+		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		getFragmentManager().beginTransaction()
+				.replace(R.id.content, new CursorLoaderListFragment())
+				.commit();
 	}
 	
 	@Override
@@ -101,9 +108,9 @@ public class WalletActivity extends IskActivity {
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 			inflater.inflate(R.menu.wallet_options, menu);
 			
-			SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+			/*SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
 			searchView.setOnQueryTextListener(this);
-			searchView.setQueryHint(getResources().getText(R.string.wallet_search_hint));
+			searchView.setQueryHint(getResources().getText(R.string.wallet_search_hint));*/
 			
 			super.onCreateOptionsMenu(menu, inflater);
 		}
@@ -179,8 +186,8 @@ public class WalletActivity extends IskActivity {
 			integerFormatter.setMinimumFractionDigits(0);
 			integerFormatter.setMaximumFractionDigits(0);
 			
-			positiveNumber = context.getResources().getColor(R.color.wallet_entry_number_positive);
-			negativeNumber = context.getResources().getColor(R.color.wallet_entry_number_negative);
+			positiveNumber = ContextCompat.getColor(context, R.color.wallet_entry_number_positive);
+			negativeNumber = ContextCompat.getColor(context, R.color.wallet_entry_number_negative);
 		}
 
 		@Override
@@ -228,13 +235,13 @@ public class WalletActivity extends IskActivity {
 					// Initial market escrow
 					formatDefault(viewHolder, context, cursor);
 				} else {
-					formatMarketTransaction(viewHolder, context, cursor, true);
+					formatMarketTransaction(viewHolder, cursor, true);
 				}
 				break;
 				
 			case -42:
 				// Transaction, already payed by market escrow
-				formatMarketTransaction(viewHolder, context, cursor, false);
+				formatMarketTransaction(viewHolder, cursor, false);
 				break;
 				
 			default:
@@ -243,7 +250,7 @@ public class WalletActivity extends IskActivity {
 			}
 		}
 		
-		private void formatMarketTransaction(ViewHolder viewHolder, Context context, Cursor cursor, boolean hasWalletEntry) {
+		private void formatMarketTransaction(ViewHolder viewHolder, Cursor cursor, boolean hasWalletEntry) {
 			viewHolder.marketInclude.setVisibility(View.VISIBLE);
 			
 			String transactionType = cursor.getString(13);

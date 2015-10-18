@@ -15,7 +15,6 @@
  */
 package de.matdue.isk;
 
-import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -23,27 +22,34 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 
 public class EveAccessActivity extends IskActivity {
-	
+
+	public static void navigate(AppCompatActivity activity) {
+		Intent intent = new Intent(activity, EveAccessActivity.class);
+		ActivityCompat.startActivity(activity, intent, null);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		
-		FragmentManager fm = getFragmentManager();
-		if (fm.findFragmentById(android.R.id.content) == null) {
-            CursorLoaderListFragment list = new CursorLoaderListFragment();
-            fm.beginTransaction().add(android.R.id.content, list).commit();
-        }
+
+		setContentView(R.layout.eveaccess);
+		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		getFragmentManager()
+				.beginTransaction()
+				.replace(R.id.content, new CursorLoaderListFragment())
+				.commit();
 	}
 	
 	@Override

@@ -15,23 +15,31 @@
  */
 package de.matdue.isk;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class AboutActivity extends Activity {
-	
+public class AboutActivity extends IskActivity {
+
+	public static void navigate(AppCompatActivity activity) {
+		Intent intent = new Intent(activity, AboutActivity.class);
+		ActivityCompat.startActivity(activity, intent, null);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.about);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		
+		setContentView(R.layout.about2);
+		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 		// Set correct version number
 		try {
 			PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
