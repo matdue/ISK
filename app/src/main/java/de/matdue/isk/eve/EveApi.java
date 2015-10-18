@@ -26,12 +26,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 
 import android.net.Uri;
+import android.sax.Element;
 import android.sax.EndTextElementListener;
 import android.sax.RootElement;
 import android.sax.StartElementListener;
@@ -62,7 +64,11 @@ public class EveApi {
 	public static String getCharacterUrl(String characterId, int resolution) {
 		return IMAGE_BASE + "Character/" + characterId + "_" + resolution + ".jpg";
 	}
-	
+
+	public static String getCorporationUrl(String corporationId, int resolution) {
+		return IMAGE_BASE + "Corporation/" + corporationId + "_" + resolution + ".png";
+	}
+
 	public static String getTypeUrl(String typeID, int resolution) {
 		return IMAGE_BASE + "Type/" + typeID + "_" + resolution + ".png";
 	}
@@ -102,6 +108,9 @@ public class EveApi {
 			// Submit request
 			URL requestURL = new URL(uriBuilder.build().toString());
 			connection = (HttpsURLConnection) requestURL.openConnection();
+			// For debugging requests:
+			// connection = (HttpsURLConnection) requestURL.openConnection(HttpsURLConnectionUtils.buildProxy("10.0.2.2", 8888));
+			// HttpsURLConnectionUtils.trustAllCertificates(connection);
 			connection.setRequestProperty("User-Agent", AGENT);
 			connection.setDoOutput(true);
 
@@ -165,14 +174,12 @@ public class EveApi {
 		}
 		
 		// Plausibility check
-		if (result != null) {
-			if (result.accessMask == 0 ||
-				result.type == null ||
-				result.characters.size() == 0) {
-				return null;
-			}
+		if (result.accessMask == 0 ||
+			result.type == null ||
+			result.characters.size() == 0) {
+			return null;
 		}
-		
+
 		// Cache result
 		apiCache.cache(cacheKey, cacheInformation);
 		
@@ -229,7 +236,7 @@ public class EveApi {
 				newChar.characterName = attributes.getValue("characterName");
 				newChar.corporationID = attributes.getValue("corporationID");
 				newChar.corporationName = attributes.getValue("corporationName");
-				
+
 				result.characters.add(newChar);
 			}
 		});
@@ -245,8 +252,8 @@ public class EveApi {
 		if (apiCache.isCached(cacheKey)) {
 			return null;
 		}
-		
-		AccountBalance result = new AccountBalance();
+
+		ArrayList<AccountBalance> result = new ArrayList<>(1);
 		CacheInformation cacheInformation = new CacheInformation();
 		
 		// Prepare XML parser
@@ -258,38 +265,135 @@ public class EveApi {
 		}
 		
 		// Plausibility check
-		if (result != null) {
-			if (result.accountID == null || result.accountKey == null) {
-				return null;
-			}
+		if (result.isEmpty() || result.get(0).accountID == null || result.get(0).accountKey == null) {
+			return null;
 		}
-		
+
 		// Cache result
 		apiCache.cache(cacheKey, cacheInformation);
-		
+
+		return result.get(0);
+	}
+
+	public List<AccountBalance> queryCorporationAccountBalance(String keyID, String vCode, String corporationID) {
+		final String URL = "/corp/AccountBalance.xml.aspx";
+
+		// Lookup in cache
+		String cacheKey = CacheInformation.buildHashKey(URL, keyID, vCode, corporationID);
+		if (apiCache.isCached(cacheKey)) {
+			return null;
+		}
+
+		ArrayList<AccountBalance> result = new ArrayList<>();
+		CacheInformation cacheInformation = new CacheInformation();
+
+		// Prepare XML parser
+		RootElement root = prepareAccountBalanceXmlParser(result, cacheInformation);
+
+		// Query API
+		if (!queryApi(root.getContentHandler(), URL, keyID, vCode, corporationID)) {
+			return null;
+		}
+
+		// Plausibility check
+		if (result.isEmpty()) {
+			return null;
+		}
+
+		// Cache result
+		apiCache.cache(cacheKey, cacheInformation);
+
 		return result;
 	}
-	
-	private RootElement prepareAccountBalanceXmlParser(final AccountBalance result, final CacheInformation cacheInformation) {
+
+	private RootElement prepareAccountBalanceXmlParser(final List<AccountBalance> result, final CacheInformation cacheInformation) {
 		RootElement root = new RootElement("eveapi");
 		prepareCacheInformationXmlParser(root, cacheInformation);
 		
 		root.getChild("result").getChild("rowset").getChild("row").setStartElementListener(new StartElementListener() {
 			@Override
 			public void start(Attributes attributes) {
-				result.accountID = attributes.getValue("accountID");
-				result.accountKey = attributes.getValue("accountKey");
+				AccountBalance accountBalance = new AccountBalance();
+				accountBalance.accountID = attributes.getValue("accountID");
+				accountBalance.accountKey = attributes.getValue("accountKey");
 				try {
-					result.balance = new BigDecimal(attributes.getValue("balance"));
+					accountBalance.balance = new BigDecimal(attributes.getValue("balance"));
 				} catch (NumberFormatException e) {
 					// Ignore error, leave balance as 0.0
 				}
+
+				result.add(accountBalance);
 			}
 		});
 		
 		return root;
 	}
-	
+
+	public Map<String, String> queryCorpAccountKeys(String keyID, String vCode, String corporationID) {
+		final String URL = "/corp/CorporationSheet.xml.aspx";
+
+		// Lookup in cache
+		String cacheKey = CacheInformation.buildHashKey(URL, keyID, vCode, corporationID);
+		if (apiCache.isCached(cacheKey)) {
+			return null;
+		}
+
+		HashMap<String, String> result = new HashMap<>();
+		CacheInformation cacheInformation = new CacheInformation();
+
+		// Prepare XML parser
+		RootElement root = prepareCorporationSheetXmlParser(result, cacheInformation);
+
+		// Query API
+		if (!queryApi(root.getContentHandler(), URL, keyID, vCode)) {
+			return null;
+		}
+
+		// Plausibility check
+		if (result.isEmpty()) {
+			return null;
+		}
+
+		// Cache result
+		apiCache.cache(cacheKey, cacheInformation);
+
+		return result;
+	}
+
+	private RootElement prepareCorporationSheetXmlParser(final HashMap<String, String> result, final CacheInformation cacheInformation) {
+		RootElement root = new RootElement("eveapi");
+		prepareCacheInformationXmlParser(root, cacheInformation);
+
+		final WalletDivisionsListener walletDivisionsListener = new WalletDivisionsListener();
+		Element rowsetElement = root.getChild("result").getChild("rowset");
+		rowsetElement.setStartElementListener(walletDivisionsListener);
+		rowsetElement.getChild("row").setStartElementListener(new StartElementListener() {
+			@Override
+			public void start(Attributes attributes) {
+				if (walletDivisionsListener.isWalletDivision()) {
+					String accountKey = attributes.getValue("accountKey");
+					String description = attributes.getValue("description");
+					result.put(accountKey, description);
+				}
+			}
+		});
+
+		return root;
+	}
+
+	private static class WalletDivisionsListener implements StartElementListener {
+		private boolean walletDivision;
+
+		public boolean isWalletDivision() {
+			return walletDivision;
+		}
+
+		@Override
+		public void start(Attributes attributes) {
+			walletDivision = "walletDivisions".equals(attributes.getValue("name"));
+		}
+	}
+
 	public List<WalletJournal> queryWallet(String keyID, String vCode, String characterID) {
 		final String journalURL = "/char/WalletJournal.xml.aspx";
 		final String transactionsURL = "/char/WalletTransactions.xml.aspx";
@@ -312,7 +416,7 @@ public class EveApi {
 		// Prepare XML parser
 		HashMap<Long, WalletTransaction> walletTransactionsByIdBatch = new HashMap<Long, WalletTransaction>();
 		HashMap<Long, WalletTransaction> walletTransactionsByJournalIdBatch = new HashMap<Long, WalletTransaction>();
-		RootElement root = prepareWalletTransactionXmlParser(walletTransactionsByIdBatch, walletTransactionsByJournalIdBatch, cacheInformation);
+		RootElement root = prepareWalletTransactionXmlParser(walletTransactionsByIdBatch, walletTransactionsByJournalIdBatch);
 		
 		// Query in batches of 2560 entries
 		if (!queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", null)) {
@@ -468,8 +572,7 @@ public class EveApi {
 	}
 	
 	private RootElement prepareWalletTransactionXmlParser(final HashMap<Long, WalletTransaction> resultById,
-			final HashMap<Long, WalletTransaction> resultByJournalId,
-			final CacheInformation cacheInformation) {
+			final HashMap<Long, WalletTransaction> resultByJournalId) {
 		RootElement root = new RootElement("eveapi");
 		// Do not catch cache information, this has been done in wallet journal already
 		

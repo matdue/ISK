@@ -15,7 +15,9 @@
  */
 package de.matdue.isk.eve;
 
-public class Character {
+import java.io.Serializable;
+
+public class Character implements Serializable {
 	
 	// No getters and setters to achive better performance
 	public String characterID;
