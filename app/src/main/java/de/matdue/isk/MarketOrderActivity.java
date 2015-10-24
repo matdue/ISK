@@ -20,21 +20,22 @@ import java.text.NumberFormat;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.app.ListFragment;
-import android.app.LoaderManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -56,7 +57,9 @@ import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
 import de.matdue.isk.eve.EveApi;
 
-public class MarketOrderActivity extends IskActivity implements ActionBar.TabListener {
+public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabSelectedListener {
+
+	private TabLayout tabLayout;
 
 	public static void navigate(AppCompatActivity activity, String characterID) {
 		Intent intent = new Intent(activity, MarketOrderActivity.class);
@@ -72,54 +75,46 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setNavigationMode(android.support.v7.app.ActionBar.NAVIGATION_MODE_TABS);
-		
+
 		int selectedTab = 0;
 		if (savedInstanceState != null) {
 			selectedTab = savedInstanceState.getInt("tab", 0);
-        }
-		
-		ActionBar.Tab tab = actionBar.newTab();
-		tab.setText(R.string.market_order_tab_sell);
-		tab.setTabListener(this);
-		tab.setTag(OrderWatch.SELL);
-		actionBar.addTab(tab, selectedTab == 0);
-		
-		tab = actionBar.newTab();
-		tab.setText(R.string.market_order_tab_buy);
-		tab.setTabListener(this);
-		tab.setTag(OrderWatch.BUY);
-		actionBar.addTab(tab, selectedTab == 1);
+		}
 
-		getFragmentManager().beginTransaction()
+		tabLayout = (TabLayout) findViewById(R.id.tabs);
+		tabLayout.setOnTabSelectedListener(this);
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.market_order_tab_sell).setTag(OrderWatch.SELL), selectedTab == 0);
+		tabLayout.addTab(tabLayout.newTab().setText(R.string.market_order_tab_buy).setTag(OrderWatch.BUY), selectedTab == 1);
+
+		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.content, CursorLoaderListFragment.newInstance(OrderWatch.SELL))
 				.commit();
 
 		// Cancel notifications
 		((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(R.id.market_order_notification);
 	}
-	
+
 	@Override
-	public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+	public void onTabUnselected(TabLayout.Tab tab) {
 	}
 
 	@Override
-	public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getFragmentManager().findFragmentById(android.R.id.content);
+	public void onTabSelected(TabLayout.Tab tab) {
+		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getSupportFragmentManager().findFragmentById(R.id.content);
 		if (fragment != null) {
 			fragment.switchBuySell((Integer) tab.getTag());
 		}
 	}
-	
+
 	@Override
-	public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+	public void onTabReselected(TabLayout.Tab tab) {
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		outState.putInt("tab", getSupportActionBar().getSelectedNavigationIndex());
+		outState.putInt("tab", tabLayout.getSelectedTabPosition());
 	}
 	
 	@Override
@@ -137,7 +132,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 	}
 	
 	private void sortBy(int sortOrder) {
-		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getFragmentManager().findFragmentById(android.R.id.content);
+		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content);
 		if (fragment != null) {
 			fragment.switchSortOrder(sortOrder);
 		}
@@ -156,9 +151,9 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 	}
 	
 	public void showHelp(MenuItem menuItem) {
-		FragmentManager fm = getFragmentManager();
+		FragmentManager fm = getSupportFragmentManager();
 		if (fm.findFragmentByTag("HelpDialog") == null) {
-			android.app.FragmentTransaction ft = fm.beginTransaction().addToBackStack(null);
+			FragmentTransaction ft = fm.beginTransaction().addToBackStack(null);
 			HelpDialogFragment fragment = HelpDialogFragment.newInstance();
 			fragment.show(ft, "HelpDialog");
 		}
@@ -252,7 +247,7 @@ public class MarketOrderActivity extends IskActivity implements ActionBar.TabLis
 
 			super.onCreateOptionsMenu(menu, inflater);
 		}
-		
+
 		@Override
 		public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 			return new SimpleCursorLoader(getActivity(), args) {

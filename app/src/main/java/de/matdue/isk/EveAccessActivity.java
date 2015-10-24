@@ -15,14 +15,14 @@
  */
 package de.matdue.isk;
 
-import android.app.ListFragment;
-import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
@@ -46,7 +46,7 @@ public class EveAccessActivity extends IskActivity {
 		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		getFragmentManager()
+		getSupportFragmentManager()
 				.beginTransaction()
 				.replace(R.id.content, new CursorLoaderListFragment())
 				.commit();

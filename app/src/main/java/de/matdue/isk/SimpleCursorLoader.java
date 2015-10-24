@@ -15,10 +15,10 @@
  */
 package de.matdue.isk;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.content.AsyncTaskLoader;
 
 /**
  * Based on android.content.CursorLoader
