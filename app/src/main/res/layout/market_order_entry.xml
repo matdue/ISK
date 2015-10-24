@@ -6,19 +6,11 @@
     android:padding="5dip">
     
     <TextView
-        android:id="@+id/market_order_entry_orderstate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="@string/market_order_orderstate_buy" />
-    
-    <TextView 
         android:id="@+id/market_order_entry_station"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/market_order_entry_orderstate"
+        android:layout_alignParentTop="true"
         android:ellipsize="end"
         android:singleLine="true"
         android:text="@string/market_order_unknown_station" />

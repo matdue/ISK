@@ -389,7 +389,6 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 			ViewHolder viewHolder = (ViewHolder) view.getTag();
 			if (viewHolder == null) {
 				viewHolder = new ViewHolder();
-				viewHolder.orderState = (TextView) view.findViewById(R.id.market_order_entry_orderstate);
 				viewHolder.station = (TextView) view.findViewById(R.id.market_order_entry_station);
 				viewHolder.item = (TextView) view.findViewById(R.id.market_order_entry_item);
 				viewHolder.itemImage = (ImageView) view.findViewById(R.id.market_order_entry_item_image);
@@ -429,9 +428,6 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 			int orderState = cursor.getInt(2);
 			if (orderState == 0 && cursor.getLong(1) != 0) {
 				// Active order
-				int action = cursor.getInt(12);
-				viewHolder.orderState.setText(action == 0 ? resources.getString(R.string.market_order_orderstate_sell) : resources.getString(R.string.market_order_orderstate_buy));
-				
 				int volEntered = cursor.getInt(8);
 				int volRemaining = cursor.getInt(9);
 				int fulfilled = cursor.getInt(10);
@@ -457,16 +453,12 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 				viewHolder.activeOrderGroup.setVisibility(View.VISIBLE);
 			} else {
 				// Inactive order
-				int action = cursor.getInt(12);
-				viewHolder.orderState.setText(action == 0 ? resources.getString(R.string.market_order_orderstate_sold) : resources.getString(R.string.market_order_orderstate_bought));
-				
 				view.setTag(R.id.market_order_disposable, Boolean.TRUE);
 				viewHolder.activeOrderGroup.setVisibility(View.GONE);
 			}
 		}
 		
 		class ViewHolder {
-			TextView orderState;
 			TextView station;
 			TextView item;
 			ImageView itemImage;
