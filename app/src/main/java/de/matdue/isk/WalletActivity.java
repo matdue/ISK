@@ -30,6 +30,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.Menu;
@@ -38,8 +39,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
-import android.widget.SearchView;
-import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
 public class WalletActivity extends IskActivity {
@@ -77,7 +76,7 @@ public class WalletActivity extends IskActivity {
 		}
 	}
 	
-	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnQueryTextListener {
+	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, SearchView.OnQueryTextListener {
 		
 		private WalletAdapter adapter;
 		private String searchFilter;
@@ -108,9 +107,9 @@ public class WalletActivity extends IskActivity {
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 			inflater.inflate(R.menu.wallet_options, menu);
 			
-			/*SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+			SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
 			searchView.setOnQueryTextListener(this);
-			searchView.setQueryHint(getResources().getText(R.string.wallet_search_hint));*/
+			searchView.setQueryHint(getResources().getText(R.string.wallet_search_hint));
 			
 			super.onCreateOptionsMenu(menu, inflater);
 		}

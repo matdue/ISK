@@ -38,6 +38,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.view.Menu;
@@ -49,9 +50,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
-import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.SearchView.OnQueryTextListener;
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
@@ -132,7 +131,7 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 	}
 	
 	private void sortBy(int sortOrder) {
-		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content);
+		CursorLoaderListFragment fragment = (CursorLoaderListFragment)getSupportFragmentManager().findFragmentById(R.id.content);
 		if (fragment != null) {
 			fragment.switchSortOrder(sortOrder);
 		}
@@ -159,7 +158,7 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 		}
 	}
 	
-	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnQueryTextListener, MarketOrderAdapter.MarketOrderListener {
+	public static class CursorLoaderListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, SearchView.OnQueryTextListener, MarketOrderAdapter.MarketOrderListener {
 		
 		private String characterId;
 		private int action;
@@ -240,10 +239,10 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 		@Override
 		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 			inflater.inflate(R.menu.market_order_options, menu);
-			
-			/*SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
+
+			SearchView searchView = (SearchView)menu.findItem(R.id.search).getActionView();
 			searchView.setOnQueryTextListener(this);
-			searchView.setQueryHint(getResources().getText(R.string.market_order_search_hint));*/
+			searchView.setQueryHint(getResources().getText(R.string.market_order_search_hint));
 
 			super.onCreateOptionsMenu(menu, inflater);
 		}
