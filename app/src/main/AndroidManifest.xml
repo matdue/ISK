@@ -12,6 +12,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:name=".IskApplication"
@@ -67,7 +71,7 @@
             android:label="@string/market_order_title">
         </activity>
         
-        <activity 
+        <!--activity
             android:name=".ApiCallbackActivity" 
             android:exported="true"
             tools:ignore="ExportedActivity">
@@ -82,7 +86,7 @@
         <activity 
             android:name=".ApiKeyActivity"
             android:label="@string/pilots_key_title">
-        </activity>
+        </activity-->
         
         <service android:name=".EveApiUpdaterService"></service>
         <receiver 
@@ -98,7 +102,53 @@
         </receiver>
         <service android:name=".NotificationDeletedService" android:exported="false">
         </service>
-        
+
+        <service android:name=".account.IskAuthenticatorService" >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <activity
+            android:name=".account.AuthenticatorActivity"
+            android:label="@string/account_authenticator_title"
+            android:launchMode="singleInstance">
+        </activity>
+        <activity android:name=".account.ApiCallbackActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="api.eveonline.com"
+                    android:path="/installKey"
+                    android:scheme="eve" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".account.CheckApiKeyActivity"
+            android:label="@string/account_api_title" >
+        </activity>
+        <provider
+            android:authorities="de.matdue.isk.content.provider"
+            android:name=".content.StubContentProvider"
+            android:exported="false"
+            android:syncable="true" />
+        <service
+            android:name=".account.SyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_adapter" />
+        </service>
+
     </application>
 
 </manifest>

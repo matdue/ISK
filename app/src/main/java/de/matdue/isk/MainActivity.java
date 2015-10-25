@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
+import de.matdue.isk.account.AuthenticatorActivity;
 import de.matdue.isk.eve.EveApi;
 
 import android.app.AlertDialog;
@@ -173,7 +174,7 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 				return true;
 
 			case R.id.navdrawer_account_add:
-				/*AuthenticatorActivity.navigate(this);*/
+				AuthenticatorActivity.navigate(this);
 				toggleNavAccountView(false);
 				return true;
 
