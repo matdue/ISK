@@ -109,9 +109,8 @@ public class BitmapManager {
 	 * This method returns immediately. If the image is in memory cache,
 	 * all work is done. Otherwise, a background thread will load the image.
 	 *
-	 * All threads are running concurrently. There is no guarantee that requests are handled
-	 * in sequence. If you set multiple URLs for the same image, the final URL may not correspond
-	 * to the last call of this method.
+	 * If you call this method multiple times for the same {@code bitmapReceiver},
+	 * only the last call will deliver the image. All previous calls will be discarded.
 	 *
 	 * @param bitmapReceiver Bitmap receiver callback interface
 	 * @param imageUrl URL of bitmap

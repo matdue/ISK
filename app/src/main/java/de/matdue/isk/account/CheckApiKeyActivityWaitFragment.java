@@ -15,8 +15,6 @@
  */
 package de.matdue.isk.account;
 
-import android.app.Activity;
-//import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;

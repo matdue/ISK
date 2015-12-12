@@ -102,9 +102,9 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
     }
 
     /**
-     * Adds all children which implement the @link android.widget.Checkable} interface.
+     * Adds all children which implement the {@link android.widget.Checkable} interface.
      * If a child is a group, it will be checked, too, by calling this method again
-     * recursivly.
+     * recursively.
      *
      * @param viewGroup View group
      */
