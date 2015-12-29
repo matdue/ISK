@@ -16,8 +16,6 @@
 package de.matdue.isk;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -41,13 +39,8 @@ public class AboutActivity extends IskActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// Set correct version number
-		try {
-			PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-			String versionNumber = getResources().getString(R.string.about_version) + " " + packageInfo.versionName;
-			((TextView)findViewById(R.id.about_version)).setText(versionNumber);
-		} catch (NameNotFoundException e) {
-			// Ignore any error
-		}
+		String versionNumber = getResources().getString(R.string.about_version) + " " + BuildConfig.VERSION_NAME;
+		((TextView)findViewById(R.id.about_version)).setText(versionNumber);
 	}
 
 	@Override
