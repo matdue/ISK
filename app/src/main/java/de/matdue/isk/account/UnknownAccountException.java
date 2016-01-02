@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Matthias Düsterhöft
+ * Copyright 2015 Matthias Düsterhöft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.matdue.isk.eve;
+package de.matdue.isk.account;
 
-import java.io.Serializable;
+/**
+ * Exception to indicate an unknown account
+ */
+public class UnknownAccountException extends Exception {
 
-public class Character implements Serializable {
-	
-	// No getters and setters to achieve better performance
-	public String characterID;
-	public String characterName;
-	public String corporationID;
-	public String corporationName;
-	public String allianceID;
-	public String allianceName;
-	
+    public UnknownAccountException(String accountName) {
+        super(accountName);
+    }
+
 }

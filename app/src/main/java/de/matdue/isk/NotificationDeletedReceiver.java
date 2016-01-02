@@ -15,12 +15,17 @@
  */
 package de.matdue.isk;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.WakefulBroadcastReceiver;
 
-public class NotificationDeletedReceiver extends WakelockedBroadcastReceiver {
+public class NotificationDeletedReceiver extends WakefulBroadcastReceiver{
 
 	@Override
-	protected Class<? extends WakelockedService> getServiceClass() {
-		return NotificationDeletedService.class;
-	}
+	public void onReceive(Context context, Intent intent) {
+		Intent serviceIntent = new Intent(context, NotificationDeletedService.class);
+		serviceIntent.putExtra("originalIntent", intent);
 
+		startWakefulService(context, serviceIntent);
+	}
 }

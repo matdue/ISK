@@ -80,6 +80,9 @@ public class CheckApiKeyActivity extends IskActivity implements CheckApiKeyActiv
         if (account == null) {
             // Unknown error happened, probably communication error
             fragment = CheckApiKeyActivityErrorFragment.newInstance(R.string.pilots_key_error_validate);
+        } else if (account.isCorporation()) {
+            // API key is a corporation key which is not supported yet
+            fragment = CheckApiKeyActivityErrorFragment.newInstance(R.string.pilots_key_error_type);
         } else if ((account.accessMask & ACCESS_MASK) != ACCESS_MASK) {
             // API key does not match the required access mask, i.e. provided not enough rights
             fragment = CheckApiKeyActivityErrorFragment.newInstance(R.string.pilots_key_error_accessmask);

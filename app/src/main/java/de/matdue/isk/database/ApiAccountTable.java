@@ -22,6 +22,8 @@ public class ApiAccountTable {
     static final String CHARACTER_NAME = "characterName";
     static final String CORPORATION_ID = "corporationId";
     static final String CORPORATION_NAME = "corporationName";
+    static final String ALLIANCE_ID = "allianceId";
+    static final String ALLIANCE_NAME = "allianceName";
 
     // Table
     static final String TABLE_NAME = "apiAccount";
@@ -32,7 +34,9 @@ public class ApiAccountTable {
                     CHARACTER_ID + " TEXT," +
                     CHARACTER_NAME + " TEXT," +
                     CORPORATION_ID + " TEXT," +
-                    CORPORATION_NAME + " TEXT" +
+                    CORPORATION_NAME + " TEXT," +
+                    ALLIANCE_ID + " TEXT," +
+                    ALLIANCE_NAME + " TEXT" +
                     ")";
 
     static final String SQL_DROP =

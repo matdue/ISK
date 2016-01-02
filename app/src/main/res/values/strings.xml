@@ -6,6 +6,8 @@
     <string name="main_pilot_portrait">Pilot´s portrait</string>
     <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet and market orders at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
     <string name="main_dialog_welcome_close">Close</string>
+    <string name="main_welcome_intro">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet and market orders at any time.\n\nTap the button and select the pod pilots you would like to watch.</string>
+    <string name="main_welcome_setup_pilot">Setup pilot</string>
     <string name="main_optmenu_refresh">Refresh</string>
     <string name="main_optmenu_eveaccess">Update history</string>
     <string name="main_optmenu_preferences">Settings</string>
@@ -14,6 +16,10 @@
     <string name="main_menu_pilots">Pilots</string>
     <string name="main_menu_market_orders">Orders</string>
     <string name="main_refresh_error">Error while refreshing data: %1$s</string>
+    <string name="main_balance">Balance:\u0020</string>
+    <string name="main_balance_value">%1$s ISK</string>
+    <string name="main_balance_million">(%1$sm ISK)"</string>
+    <string name="main_balance_billion">(%1$sbn ISK)</string>
 
     <string name="preferences_title">Settings</string>
     <string name="preferences_cat_updating_data">Updating data</string>
@@ -21,7 +27,7 @@
     <string name="preferences_honor_gs">Honor global sync</string>
     <string name="preferences_honor_gs_summary">Update with activated global sync only.</string>
     <string name="preferences_require_wifi">Require WIFI connection</string>
-    <string name="preferences_require_wifi_summary">Data volume may be 250 KByte and more.</string>
+    <string name="preferences_require_wifi_summary">Data volume may be 250 KByte and more per update.</string>
     <string name="preferences_cat_notifications">Notifications</string>
     <string name="preferences_notifications">Notifications</string>
     <string name="preferences_notifications_summary">Enable notifications (ended market orders)</string>
@@ -57,7 +63,7 @@
     <string name="pilots_key_empty_fields">Please enter both ID and Verification Code.</string>
     <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
     <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key or choose a different one.</string>
-    <string name="pilots_key_error_type">Character key only is allowed.</string>
+    <string name="pilots_key_error_type">At the moment only character keys are supported.</string>
     
     <string name="wallet_title">Wallet and transactions</string>
     <string name="wallet_no_data">No data</string>
@@ -112,5 +118,8 @@
     <string name="account_authentication_failed_intro">Login with API key failed for capsuleer or corporation %1$s. Please choose the correct key, create a new one or enter the data manually.</string>
     <string name="account_authentication_aborted">Authentication aborted</string>
     <string name="account_authentication_failed">Authentication failed</string>
+    <string name="account_toast_created">Created: %1$s</string>
+    <string name="account_toast_updated">Updated: %1$s</string>
+    <string name="account_toast_failed">Failed to create: %1$s</string>
 
 </resources>

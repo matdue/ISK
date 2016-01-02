@@ -17,63 +17,111 @@ package de.matdue.isk.account;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
-// TODO: import de.matdue.isk.EveApiUpdater;
+import de.matdue.isk.IskApplication;
 
 /**
  * Sync adapter performing updating our accounts
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
-    private Context context;
+    public static final String CONTENT_AUTHORITY = "de.matdue.isk.content.provider";
+    public static final String SYNC_FINISHED_BROADCAST = "de.matdue.isk.SYNC_FINISHED";
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-        this.context = context;
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        AccountManager accountManager = AccountManager.get(context);
+        String errorMessage = null;
+        boolean forcedUpdate = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
         try {
-            Boolean isCharacter = accountManager.hasFeatures(account, new String[]{"apiCharacter"}, null, null).getResult();
-            if (isCharacter != null && isCharacter) {
-                String token = accountManager.blockingGetAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API, true);
-                Log.d("SyncAdapter", "Character " + account.name + "; " + (token != null ? token : "<null>"));
-                if (token != null) {
-                    /* TODO: ApiKey apiKey = new ApiKey(token);
-                    Log.d("SyncAdapter", apiKey.toString());
-
-                    EveApiUpdater eveApiUpdater = new EveApiUpdater(context, true);
-                    eveApiUpdater.updateBalance(apiKey);*/
-                }
+            // Skip update if no network is available
+            if (!isNetworkAvailable()) {
+                return;
             }
 
-            Boolean isCorporation = accountManager.hasFeatures(account, new String[]{"apiCorporation"}, null, null).getResult();
-            if (isCorporation != null && isCorporation) {
-                String token = accountManager.blockingGetAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API, true);
-                Log.d("SyncAdapter", "Corporation " + account.name + "; " + (token != null ? token : "<null>"));
-                if (token != null) {
-                    /* TODO: ApiKey apiKey = new ApiKey(token);
-                    Log.d("SyncAdapter", apiKey.toString());
-
-                    EveApiUpdater eveApiUpdater = new EveApiUpdater(context, true);
-                    eveApiUpdater.updateCorporationBalance(apiKey);*/
-                }
+            // Skip update if WIFI inactive, but required
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
+            boolean requireWifi = sharedPreferences.getBoolean("requireWifi", false);
+            if (!forcedUpdate && requireWifi && !isWifiConnected()) {
+                return;
             }
 
-            syncResult.stats.numAuthExceptions = 0;  // Hard error
-            syncResult.stats.numIoExceptions = 0;  // Soft error
-            syncResult.stats.numUpdates = 0;
+            AccountManager accountManager = AccountManager.get(getContext());
+            String token = accountManager.blockingGetAuthToken(account, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHAR, true);
+            if (token == null) {
+                // Authentication failed
+                syncResult.stats.numAuthExceptions++;
+                return;
+            }
+
+            Log.d("SyncAdapter", "Syncing account " + account.name);
+
+            IskApplication iskApplication = (IskApplication) getContext().getApplicationContext();
+            AccountUpdater accountUpdater = new AccountUpdater(account, token, iskApplication, forcedUpdate);
+            try {
+                int updates = accountUpdater.updateCharacter();
+                syncResult.stats.numUpdates += updates;
+            } catch (UnknownAccountException e) {
+                // No corresponding database entry found for account
+                // Invalidate token to force an authentication by user
+                accountManager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, token);
+                syncResult.stats.numAuthExceptions++;
+                errorMessage = "Authentication failure";  // TODO: l10n
+                return;
+            }
+
+            Log.d("SyncAdapter", "Finished syncing account " + account.name);
+        } catch (OperationCanceledException | AuthenticatorException e) {
+            // User cancelled authorization; not possible here as we do not wait for user interaction
+            syncResult.stats.numAuthExceptions++;
+            errorMessage = e.getMessage();
+            Log.e("SyncAdapter", "Authentication failure", e);
         } catch (Exception e) {
-            e.printStackTrace();
+            // Network error, Android will try again later
+            syncResult.stats.numIoExceptions++;
+            errorMessage = e.getMessage();
+            Log.e("SyncAdapter", "I/O or any other error", e);
+        } finally {
+            getContext().sendBroadcast(new Intent(SYNC_FINISHED_BROADCAST)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .putExtra("account", account.name)
+                    .putExtra("error", errorMessage));
         }
+    }
+
+    /**
+     * Network detection
+     */
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    /**
+     * WIFI detection
+     */
+    private boolean isWifiConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI && activeNetworkInfo.isConnectedOrConnecting();
     }
 
 }

@@ -21,5 +21,7 @@ public class ApiAccount extends BaseModel {
     public String characterName;
     public String corporationId;
     public String corporationName;
+    public String allianceId;
+    public String allianceName;
 
 }

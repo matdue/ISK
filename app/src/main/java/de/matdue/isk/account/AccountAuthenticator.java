@@ -40,7 +40,8 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
     /**
      * Auth token types
      */
-    public static final String AUTHTOKEN_TYPE_API = "API";
+    public static final String AUTHTOKEN_TYPE_API_CHAR = "API-Char";
+    public static final String AUTHTOKEN_TYPE_API_CORP = "API-Corp";
     public static final String AUTHTOKEN_TYPE_CREST = "CREST";
 
     public static final String EVE_ACCOUNT_TYPE_CHARACTER = "character";
@@ -71,7 +72,8 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
         // If the caller requested an authToken type we don't support, then
         // return an error
-        if (!AUTHTOKEN_TYPE_API.equals(authTokenType) &&
+        if (!AUTHTOKEN_TYPE_API_CHAR.equals(authTokenType) &&
+                !AUTHTOKEN_TYPE_API_CORP.equals(authTokenType) &&
                 !AUTHTOKEN_TYPE_CREST.equals(authTokenType)) {
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType");
@@ -112,8 +114,10 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public String getAuthTokenLabel(String authTokenType) {
-        if (AUTHTOKEN_TYPE_API.equals(authTokenType))
-            return "EVE Online API account";
+        if (AUTHTOKEN_TYPE_API_CHAR.equals(authTokenType))
+            return "EVE Online API account (character)";
+        else if (AUTHTOKEN_TYPE_API_CORP.equals(authTokenType))
+            return "EVE Online API account (corporation)";
         else if (AUTHTOKEN_TYPE_CREST.equals(authTokenType))
             return "EVE Online CREST account";
 
@@ -126,9 +130,9 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
         boolean hasAllFeatures = true;
         for (String feature : features) {
             if ("apiCharacter".equals(feature)) {
-                hasAllFeatures &= EVE_ACCOUNT_TYPE_CHARACTER.equals(accountManager.getUserData(account, "api"));
+                hasAllFeatures &= accountManager.peekAuthToken(account, AUTHTOKEN_TYPE_API_CHAR) != null;
             } else if ("apiCorporation".equals(feature)) {
-                hasAllFeatures &= EVE_ACCOUNT_TYPE_CORPORATION.equals(accountManager.getUserData(account, "api"));
+                hasAllFeatures &= accountManager.peekAuthToken(account, AUTHTOKEN_TYPE_API_CORP) != null;
             }
         }
 

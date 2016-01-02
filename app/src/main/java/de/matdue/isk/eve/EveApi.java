@@ -236,6 +236,8 @@ public class EveApi {
 				newChar.characterName = attributes.getValue("characterName");
 				newChar.corporationID = attributes.getValue("corporationID");
 				newChar.corporationName = attributes.getValue("corporationName");
+				newChar.allianceID = attributes.getValue("allianceID");
+				newChar.allianceName = attributes.getValue("allianceName");
 
 				result.characters.add(newChar);
 			}

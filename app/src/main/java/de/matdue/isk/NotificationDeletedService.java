@@ -17,20 +17,29 @@ package de.matdue.isk;
 
 import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
+
+import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
-public class NotificationDeletedService extends WakelockedService {
+public class NotificationDeletedService extends IntentService {
 
-	@Override
-	protected void onHandleBroadcastIntent(Intent broadcastIntent) {
-		try {
-			IskApplication iskApplication = (IskApplication) getApplication();
-			IskDatabase iskDatabase = iskApplication.getIskDatabase();
-			iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED_AND_READ);
-		} catch (Exception e) {
-			Log.e("NotificationDeleted",  "Error occured", e);
-		}
+	public NotificationDeletedService() {
+		super("NotificationDeletedService");
 	}
 
+	@Override
+	protected void onHandleIntent(Intent intent) {
+		try {
+			Intent broadcastIntent = intent.getParcelableExtra("originalIntent");
+			String characterId = broadcastIntent.getStringExtra("characterID");
+			IskApplication iskApplication = (IskApplication) getApplication();
+			IskDatabase iskDatabase = iskApplication.getIskDatabase();
+			iskDatabase.setOrderWatchStatusBits(characterId, OrderWatch.NOTIFIED_AND_READ);
+		} catch (Exception e) {
+			Log.e("NotificationDeleted",  "Error occurred", e);
+		} finally {
+			NotificationDeletedReceiver.completeWakefulIntent(intent);
+		}
+	}
 }

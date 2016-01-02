@@ -35,7 +35,7 @@ import android.util.Log;
 public class IskDatabase extends SQLiteOpenHelper {
 	
 	private static final String DATABASE_NAME = "isk.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	
 	public IskDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -56,12 +56,15 @@ public class IskDatabase extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		switch (oldVersion) {
-		case 1:
-			// 1 -> 2: New tables 'orderWatch' and 'orderWatchItem'
+		if (oldVersion < 2) {
+			// 2: New tables 'orderWatch' and 'orderWatchItem'
 			db.execSQL(OrderWatchTable.SQL_CREATE);
 			db.execSQL(OrderWatchItemTable.SQL_CREATE);
-			break;
+		}
+
+		if (oldVersion < 3) {
+			// 3: New table 'apiAccount'
+			db.execSQL(ApiAccountTable.SQL_CREATE);
 		}
 	}
 
@@ -309,13 +312,17 @@ public class IskDatabase extends SQLiteOpenHelper {
 		return result;
 	}
 
+	private static String getStringFromCursor(Cursor cursor, int columnIndex, String defaultValue) {
+		return !cursor.isNull(columnIndex) ? cursor.getString(columnIndex) : defaultValue;
+	}
+
 	public List<ApiAccount> queryAllApiAccounts() {
 		ArrayList<ApiAccount> result = new ArrayList<>();
 
 		try {
 			SQLiteDatabase db = getReadableDatabase();
 			Cursor cursor = db.query(ApiAccountTable.TABLE_NAME,
-					new String[]{ApiAccountTable.CHARACTER_ID, ApiAccountTable.CHARACTER_NAME, ApiAccountTable.CORPORATION_ID, ApiAccountTable.CORPORATION_NAME},
+					new String[]{ApiAccountTable.CHARACTER_ID, ApiAccountTable.CHARACTER_NAME, ApiAccountTable.CORPORATION_ID, ApiAccountTable.CORPORATION_NAME, ApiAccountTable.ALLIANCE_ID, ApiAccountTable.ALLIANCE_NAME},
 					null,
 					null,
 					null,
@@ -331,6 +338,8 @@ public class IskDatabase extends SQLiteOpenHelper {
 					apiAccount.corporationId = cursor.getString(2);
 					apiAccount.corporationName = cursor.getString(3);
 				}
+				apiAccount.allianceId = getStringFromCursor(cursor, 4, null);
+				apiAccount.allianceName = getStringFromCursor(cursor, 5, null);
 
 				result.add(apiAccount);
 			}
@@ -342,12 +351,45 @@ public class IskDatabase extends SQLiteOpenHelper {
 		return result;
 	}
 
+	public ApiAccount queryApiAccount(String characterName) {
+		ApiAccount result = null;
+
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(ApiAccountTable.TABLE_NAME,
+					new String[]{ApiAccountTable.CHARACTER_ID, ApiAccountTable.CHARACTER_NAME, ApiAccountTable.CORPORATION_ID, ApiAccountTable.CORPORATION_NAME, ApiAccountTable.ALLIANCE_ID, ApiAccountTable.ALLIANCE_NAME},
+					ApiAccountTable.CHARACTER_NAME + "=?",
+					new String[] { characterName },
+					null,
+					null,
+					null);
+			if (cursor.moveToNext()) {
+				result = new ApiAccount();
+				if (!cursor.isNull(0)) {
+					result.characterId = cursor.getString(0);
+					result.characterName = cursor.getString(1);
+				}
+				if (!cursor.isNull(2)) {
+					result.corporationId = cursor.getString(2);
+					result.corporationName = cursor.getString(3);
+				}
+				result.allianceId = getStringFromCursor(cursor, 4, null);
+				result.allianceName = getStringFromCursor(cursor, 5, null);
+			}
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryApiAccount", e);
+		}
+
+		return result;
+	}
+
 	public void storeApiAccount(ApiAccount apiAccount) {
 		try {
 			SQLiteDatabase db = getWritableDatabase();
 			SQLiteStatement insertApiAccount = db.compileStatement("INSERT INTO " + ApiAccountTable.TABLE_NAME
-					+ " (" + ApiAccountTable.CHARACTER_ID + "," + ApiAccountTable.CHARACTER_NAME + "," + ApiAccountTable.CORPORATION_ID + "," + ApiAccountTable.CORPORATION_NAME + ")"
-					+ " VALUES (?,?,?,?)");
+					+ " (" + ApiAccountTable.CHARACTER_ID + "," + ApiAccountTable.CHARACTER_NAME + "," + ApiAccountTable.CORPORATION_ID + "," + ApiAccountTable.CORPORATION_NAME + "," + ApiAccountTable.ALLIANCE_ID + "," + ApiAccountTable.ALLIANCE_NAME + ")"
+					+ " VALUES (?,?,?,?,?,?)");
 			try {
 				db.beginTransaction();
 
@@ -362,6 +404,8 @@ public class IskDatabase extends SQLiteOpenHelper {
 						insertApiAccount.bindString(3, apiAccount.corporationId);
 						insertApiAccount.bindString(4, apiAccount.corporationName);
 					}
+					insertApiAccount.bindString(5, apiAccount.allianceId);
+					insertApiAccount.bindString(6, apiAccount.allianceName);
 					insertApiAccount.executeInsert();
 				} else {
 					db.delete(ApiAccountTable.TABLE_NAME,
@@ -370,6 +414,8 @@ public class IskDatabase extends SQLiteOpenHelper {
 
 					insertApiAccount.bindString(3, apiAccount.corporationId);
 					insertApiAccount.bindString(4, apiAccount.corporationName);
+					insertApiAccount.bindString(5, apiAccount.allianceId);
+					insertApiAccount.bindString(6, apiAccount.allianceName);
 					insertApiAccount.executeInsert();
 				}
 
@@ -446,16 +492,16 @@ public class IskDatabase extends SQLiteOpenHelper {
 		try {
 			SQLiteDatabase db = getReadableDatabase();
 			Cursor cursor = db.query(CharacterTable.TABLE_NAME + " LEFT JOIN " + BalanceTable.TABLE_NAME + " ON " + CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID + "=" + BalanceTable.TABLE_NAME + "." + BalanceTable.CHARACTER_ID,
-					new String[] {
-					CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID,
-					CharacterTable.TABLE_NAME + "." + CharacterTable.NAME,
-					BalanceTable.TABLE_NAME + "." + BalanceTable.BALANCE
-				},
-				CharacterTable.TABLE_NAME + "." + CharacterTable.SELECTED + "=?",  // where
-				new String[] { "1" },  // where arguments
-				null,  // group by
-				null,  // having
-				null); // order by
+					new String[]{
+							CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID,
+							CharacterTable.TABLE_NAME + "." + CharacterTable.NAME,
+							BalanceTable.TABLE_NAME + "." + BalanceTable.BALANCE
+					},
+					CharacterTable.TABLE_NAME + "." + CharacterTable.SELECTED + "=?",  // where
+					new String[]{"1"},  // where arguments
+					null,  // group by
+					null,  // having
+					null); // order by
 			
 			return cursor;
 		} catch (SQLiteException e) {
@@ -470,12 +516,12 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		try {
 			SQLiteDatabase db = getReadableDatabase();
-			Cursor cursor = db.query(ApiKeyTable.TABLE_NAME + " INNER JOIN " + CharacterTable.TABLE_NAME + " ON " + ApiKeyTable.TABLE_NAME + "." + ApiKeyTable.ID + " = " + CharacterTable.TABLE_NAME + "." + CharacterTable.API_ID, 
-					new String[] { ApiKeyTable.TABLE_NAME + "." + ApiKeyTable.KEY, ApiKeyTable.TABLE_NAME + "." + ApiKeyTable.CODE }, 
-					CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID + "=?", 
-					new String [] { characterId }, 
-					null, 
-					null, 
+			Cursor cursor = db.query(ApiKeyTable.TABLE_NAME + " INNER JOIN " + CharacterTable.TABLE_NAME + " ON " + ApiKeyTable.TABLE_NAME + "." + ApiKeyTable.ID + " = " + CharacterTable.TABLE_NAME + "." + CharacterTable.API_ID,
+					new String[]{ApiKeyTable.TABLE_NAME + "." + ApiKeyTable.KEY, ApiKeyTable.TABLE_NAME + "." + ApiKeyTable.CODE},
+					CharacterTable.TABLE_NAME + "." + CharacterTable.CHARACTER_ID + "=?",
+					new String[]{characterId},
+					null,
+					null,
 					null);
 			if (cursor.moveToNext()) {
 				result = new ApiKey();
@@ -854,9 +900,9 @@ public class IskDatabase extends SQLiteOpenHelper {
 	public void deleteOrderWatch(String characterId, long seqId) {
 		try {
 			SQLiteDatabase db = getWritableDatabase();
-			db.delete(OrderWatchTable.TABLE_NAME, 
-					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?",  
-					new String[] { characterId, Long.toString(seqId) });
+			db.delete(OrderWatchTable.TABLE_NAME,
+					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?",
+					new String[]{characterId, Long.toString(seqId)});
 		} catch (SQLiteException e) {
 			Log.e("IskDatabase", "deleteOrderWatch", e);
 		}
@@ -866,12 +912,12 @@ public class IskDatabase extends SQLiteOpenHelper {
 		boolean result = false;
 		try {
 			SQLiteDatabase db = getReadableDatabase();
-			Cursor cursor = db.query(OrderWatchItemTable.TABLE_NAME, 
-					new String[] { "rowid _id" }, 
-					OrderWatchItemTable.CHARACTER_ID + "=? AND " + OrderWatchItemTable.TYPE_ID + "=? AND " + OrderWatchItemTable.ACTION + "=?", 
-					new String[] { characterId, Integer.toString(typeID), Integer.toString(action) }, 
-					null, 
-					null, 
+			Cursor cursor = db.query(OrderWatchItemTable.TABLE_NAME,
+					new String[]{"rowid _id"},
+					OrderWatchItemTable.CHARACTER_ID + "=? AND " + OrderWatchItemTable.TYPE_ID + "=? AND " + OrderWatchItemTable.ACTION + "=?",
+					new String[]{characterId, Integer.toString(typeID), Integer.toString(action)},
+					null,
+					null,
 					null);
 			result = cursor.moveToNext();
 			cursor.close();
@@ -887,12 +933,12 @@ public class IskDatabase extends SQLiteOpenHelper {
 			SQLiteDatabase db = getWritableDatabase();
 			
 			// Get item's type ID
-			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
-					new String[] { OrderWatchTable.TYPE_ID }, 
-					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?", 
-					new String[] { characterId, Long.toString(seqId) }, 
-					null, 
-					null, 
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME,
+					new String[]{OrderWatchTable.TYPE_ID},
+					OrderWatchTable.CHARACTER_ID + "=? AND " + OrderWatchTable.SEQ_ID + "=?",
+					new String[]{characterId, Long.toString(seqId)},
+					null,
+					null,
 					null);
 			if (cursor.moveToNext()) {
 				int typeID = cursor.getInt(0);
@@ -927,45 +973,76 @@ public class IskDatabase extends SQLiteOpenHelper {
 			Log.e("IskDatabase", "storeOrderWatchItem", e);
 		}
 	}
-	
+
 	public void setOrderWatchStatusBits(int bitmask) {
 		try {
 			SQLiteDatabase db = getWritableDatabase();
-			Cursor cursor = db.rawQuery("UPDATE " + OrderWatchTable.TABLE_NAME + " SET " + OrderWatchTable.STATUS + " = (" + OrderWatchTable.STATUS + " | ?)", 
-					new String[] { Integer.toString(bitmask) });
+			Cursor cursor = db.rawQuery("UPDATE " + OrderWatchTable.TABLE_NAME + " SET " + OrderWatchTable.STATUS + " = (" + OrderWatchTable.STATUS + " | ?)",
+					new String[]{Integer.toString(bitmask)});
 			cursor.moveToNext();
 			cursor.close();
 		} catch (SQLiteException e) {
-			Log.e("IskDatabase", "storeOrderWatchItem", e);
+			Log.e("IskDatabase", "setOrderWatchStatusBits", e);
+		}
+	}
+
+	public void setOrderWatchStatusBits(String characterId, int bitmask) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			Cursor cursor = db.rawQuery("UPDATE " + OrderWatchTable.TABLE_NAME + " SET " + OrderWatchTable.STATUS + " = (" + OrderWatchTable.STATUS + " | ?)" +
+							" WHERE " + OrderWatchTable.CHARACTER_ID + "=?",
+					new String[]{Integer.toString(bitmask), characterId});
+			cursor.moveToNext();
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "setOrderWatchStatusBits", e);
 		}
 	}
 	
 	public Cursor getJustEndedOrderWatches() {
 		try {
 			SQLiteDatabase db = getReadableDatabase();
-			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME, 
-					new String[] { OrderWatchTable.CHARACTER_ID, OrderWatchTable.TYPE_NAME }, 
-					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0", 
-					new String[] { Integer.toString(OrderWatch.NOTIFIED_AND_READ) }, 
-					null, 
-					null, 
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME,
+					new String[]{OrderWatchTable.CHARACTER_ID, OrderWatchTable.TYPE_NAME},
+					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0",
+					new String[]{Integer.toString(OrderWatch.NOTIFIED_AND_READ)},
+					null,
+					null,
 					null);
 			return cursor;
 		} catch (SQLiteException e) {
-			Log.e("IskDatabase", "getOrderWatchesNotNotified", e);
+			Log.e("IskDatabase", "getJustEndedOrderWatches", e);
 		}
 		
 		return null;
 	}
-	
+
+	public Cursor getJustEndedOrderWatches(String characterId) {
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(OrderWatchTable.TABLE_NAME,
+					new String[]{OrderWatchTable.CHARACTER_ID, OrderWatchTable.TYPE_NAME},
+					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0 AND " + OrderWatchTable.CHARACTER_ID + "=?",
+					new String[]{Integer.toString(OrderWatch.NOTIFIED_AND_READ), characterId},
+					null,
+					null,
+					null);
+			return cursor;
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "getJustEndedOrderWatches", e);
+		}
+
+		return null;
+	}
+
 	public boolean hasUnreadOrderWatches() {
 		boolean result = false;
 		try {
 			SQLiteDatabase db = getReadableDatabase();
-			long count = DatabaseUtils.queryNumEntries(db, 
-					OrderWatchTable.TABLE_NAME, 
+			long count = DatabaseUtils.queryNumEntries(db,
+					OrderWatchTable.TABLE_NAME,
 					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0",
-					new String[] { Integer.toString(OrderWatch.NOTIFIED) });
+					new String[]{Integer.toString(OrderWatch.NOTIFIED)});
 			result = count != 0;
 		} catch (SQLiteException e) {
 			Log.e("IskDatabase", "hasUnreadOrderWatches", e);
@@ -973,5 +1050,21 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		return result;
 	}
-	
+
+	public boolean hasUnreadOrderWatches(String characterId) {
+		boolean result = false;
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			long count = DatabaseUtils.queryNumEntries(db,
+					OrderWatchTable.TABLE_NAME,
+					OrderWatchTable.ORDER_ID + "=0 AND " + OrderWatchTable.STATUS + " & ? =0 AND " + OrderWatchTable.CHARACTER_ID + "=?",
+					new String[] { Integer.toString(OrderWatch.NOTIFIED), characterId });
+			result = count != 0;
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "hasUnreadOrderWatches", e);
+		}
+
+		return result;
+	}
+
 }

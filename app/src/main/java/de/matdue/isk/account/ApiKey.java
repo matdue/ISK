@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Matthias Düsterhöft
+ * Copyright 2015 Matthias Düsterhöft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.matdue.isk.eve;
+package de.matdue.isk.account;
 
-import java.io.Serializable;
+/**
+ * API key data got from an authentication token
+ */
+public class ApiKey {
 
-public class Character implements Serializable {
-	
-	// No getters and setters to achieve better performance
-	public String characterID;
-	public String characterName;
-	public String corporationID;
-	public String corporationName;
-	public String allianceID;
-	public String allianceName;
-	
+    private String keyID;
+    private String vCode;
+
+    public ApiKey(String token) {
+        String[] data = token.split("\\|");
+        keyID = data[0];
+        vCode = data[1];
+    }
+
+    public String getKeyID() {
+        return keyID;
+    }
+
+    public String getVCode() {
+        return vCode;
+    }
+
+    @Override
+    public String toString() {
+        return "keyID=" + keyID + ", vCode=" + vCode;
+    }
 }

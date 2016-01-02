@@ -18,50 +18,46 @@ package de.matdue.isk;
 import java.math.BigDecimal;
 import java.text.Collator;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
-import com.commonsware.cwac.wakeful.WakefulIntentService;
-
+import de.matdue.isk.account.AccountAuthenticator;
 import de.matdue.isk.account.AuthenticatorActivity;
+import de.matdue.isk.account.SyncAdapter;
+import de.matdue.isk.database.ApiAccount;
+import de.matdue.isk.database.Balance;
 import de.matdue.isk.eve.EveApi;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends IskActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+	public static final BigDecimal ONE_MILLION = new BigDecimal(1000000);
+	public static final BigDecimal ONE_BILLION = new BigDecimal(1000000000);
 
 	private BroadcastReceiver eveApiUpdaterReceiver;
 	private DrawerLayout drawerLayout;
@@ -96,46 +92,46 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 		};
 		drawerLayout.setDrawerListener(drawerToggle);
 
-		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				PilotData selectedPilot = (PilotData) parent.getItemAtPosition(position);
-				getPreferences()
-					.edit()
-					.putString("startCharacterID", selectedPilot.characterId)
-					.apply();
-			}
+		String startCharacterName = getPreferences().getString("startCharacterName", null);
+		if (startCharacterName != null) {
+			switchToAccount(startCharacterName);
+		}
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-				getPreferences()
-					.edit()
-					.remove("startCharacterID")
-					.apply();
-			}
-		});
-        
-        List<PilotData> pilots = new ArrayList<PilotData>();
-        
-        // Sort by character name
- 		final Collator collator = Collator.getInstance();
- 		Collections.sort(pilots, new Comparator<PilotData>() {
- 			@Override
- 			public int compare(PilotData lhs, PilotData rhs) {
- 				return collator.compare(lhs.name, rhs.name);
- 			}
- 		});
- 		
- 		PilotAdapter adapter = new PilotAdapter(this, pilots);
-        spinner.setAdapter(adapter);
-        refreshPilots();
-        
-        // Make sure update service to be called regularly
-     	WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getApplicationContext(), false);
-     		
-        showWelcomeDialog();
+		// Show/hide elements for new users
+		showWelcomeText();
     }
+
+	private void showWelcomeText() {
+		Account[] accounts = AccountManager.get(this).getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		boolean hasAccounts = accounts.length != 0;
+		findViewById(R.id.main_welcome).setVisibility(hasAccounts ? View.GONE : View.VISIBLE);
+		findViewById(R.id.main_balance).setVisibility(hasAccounts ? View.VISIBLE : View.GONE);
+		findViewById(R.id.main_navigation_buttons).setVisibility(hasAccounts ? View.VISIBLE : View.GONE);
+
+		if (!hasAccounts) {
+			// Make sure no account is selected
+			switchToAccount(null);
+		} else {
+			// Make sure an account is selected; select the first one if none was selected
+			String startCharacterName = getPreferences().getString("startCharacterName", null);
+			if (startCharacterName == null) {
+				switchToAccount(accounts[0].name);
+			} else {
+				// Check if current account is still existing
+				boolean startCharacterIsKnown = false;
+				for (Account account : accounts) {
+					if (startCharacterName.equals(account.name)) {
+						startCharacterIsKnown = true;
+						break;
+					}
+				}
+
+				if (!startCharacterIsKnown) {
+					switchToAccount(accounts[0].name);
+				}
+			}
+		}
+	}
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
@@ -166,7 +162,7 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 				return true;
 
 			case R.id.navdrawer_account_manage:
-				String[] authorities = {"de.matdue.isk.content.provider"};
+				String[] authorities = {SyncAdapter.CONTENT_AUTHORITY};
 				Intent intent = new Intent(Settings.ACTION_SYNC_SETTINGS);
 				intent.putExtra(Settings.EXTRA_AUTHORITIES, authorities);
 				startActivity(intent);
@@ -180,7 +176,7 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 
 			case Menu.NONE:
 				if (menuItem.getGroupId() == R.id.navdrawer_menu_accounts) {
-					/*switchToAccount(menuItem.getTitle());*/
+					switchToAccount(menuItem.getTitle().toString());
 					toggleNavAccountView(false);
 					return true;
 				}
@@ -202,15 +198,19 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 		ImageView expandIndicator = ((ImageView) findViewById(R.id.expand_account_box_indicator));
 		expandIndicator.setImageResource(drawerShowAccounts ? R.drawable.ic_arrow_drop_up_white_24dp : R.drawable.ic_arrow_drop_down_white_24dp);
 
+		// The following menu modification destroys the ripple effect for an unknown reason.
 		Menu navigationViewMenu = navigationView.getMenu();
 		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu, !drawerShowAccounts);
 		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu_accounts, drawerShowAccounts);
 		navigationViewMenu.setGroupVisible(R.id.navdrawer_menu_accountmgmt, drawerShowAccounts);
 
+		// Add accounts
 		navigationViewMenu.removeGroup(R.id.navdrawer_menu_accounts);
 		if (drawerShowAccounts) {
-			/*AccountManager accountManager = AccountManager.get(this);
+			AccountManager accountManager = AccountManager.get(this);
 			Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+
+			// Sort by name
 			final Collator collator = Collator.getInstance();
 			Arrays.sort(accounts, new Comparator<Account>() {
 				@Override
@@ -219,53 +219,183 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 				}
 			});
 
+			// Add menu entry with a general person icon.
+			// We cannot display the real character image as there is a filter on each menu item
+			// which would result in a grey rectangular only.
 			int order = Menu.FIRST;
 			for (Account account : accounts) {
 				navigationViewMenu.add(R.id.navdrawer_menu_accounts, Menu.NONE, order++, account.name)
 						.setIcon(R.drawable.ic_person_white_24dp);
-			}*/
-		}
-	}
-
-	public void selectAccount(View view) {
-		Log.d("MainActivity", "Select account " + view.getTag());
-	}
-
-	public void gotoWallet(View view) {
-    	String characterID = getPreferences().getString("startCharacterID", null);
-		if (characterID != null) {
-			WalletActivity.navigate(this, characterID);
-		}
-    }
-    
-    public void gotoMarketOrders(View view) {
-    	String characterID = getPreferences().getString("startCharacterID", null);
-		if (characterID != null) {
-			MarketOrderActivity.navigate(this, characterID);
-		}
-    }
-    
-    public void gotoPilots(View view) {
-    	startActivity(new Intent(this, PilotsActivity.class));
-    }
-    
-    /**
-	 * Show a Welcome! dialog
-	 */
-	private void showWelcomeDialog() {
-		SharedPreferences preferences = getPreferences();
-		boolean welcomed = preferences.getBoolean("welcomed", false);
-		if (!welcomed) {
-			FragmentManager fm = getFragmentManager();
-			if (fm.findFragmentByTag("WelcomeDialog") == null) {
-				FragmentTransaction ft = fm.beginTransaction().addToBackStack(null);
-				WelcomeDialogFragment fragment = WelcomeDialogFragment.newInstance();
-				fragment.show(ft, "WelcomeDialog");
 			}
 		}
 	}
-	
-	
+
+	private static class AccountData {
+		ApiAccount apiAccount;
+		Balance balance;
+		Bitmap pilotImage;
+	}
+
+	private void switchToAccount(String name) {
+		View navigationHeader = navigationView.getHeaderView(0);
+
+		// Display name and reset all other fields
+		TextView nameTextView = (TextView) navigationHeader.findViewById(R.id.pilot_name);
+		nameTextView.setText(name);
+
+		final TextView corporationTextView = (TextView) navigationHeader.findViewById(R.id.pilot_corporation);
+		corporationTextView.setText(null);
+
+		final TextView allianceTextView = (TextView) navigationHeader.findViewById(R.id.pilot_alliance);
+		allianceTextView.setText(null);
+		allianceTextView.setVisibility(View.GONE);
+
+		final ImageView pilotImageView = (ImageView) navigationHeader.findViewById(R.id.profile_image);
+		pilotImageView.setImageResource(R.drawable.ic_main_pilots);
+
+		// Load corporation name etc. from database
+		new AsyncTask<String, Void, AccountData>() {
+			@Override
+			protected AccountData doInBackground(String... params) {
+				String characterName = params[0];
+				if (characterName == null) {
+					return null;
+				}
+
+				ApiAccount apiAccount = getDatabase().queryApiAccount(characterName);
+				if (apiAccount == null) {
+					return null;
+				}
+
+				Balance balance = getDatabase().queryBalance(apiAccount.characterId);
+
+				AccountData accountData = new AccountData();
+				accountData.apiAccount = apiAccount;
+				accountData.balance = balance;
+				accountData.pilotImage = getBitmapManager().getImage(EveApi.getCharacterUrl(apiAccount.characterId, calculateResolution(pilotImageView)));
+
+				return accountData;
+			}
+
+			private int calculateResolution(ImageView imageView) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+					// ImageView.getMaxWidth() is not available before Jelly Bean
+					int maxWidth = imageView.getMaxWidth();
+					return maxWidth < 128 ? 128 : 256;
+				} else {
+					return 128;
+				}
+			}
+
+			@Override
+			protected void onPostExecute(AccountData accountData) {
+				if (accountData == null) {
+					return;
+				}
+
+				corporationTextView.setText(accountData.apiAccount.corporationName);
+				allianceTextView.setText(accountData.apiAccount.allianceName);
+				allianceTextView.setVisibility(TextUtils.isEmpty(accountData.apiAccount.allianceName) ? View.GONE : View.VISIBLE);
+				if (accountData.pilotImage != null) {
+					pilotImageView.setImageBitmap(accountData.pilotImage);
+				}
+
+				ImageView mainPilotImage = (ImageView) findViewById(R.id.main_pilot_image);
+				if (accountData.pilotImage != null) {
+					mainPilotImage.setImageBitmap(accountData.pilotImage);
+				} else {
+					mainPilotImage.setImageResource(R.drawable.ic_main_pilots);
+				}
+
+				TextView mainPilotName = (TextView) findViewById(R.id.main_pilot_name);
+				mainPilotName.setText(accountData.apiAccount.characterName);
+
+				if (accountData.balance != null) {
+					NumberFormat balanceFormatter = NumberFormat.getInstance();
+					balanceFormatter.setMinimumFractionDigits(2);
+					balanceFormatter.setMaximumFractionDigits(2);
+					String balance = getString(R.string.main_balance_value, balanceFormatter.format(accountData.balance.balance));
+
+					TextView mainBalance = (TextView) findViewById(R.id.main_pilot_balance);
+					mainBalance.setText(balance);
+
+					mainBalance = (TextView) findViewById(R.id.main_pilot_balance_human);
+					if (accountData.balance.balance.compareTo(ONE_MILLION) >= 0) {
+						if (accountData.balance.balance.compareTo(ONE_BILLION) < 0) {
+							// Between 1 million and 1 billion
+							balance = balanceFormatter.format(accountData.balance.balance.divide(ONE_MILLION, 2, BigDecimal.ROUND_HALF_UP));
+							mainBalance.setText(getString(R.string.main_balance_million, balance));
+						} else {
+							// 1 Billion or more
+							balance = balanceFormatter.format(accountData.balance.balance.divide(ONE_BILLION, 2, BigDecimal.ROUND_HALF_UP));
+							mainBalance.setText(getString(R.string.main_balance_billion, balance));
+						}
+						mainBalance.setVisibility(View.VISIBLE);
+					} else {
+						mainBalance.setVisibility(View.GONE);
+					}
+				}
+
+				if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+					reportFullyDrawn();
+				}
+			}
+		}.execute(name);
+
+		getPreferences()
+				.edit()
+				.putString("startCharacterName", name)
+				.apply();
+	}
+
+	public void gotoWallet(View view) {
+		String characterName = getPreferences().getString("startCharacterName", null);
+		if (characterName == null) {
+			return;
+		}
+
+		new AsyncTask<String, Void, ApiAccount>() {
+			@Override
+			protected ApiAccount doInBackground(String... params) {
+				ApiAccount apiAccount = getDatabase().queryApiAccount(params[0]);
+				return apiAccount;
+			}
+
+			@Override
+			protected void onPostExecute(ApiAccount apiAccount) {
+				if (apiAccount != null) {
+					WalletActivity.navigate(MainActivity.this, apiAccount.characterId);
+				}
+			}
+		}.execute(characterName);
+    }
+    
+    public void gotoMarketOrders(View view) {
+		String characterName = getPreferences().getString("startCharacterName", null);
+		if (characterName == null) {
+			return;
+		}
+
+		new AsyncTask<String, Void, ApiAccount>() {
+			@Override
+			protected ApiAccount doInBackground(String... params) {
+				ApiAccount apiAccount = getDatabase().queryApiAccount(params[0]);
+				return apiAccount;
+			}
+
+			@Override
+			protected void onPostExecute(ApiAccount apiAccount) {
+				if (apiAccount != null) {
+					MarketOrderActivity.navigate(MainActivity.this, apiAccount.characterId, apiAccount.characterName);
+				}
+			}
+		}.execute(characterName);
+    }
+
+	public void gotoSetupPilot(View view) {
+		AuthenticatorActivity.navigate(this);
+	}
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main_options, menu);
@@ -292,21 +422,20 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 	protected void onResume() {
 		super.onResume();
 		
-		refreshPilots();
-		
 		// Register broadcast receiver: If character data has been updated in background,
 		// show latest data immediately
-		IntentFilter filter = new IntentFilter(EveApiUpdaterService.ACTION_RESP);
+		IntentFilter filter = new IntentFilter(SyncAdapter.SYNC_FINISHED_BROADCAST);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         eveApiUpdaterReceiver = new BroadcastReceiver(){
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				// Character has been updated in background
 				// => Update view now, if the current character has been updated
-				String characterId = intent.getStringExtra("characterId");
-				String currentCharacterID = getPreferences().getString("startCharacterID", null);
-				if (currentCharacterID != null && currentCharacterID.equals(characterId)) {
-					refreshPilots();
+				String characterName = intent.getStringExtra("account");
+				Log.d("MainActivity", "Got SYNC_FINISHED broadcast for account " + characterName);
+				String currentCharacterName = getPreferences().getString("startCharacterName", null);
+				if (currentCharacterName != null && currentCharacterName.equals(characterName)) {
+					switchToAccount(characterName);
 				}
 				
 				String errorMessage = intent.getStringExtra("error");
@@ -320,6 +449,8 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 			}
 		};
         registerReceiver(eveApiUpdaterReceiver, filter);
+
+		showWelcomeText();
 	}
 	
 	@Override
@@ -330,191 +461,37 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 		
 		// Stop progress bar
 		setRefreshActionItemState(false);
-	}
-	
-	
-	private void refreshPilots() {
-		new AsyncTask<Void, Void, List<PilotData>>() {
-			
-			String characterID;
-			
-			@Override
-			protected List<PilotData> doInBackground(Void... params) {
-				// Get active pilot
-				characterID = getPreferences().getString("startCharacterID", null);
-				
-				// Load all pilots and their balance
-				List<PilotData> pilots = new ArrayList<PilotData>();
-				Cursor pilotsCursor = getDatabase().queryCharactersAndBalance();
-				while (pilotsCursor.moveToNext()) {
-					PilotData pilotData = new PilotData();
-					pilotData.characterId = pilotsCursor.getString(0);
-					pilotData.name = pilotsCursor.getString(1);
-					pilotData.balance = BigDecimal.ZERO;
-					String sBalance = pilotsCursor.getString(2);
-					if (sBalance != null && sBalance.length() > 0) {
-						pilotData.balance = new BigDecimal(sBalance);
-					}
-					
-					pilots.add(pilotData);
-				}
-				pilotsCursor.close();
-				
-				// Sort by character name
-		 		final Collator collator = Collator.getInstance();
-		 		Collections.sort(pilots, new Comparator<PilotData>() {
-		 			@Override
-		 			public int compare(PilotData lhs, PilotData rhs) {
-		 				return collator.compare(lhs.name, rhs.name);
-		 			}
-		 		});
-		 		
-				return pilots;
-			}
-			
-			@Override
-			protected void onPostExecute(List<PilotData> result) {
-		 		// Find index of active pilot
-		 		int activePilot = 0;
-		 		for (int i = 0; i < result.size(); ++i) {
-		 			if (result.get(i).characterId.equals(characterID)) {
-		 				activePilot = i;
-		 				break;
-		 			}
-		 		}
-		 		
-		 		// Update spinner and its adapter
-		 		Spinner spinner = (Spinner) findViewById(R.id.main_pilot);
-		 		PilotAdapter adapter = (PilotAdapter) spinner.getAdapter();
-		 		adapter.refresh(result);
-		 		adapter.notifyDataSetChanged();
-		 		spinner.setSelection(activePilot);
-			}
-		}.execute();
+
+		showWelcomeText();
 	}
 	
 	/**
 	 * Refreshes current character
 	 */
 	private void refreshCurrentCharacter() {
-		String currentCharacterID = getPreferences().getString("startCharacterID", null);
-		if (currentCharacterID == null) {
+		String characterName = getPreferences().getString("startCharacterName", null);
+		if (characterName == null) {
 			return;
 		}
-		
-		// Force refresh of current character
-		Intent msgIntent = new Intent(this, EveApiUpdaterService.class);
-		msgIntent.putExtra("characterId", currentCharacterID);
-		msgIntent.putExtra("force", true);
-		WakefulIntentService.sendWakefulWork(this, msgIntent);
-		
-		// Show refresh animation
-		setRefreshActionItemState(true);
-	}
-	
-	
-	private static class PilotData {
-		public String characterId;
-		public String name;
-		public BigDecimal balance;
-	}
-	
-	private class PilotAdapter extends BaseAdapter {
-		
-		List<PilotData> pilots;
-		LayoutInflater inflater;
-		NumberFormat balanceFormatter = NumberFormat.getInstance();
-		
-		public PilotAdapter(Context context, List<PilotData> pilots) {
-			inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			this.pilots = pilots;
-			
-			balanceFormatter.setMinimumFractionDigits(2);
-			balanceFormatter.setMaximumFractionDigits(2);
-		}
 
-		@Override
-		public int getCount() {
-			return pilots.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return pilots.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return getPilotView(position, convertView, parent, R.layout.main_pilot);
-		}
-		
-		@Override
-		public View getDropDownView(int position, View convertView, ViewGroup parent) {
-			return getPilotView(position, convertView, parent, R.layout.main_pilot_spinner_item);
-		}
-		
-		public void refresh(List<PilotData> pilots) {
-			this.pilots = pilots;
-		}
-		
-		private View getPilotView(int position, View convertView, ViewGroup parent, int resource) {
-			View view = convertView;
-			if (view == null) {
-				view = inflater.inflate(resource, parent, false);
+		// Look up corresponding account
+		AccountManager accountManager = AccountManager.get(this);
+		Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		for (Account account : accounts) {
+			if (!account.name.equals(characterName)) {
+				continue;
 			}
-			
-			ImageView pilotImage = (ImageView) view.findViewById(R.id.main_pilot_image);
-			TextView pilotName = (TextView) view.findViewById(R.id.main_pilot_name);
-			TextView pilotBalance = (TextView) view.findViewById(R.id.main_pilot_balance);
-			
-			PilotData pilot = pilots.get(position);
-			getBitmapManager().setImageBitmap(pilotImage, EveApi.getCharacterUrl(pilot.characterId, 128), null, null);
-			pilotName.setText(pilot.name);
-			if (pilotBalance != null) {
-				if (pilot.balance != null) {
-					String sBalance = balanceFormatter.format(pilot.balance) + " ISK";
-					pilotBalance.setText(sBalance);
-				} else {
-					pilotBalance.setText("");
-				}
-			}
-			
-			return view;
+
+			Bundle extras = new Bundle();
+			extras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+			extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+			ContentResolver.requestSync(account, SyncAdapter.CONTENT_AUTHORITY, extras);
+
+			// Show refresh animation
+			setRefreshActionItemState(true);
+
+			return;
 		}
-		
 	}
-	
-	public static class WelcomeDialogFragment extends DialogFragment {
-		
-		public static WelcomeDialogFragment newInstance() {
-			WelcomeDialogFragment instance = new WelcomeDialogFragment();
-			return instance;
-		}
-		
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			builder
-				.setMessage(R.string.main_dialog_welcome)
-				.setNeutralButton(R.string.main_dialog_welcome_close, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						SharedPreferences preferences = ((IskActivity)getActivity()).getPreferences();
-						preferences
-							.edit()
-							.putBoolean("welcomed", true)
-							.apply();
-						dialog.dismiss();
-					}
-				});
-			return builder.create();		
-		}
-		
-	}
-	
+
 }

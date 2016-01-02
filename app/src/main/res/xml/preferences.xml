@@ -10,11 +10,6 @@
             android:title="@string/preferences_update_interval" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="honorGlobalSync"
-            android:summary="@string/preferences_honor_gs_summary"
-            android:title="@string/preferences_honor_gs" />
-        <CheckBoxPreference
             android:defaultValue="false"
             android:key="requireWifi"
             android:summary="@string/preferences_require_wifi_summary"

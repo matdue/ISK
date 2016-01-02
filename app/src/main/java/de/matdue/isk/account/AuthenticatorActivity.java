@@ -20,9 +20,11 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -47,7 +49,8 @@ import de.matdue.isk.database.ApiAccount;
  * Account's property {@link Account#name} is the name of the charactor or corporation.
  * Property {@link Account#type} is always <code>de.matdue.isk</code>.
  * An account has either an API or CREST token. The token type is either
- * {@link AccountAuthenticator#AUTHTOKEN_TYPE_API} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_CREST}.
+ * {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CHAR},
+ * {@link AccountAuthenticator#AUTHTOKEN_TYPE_API_CORP} or {@link AccountAuthenticator#AUTHTOKEN_TYPE_CREST}.
  * <p>
  *     An account can have these features:
  *     <ul>
@@ -81,11 +84,6 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
      * Argument key for indicator whether this activity is called for a new or an existing account
      */
     public final static String ARG_IS_ADDING_NEW_ACCOUNT = "IS_ADDING_ACCOUNT";
-
-    /**
-     * Sync provider
-     */
-    private final static String SYNC_AUTHORITY = "de.matdue.isk.content.provider";
 
     public static void navigate(AppCompatActivity activity) {
         Intent intent = new Intent(activity, AuthenticatorActivity.class);
@@ -236,21 +234,25 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
 
         for (de.matdue.isk.eve.Character character : account.characters) {
             Account newAccount = new Account(account.isCorporation() ? character.corporationName : character.characterName, AccountAuthenticator.ACCOUNT_TYPE);
-            Bundle userData = new Bundle();
-            userData.putString("api", account.isCorporation() ? AccountAuthenticator.EVE_ACCOUNT_TYPE_CORPORATION : AccountAuthenticator.EVE_ACCOUNT_TYPE_CHARACTER);
-            String token = keyID + "|" + (account.isCorporation() ? character.corporationID : character.characterID) + "|" + vCode;
+            String token = keyID + "|" + vCode;
 
-            if (accountManager.addAccountExplicitly(newAccount, null, userData)) {
+            if (accountManager.addAccountExplicitly(newAccount, null, null)) {
                 // Account created, it didn't exist before
-                accountManager.setAuthToken(newAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API, token);
+                accountManager.setAuthToken(newAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHAR, token);
                 createdAccounts.add(newAccount.name);
 
-                // Enable syncing, hourly
-                ContentResolver.setIsSyncable(newAccount, SYNC_AUTHORITY, 1);
-                ContentResolver.setSyncAutomatically(newAccount, SYNC_AUTHORITY, true);
-                ContentResolver.addPeriodicSync(newAccount, SYNC_AUTHORITY, Bundle.EMPTY, 60 * 60);
+                // Enable syncing
+                ContentResolver.setIsSyncable(newAccount, SyncAdapter.CONTENT_AUTHORITY, 1);
+                ContentResolver.setSyncAutomatically(newAccount, SyncAdapter.CONTENT_AUTHORITY, true);
 
-                //storeAccountInDatabase(account.isCorporation() ? character.corporationID : character.characterID, newAccount.name, account.isCorporation());
+                // Set sync interval
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                String syncInterval = sharedPreferences.getString("updateInterval", "1");  // Default 1 hour
+                if ("0".equals(syncInterval)) {
+                    int syncIntervalHours = Integer.parseInt(syncInterval);
+                    ContentResolver.addPeriodicSync(newAccount, SyncAdapter.CONTENT_AUTHORITY, Bundle.EMPTY, syncIntervalHours * 60 * 60);
+                }
+
                 storeAccountInDatabase(character, account);
 
                 if (firstAccountData == null) {
@@ -268,10 +270,8 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
                         accountExists = true;
 
                         // Update account
-                        accountManager.setUserData(existingAccount, "api", userData.getString("api"));
-                        accountManager.setAuthToken(existingAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API, token);
+                        accountManager.setAuthToken(existingAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHAR, token);
 
-                        //storeAccountInDatabase(account.isCorporation() ? character.corporationID : character.characterID, existingAccount.name, account.isCorporation());
                         storeAccountInDatabase(character, account);
 
                         if (firstAccountData == null) {
@@ -296,13 +296,13 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
         // Prepare notice with results
         ArrayList<String> toastMessages = new ArrayList<>(3);
         if (!createdAccounts.isEmpty()) {
-            toastMessages.add(String.format("Created: %1$s", TextUtils.join(", ", createdAccounts)));
+            toastMessages.add(getString(R.string.account_toast_created, TextUtils.join(", ", createdAccounts)));
         }
         if (!updatedAccounts.isEmpty()) {
-            toastMessages.add(String.format("Updated: %1$s", TextUtils.join(", ", updatedAccounts)));
+            toastMessages.add(getString(R.string.account_toast_updated, TextUtils.join(", ", updatedAccounts)));
         }
         if (!failedAccounts.isEmpty()) {
-            toastMessages.add(String.format("Failed to create: %1$s", TextUtils.join(", ", failedAccounts)));
+            toastMessages.add(getString(R.string.account_toast_failed, TextUtils.join(", ", failedAccounts)));
         }
         // Display notice, if there is anything to show
         if (!toastMessages.isEmpty()) {
@@ -320,6 +320,8 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
         }
         apiAccount.corporationId = character.corporationID;
         apiAccount.corporationName = character.corporationName;
+        apiAccount.allianceId = character.allianceID;
+        apiAccount.allianceName = character.allianceName;
 
         new AsyncTask<ApiAccount, Void, Void>() {
             @Override

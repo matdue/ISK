@@ -20,7 +20,6 @@ import java.text.NumberFormat;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +34,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -60,9 +60,10 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 
 	private TabLayout tabLayout;
 
-	public static void navigate(AppCompatActivity activity, String characterID) {
+	public static void navigate(AppCompatActivity activity, String characterID, String characterName) {
 		Intent intent = new Intent(activity, MarketOrderActivity.class);
 		intent.putExtra("characterID", characterID);
+		intent.putExtra("characterName", characterName);
 		ActivityCompat.startActivity(activity, intent, null);
 	}
 
@@ -90,7 +91,8 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 				.commit();
 
 		// Cancel notifications
-		((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(R.id.market_order_notification);
+		NotificationManagerCompat.from(this)
+				.cancel(getIntent().getStringExtra("characterName"), R.id.market_order_notification);
 	}
 
 	@Override
@@ -253,7 +255,7 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 				@Override
 				public Cursor loadInBackground() {
 					if (getArgs() != null && getArgs().getBoolean("setNotificationBit")) {
-						iskDatabase.setOrderWatchStatusBits(OrderWatch.NOTIFIED_AND_READ);
+						iskDatabase.setOrderWatchStatusBits(characterId, OrderWatch.NOTIFIED_AND_READ);
 					}
 					Cursor cursor = iskDatabase.queryOrderWatches(characterId, action, orderBy, searchFilter);
 					registerContentObserver(cursor);

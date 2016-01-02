@@ -17,8 +17,9 @@ package de.matdue.isk;
 
 import java.util.Arrays;
 
-import com.commonsware.cwac.wakeful.WakefulIntentService;
-
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -35,6 +36,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
+import de.matdue.isk.account.AccountAuthenticator;
+import de.matdue.isk.account.SyncAdapter;
 
 public class PreferencesActivity extends IskActivity {
 
@@ -136,11 +140,19 @@ public class PreferencesActivity extends IskActivity {
 					String txtUpdateInterval = getResources().getStringArray(R.array.update_interval)[idxUpdateInterval];
 					findPreference("updateInterval").setSummary(txtUpdateInterval);
 				}
-				
-				// Restart service on change
+
+				// Update synchronization interval
 				if (!updateInterval.equals(previousUpdateInterval)) {
-					WakefulIntentService.cancelAlarms(getActivity().getApplicationContext());
-					WakefulIntentService.scheduleAlarms(new EveApiUpdaterListener(), getActivity().getApplicationContext(), true);
+					int updateIntervalHours = Integer.parseInt(updateInterval);
+					AccountManager accountManager = AccountManager.get(getActivity());
+					Account[] accounts = accountManager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+					for (Account account : accounts) {
+						if (updateIntervalHours == 0) {
+							ContentResolver.removePeriodicSync(account, SyncAdapter.CONTENT_AUTHORITY, Bundle.EMPTY);
+						} else {
+							ContentResolver.addPeriodicSync(account, SyncAdapter.CONTENT_AUTHORITY, Bundle.EMPTY, updateIntervalHours * 60 * 60);
+						}
+					}
 					previousUpdateInterval = updateInterval;
 				}
 			}

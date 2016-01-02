@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/drawer_layout"
@@ -18,112 +19,128 @@
             android:background="?attr/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
 
-        <Spinner
-            android:id="@+id/main_pilot"
+        <LinearLayout
+            android:id="@+id/main_welcome"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="32dp"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_welcome_intro"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="32dp"
+                android:text="@string/main_welcome_setup_pilot"
+                android:onClick="gotoSetupPilot"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/main_balance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="70dip"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"/>
+            android:padding="16dp">
 
-        <TableLayout
+            <ImageView
+                android:id="@+id/main_pilot_image"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:maxWidth="80dp"
+                android:maxHeight="80dp"
+                android:contentDescription="@null"
+                tools:src="@drawable/ic_main_pilots"/>
+
+            <TextView
+                android:id="@+id/main_pilot_name"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#ffffff"
+                android:layout_toRightOf="@id/main_pilot_image"
+                android:layout_toEndOf="@id/main_pilot_image"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:padding="16dp"
+                tools:text="Pilot"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/main_pilot_balance_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/main_pilot_name"
+                android:paddingTop="16dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/main_balance"/>
+
+            <TextView
+                android:id="@+id/main_pilot_balance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/main_pilot_balance_label"
+                android:layout_toEndOf="@id/main_pilot_balance_label"
+                android:layout_alignBaseline="@id/main_pilot_balance_label"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                tools:text="1,234,567.89 ISK"/>
+
+            <TextView
+                android:id="@+id/main_pilot_balance_human"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/main_pilot_balance_label"
+                android:layout_alignLeft="@id/main_pilot_balance"
+                android:layout_alignStart="@id/main_pilot_balance"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                tools:text="(1.0m ISK)"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/main_navigation_buttons"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent" >
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-            <TableRow
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/wallet"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" >
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_main_wallet"
+                android:drawablePadding="10sp"
+                android:padding="4dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:text="@string/main_menu_wallet"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/white"
+                android:onClick="gotoWallet" />
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.5" >
-
-                    <Button
-                        android:id="@+id/wallet"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:drawableTop="@drawable/ic_main_wallet"
-                        android:drawablePadding="10sp"
-                        android:padding="4dp"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:text="@string/main_menu_wallet"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textColor="@android:color/white"
-                        android:onClick="gotoWallet" />
-
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.5" >
-
-                    <Button
-                        android:id="@+id/market_orders"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:drawableTop="@drawable/ic_main_market_orders"
-                        android:drawablePadding="10sp"
-                        android:padding="4dp"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:text="@string/main_menu_market_orders"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textColor="@android:color/white"
-                        android:onClick="gotoMarketOrders" />
-
-                </FrameLayout>
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/market_orders"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" >
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_main_market_orders"
+                android:drawablePadding="10sp"
+                android:padding="4dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:text="@string/main_menu_market_orders"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/white"
+                android:onClick="gotoMarketOrders" />
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.5" >
-
-                    <Button
-                        android:visibility="invisible"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:drawableTop="@drawable/ic_launcher"
-                        android:background="@android:color/transparent"
-                        android:textColor="@android:color/white" />
-
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.5" >
-
-                    <Button
-                        android:id="@+id/pilots"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:drawableTop="@drawable/ic_main_pilots"
-                        android:drawablePadding="10sp"
-                        android:padding="4dp"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:text="@string/main_menu_pilots"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        android:textColor="@android:color/white"
-                        android:onClick="gotoPilots" />
-
-                </FrameLayout>
-
-            </TableRow>
-
-        </TableLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
