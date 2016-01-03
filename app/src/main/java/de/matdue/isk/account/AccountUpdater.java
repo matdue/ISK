@@ -48,12 +48,7 @@ import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
 import de.matdue.isk.database.Wallet;
-import de.matdue.isk.eve.AccountBalance;
-import de.matdue.isk.eve.CacheInformation;
-import de.matdue.isk.eve.EveApi;
-import de.matdue.isk.eve.EveApiCache;
-import de.matdue.isk.eve.MarketOrder;
-import de.matdue.isk.eve.WalletJournal;
+import de.matdue.isk.eve.*;
 
 /**
  * Updates a specific account: Balance, wallet and market orders
@@ -86,7 +81,8 @@ public class AccountUpdater {
         }
 
         int updates;
-        updates = updateBalance(apiAccount.characterId);
+        updates = updateApiAccount(apiAccount);
+        updates += updateBalance(apiAccount.characterId);
         updates += updateWallet(apiAccount.characterId);
         updates += updateMarketOrders(apiAccount.characterId);
 
@@ -94,6 +90,31 @@ public class AccountUpdater {
         submitNotification(apiAccount.characterId);
 
         return updates;
+    }
+
+    /**
+     * Update the character's corporation and alliance data.
+     *
+     * @param apiAccount the account
+     * @return Number of updates.
+     */
+    private int updateApiAccount(ApiAccount apiAccount) {
+        de.matdue.isk.eve.Account account = eveApi.validateKey(apiKey.getKeyID(), apiKey.getVCode());
+        if (account != null && !account.isCorporation() && account.characters != null) {
+            for (de.matdue.isk.eve.Character character : account.characters) {
+                if (apiAccount.characterId.equals(character.characterID)) {
+                    apiAccount.corporationId = character.corporationID;
+                    apiAccount.corporationName = character.corporationName;
+                    apiAccount.allianceId = character.allianceID;
+                    apiAccount.allianceName = character.allianceName;
+                    iskDatabase.storeApiAccount(apiAccount);
+
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
     }
 
     /**

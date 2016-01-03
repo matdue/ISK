@@ -8,6 +8,9 @@
     <string name="main_dialog_welcome_close">Schließen</string>
     <string name="main_welcome_intro">Willkommen!\n\nMit ISK für EVE Online können Sie jederzeit den Kontostand und die Marktaufträge Ihrer Piloten einsehen.\n\nTippen Sie auf den Button und bestimmen Sie, welche Kapselpiloten Sie beobachten möchten.</string>
     <string name="main_welcome_setup_pilot">Pilot einrichten</string>
+    <string name="main_welcome_convert_intro">Willkommen!\n\nSie haben diese App in einer früheren Version benutzt. Während damals ISK für EVE Online die Piloten selbst verwaltete, übernimmt das heute Android in Form von Accounts. Möchten Sie ihre Piloten übernehmen?</string>
+    <string name="main_welcome_convert_convert">Ja, übernehme Piloten</string>
+    <string name="main_welcome_convert_setup">Nein, lege neue Accounts an</string>
     <string name="main_optmenu_refresh">Aktualisieren</string>
     <string name="main_optmenu_eveaccess">Letzte Aktualisierungen</string>
     <string name="main_optmenu_preferences">Einstellungen</string>
@@ -20,6 +23,8 @@
     <string name="main_balance_value">%1$s ISK</string>
     <string name="main_balance_million">(%1$s Mio. ISK)"</string>
     <string name="main_balance_billion">(%1$s Mrd. ISK)</string>
+    <string name="main_pilots_converted">Piloten wurden übernommen.</string>
+    <string name="main_pilots_converted_failed">Piloten konnten nicht (vollständig) übernommen werden.</string>
 
     <string name="preferences_title">Einstellungen</string>
     <string name="preferences_cat_updating_data">Datenaktualisierung</string>

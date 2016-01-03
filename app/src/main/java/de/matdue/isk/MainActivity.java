@@ -20,12 +20,12 @@ import java.text.Collator;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import de.matdue.isk.account.AccountAuthenticator;
 import de.matdue.isk.account.AuthenticatorActivity;
 import de.matdue.isk.account.SyncAdapter;
-import de.matdue.isk.database.ApiAccount;
-import de.matdue.isk.database.Balance;
+import de.matdue.isk.database.*;
 import de.matdue.isk.eve.EveApi;
 
 import android.accounts.Account;
@@ -35,11 +35,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -101,16 +103,24 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 		showWelcomeText();
     }
 
+	/**
+	 * Shows welcome screen if no accounts are set up,
+	 * and hide welcome screen if accounts are set up.
+	 */
 	private void showWelcomeText() {
 		Account[] accounts = AccountManager.get(this).getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
 		boolean hasAccounts = accounts.length != 0;
 		findViewById(R.id.main_welcome).setVisibility(hasAccounts ? View.GONE : View.VISIBLE);
+		findViewById(R.id.main_welcome_convert).setVisibility(View.GONE);
 		findViewById(R.id.main_balance).setVisibility(hasAccounts ? View.VISIBLE : View.GONE);
 		findViewById(R.id.main_navigation_buttons).setVisibility(hasAccounts ? View.VISIBLE : View.GONE);
 
 		if (!hasAccounts) {
 			// Make sure no account is selected
 			switchToAccount(null);
+
+			// Import accounts of older ISK for EVE Online versions?
+			askImportOldAccounts();
 		} else {
 			// Make sure an account is selected; select the first one if none was selected
 			String startCharacterName = getPreferences().getString("startCharacterName", null);
@@ -131,6 +141,98 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 				}
 			}
 		}
+	}
+
+	private void askImportOldAccounts() {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				List<de.matdue.isk.database.Character> characters = getDatabase().queryAllCharacters();
+				for (de.matdue.isk.database.Character character : characters) {
+					ApiKey apiKey = getDatabase().queryApiKey(character.characterId);
+					if (apiKey != null) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			@Override
+			protected void onPostExecute(Boolean hasOldAccounts) {
+				if (!hasOldAccounts) {
+					return;
+				}
+
+				findViewById(R.id.main_welcome).setVisibility(View.GONE);
+				findViewById(R.id.main_welcome_convert).setVisibility(View.VISIBLE);
+			}
+		}.execute();
+	}
+
+	public void convertOldPilots(View view) {
+		new AsyncTask<Void, Void, AsyncTaskResult<Integer>>() {
+			@Override
+			protected AsyncTaskResult<Integer> doInBackground(Void... params) {
+				try {
+					int accountsCreated = 0;
+					List<de.matdue.isk.database.Character> characters = getDatabase().queryAllCharacters();
+					for (de.matdue.isk.database.Character character : characters) {
+						ApiKey apiKey = getDatabase().queryApiKey(character.characterId);
+						if (apiKey == null) {
+							continue;
+						}
+
+						// Create account with token
+						AccountManager accountManager = AccountManager.get(MainActivity.this);
+						Account newAccount = new Account(character.name, AccountAuthenticator.ACCOUNT_TYPE);
+						String token = apiKey.key + "|" + apiKey.code;
+						if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+							// Account created, it didn't exist before
+							accountManager.setAuthToken(newAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHAR, token);
+
+							// Store api account
+							ApiAccount apiAccount = new ApiAccount();
+							apiAccount.characterId = character.characterId;
+							apiAccount.characterName = character.name;
+							apiAccount.corporationId = character.corporationId;
+							apiAccount.corporationName = character.corporationName;
+							getDatabase().storeApiAccount(apiAccount);
+
+							// Enable syncing
+							ContentResolver.setIsSyncable(newAccount, SyncAdapter.CONTENT_AUTHORITY, 1);
+							ContentResolver.setSyncAutomatically(newAccount, SyncAdapter.CONTENT_AUTHORITY, true);
+
+							// Set sync interval
+							SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+							String syncInterval = sharedPreferences.getString("updateInterval", "1");  // Default 1 hour
+							if (!"0".equals(syncInterval)) {
+								int syncIntervalHours = Integer.parseInt(syncInterval);
+								ContentResolver.addPeriodicSync(newAccount, SyncAdapter.CONTENT_AUTHORITY, Bundle.EMPTY, syncIntervalHours * 60 * 60);
+							}
+
+							accountsCreated++;
+						}
+					}
+					return new AsyncTaskResult<>(accountsCreated);
+				} catch (Exception e) {
+					return new AsyncTaskResult<>(e);
+				}
+			}
+
+			@Override
+			protected void onPostExecute(AsyncTaskResult<Integer> accountsCreated) {
+				Account[] accounts = AccountManager.get(MainActivity.this).getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+				int msg = (accountsCreated.isFaulted() || accountsCreated.getResult() == 0 || accounts.length == 0) ? R.string.main_pilots_converted_failed : R.string.main_pilots_converted;
+				Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+
+				// Switch to first created account
+				if (accounts.length != 0) {
+					switchToAccount(accounts[0].name);
+					showWelcomeText();
+				}
+			}
+		}.execute();
 	}
 
 	@Override
@@ -461,8 +563,6 @@ public class MainActivity extends IskActivity implements NavigationView.OnNaviga
 		
 		// Stop progress bar
 		setRefreshActionItemState(false);
-
-		showWelcomeText();
 	}
 	
 	/**

@@ -3,11 +3,14 @@
 
     <string name="app_name">ISK for EVE Online</string>
     <string name="app_name_launcher">ISK</string>
-    <string name="main_pilot_portrait">Pilot´s portrait</string>
-    <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet and market orders at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
+    <string name="main_pilot_portrait">Pilot’s portrait</string>
+    <string name="main_dialog_welcome">Welcome!\n\nISK for EVE Online allows you to watch your pilot’s wallet and market orders at any time.\n\nTap the pilot icon and select the pod pilots you would like to watch.</string>
     <string name="main_dialog_welcome_close">Close</string>
-    <string name="main_welcome_intro">Welcome!\n\nISK for EVE Online allows you to watch your pilot´s wallet and market orders at any time.\n\nTap the button and select the pod pilots you would like to watch.</string>
+    <string name="main_welcome_intro">Welcome!\n\nISK for EVE Online allows you to watch your pilot’s wallet and market orders at any time.\n\nTap the button and select the pod pilots you would like to watch.</string>
     <string name="main_welcome_setup_pilot">Setup pilot</string>
+    <string name="main_welcome_convert_intro">Welcome!\n\nYou’ve used this app in a previous version. In the past, ISK for EVE online managed the pilots on its own. Today, the pilots are Android accounts. Would you like to keep your pilots?</string>
+    <string name="main_welcome_convert_convert">Yes, convert pilots</string>
+    <string name="main_welcome_convert_setup">No, create new accounts</string>
     <string name="main_optmenu_refresh">Refresh</string>
     <string name="main_optmenu_eveaccess">Update history</string>
     <string name="main_optmenu_preferences">Settings</string>
@@ -20,6 +23,8 @@
     <string name="main_balance_value">%1$s ISK</string>
     <string name="main_balance_million">(%1$sm ISK)"</string>
     <string name="main_balance_billion">(%1$sbn ISK)</string>
+    <string name="main_pilots_converted_failed">Pilot conversion failed (partly).</string>
+    <string name="main_pilots_converted">Pilots converted.</string>
 
     <string name="preferences_title">Settings</string>
     <string name="preferences_cat_updating_data">Updating data</string>
@@ -45,7 +50,7 @@
     <string name="eveaccess_title">Update history</string>
     <string name="eveaccess_no_data">No data</string>
     
-    <string name="pilots_portrait">Pilot´s portrait</string>
+    <string name="pilots_portrait">Pilot’s portrait</string>
     <string name="pilots_title">Pilots</string>
     <string name="pilots_context_remove">Remove API key</string>
     <string name="pilots_optmenu_add">Add</string>

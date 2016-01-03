@@ -241,6 +241,8 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
                 accountManager.setAuthToken(newAccount, AccountAuthenticator.AUTHTOKEN_TYPE_API_CHAR, token);
                 createdAccounts.add(newAccount.name);
 
+                storeAccountInDatabase(character, account);
+
                 // Enable syncing
                 ContentResolver.setIsSyncable(newAccount, SyncAdapter.CONTENT_AUTHORITY, 1);
                 ContentResolver.setSyncAutomatically(newAccount, SyncAdapter.CONTENT_AUTHORITY, true);
@@ -248,12 +250,10 @@ public class AuthenticatorActivity extends AppCompatAccountAuthenticatorActivity
                 // Set sync interval
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 String syncInterval = sharedPreferences.getString("updateInterval", "1");  // Default 1 hour
-                if ("0".equals(syncInterval)) {
+                if (!"0".equals(syncInterval)) {
                     int syncIntervalHours = Integer.parseInt(syncInterval);
                     ContentResolver.addPeriodicSync(newAccount, SyncAdapter.CONTENT_AUTHORITY, Bundle.EMPTY, syncIntervalHours * 60 * 60);
                 }
-
-                storeAccountInDatabase(character, account);
 
                 if (firstAccountData == null) {
                     firstAccountData = new Bundle();

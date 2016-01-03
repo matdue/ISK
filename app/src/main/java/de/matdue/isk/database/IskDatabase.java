@@ -116,7 +116,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 		
 		return null;
 	}
-	
+
 	public Cursor getCharacterCursor(long apiId) {
 		try {
 			SQLiteDatabase db = getReadableDatabase();
@@ -164,13 +164,13 @@ public class IskDatabase extends SQLiteOpenHelper {
 			try {
 				db.beginTransaction();
 				String idStr = Long.toString(id);
-				db.delete(BalanceTable.TABLE_NAME, 
-						BalanceTable.CHARACTER_ID + " IN " + subselect, 
-						new String[] { idStr });
+				db.delete(BalanceTable.TABLE_NAME,
+						BalanceTable.CHARACTER_ID + " IN " + subselect,
+						new String[]{idStr});
 				
-				db.delete(WalletTable.TABLE_NAME, 
-						WalletTable.CHARACTER_ID + " IN " + subselect, 
-						new String[] { idStr });
+				db.delete(WalletTable.TABLE_NAME,
+						WalletTable.CHARACTER_ID + " IN " + subselect,
+						new String[]{idStr});
 				
 				db.delete(OrderWatchTable.TABLE_NAME, 
 						OrderWatchTable.CHARACTER_ID + " IN " + subselect, 
@@ -359,7 +359,7 @@ public class IskDatabase extends SQLiteOpenHelper {
 			Cursor cursor = db.query(ApiAccountTable.TABLE_NAME,
 					new String[]{ApiAccountTable.CHARACTER_ID, ApiAccountTable.CHARACTER_NAME, ApiAccountTable.CORPORATION_ID, ApiAccountTable.CORPORATION_NAME, ApiAccountTable.ALLIANCE_ID, ApiAccountTable.ALLIANCE_NAME},
 					ApiAccountTable.CHARACTER_NAME + "=?",
-					new String[] { characterName },
+					new String[]{characterName},
 					null,
 					null,
 					null);
@@ -404,8 +404,12 @@ public class IskDatabase extends SQLiteOpenHelper {
 						insertApiAccount.bindString(3, apiAccount.corporationId);
 						insertApiAccount.bindString(4, apiAccount.corporationName);
 					}
-					insertApiAccount.bindString(5, apiAccount.allianceId);
-					insertApiAccount.bindString(6, apiAccount.allianceName);
+					if (apiAccount.allianceId != null) {
+						insertApiAccount.bindString(5, apiAccount.allianceId);
+					}
+					if (apiAccount.allianceName != null) {
+						insertApiAccount.bindString(6, apiAccount.allianceName);
+					}
 					insertApiAccount.executeInsert();
 				} else {
 					db.delete(ApiAccountTable.TABLE_NAME,
@@ -414,8 +418,12 @@ public class IskDatabase extends SQLiteOpenHelper {
 
 					insertApiAccount.bindString(3, apiAccount.corporationId);
 					insertApiAccount.bindString(4, apiAccount.corporationName);
-					insertApiAccount.bindString(5, apiAccount.allianceId);
-					insertApiAccount.bindString(6, apiAccount.allianceName);
+					if (apiAccount.allianceId != null) {
+						insertApiAccount.bindString(5, apiAccount.allianceId);
+					}
+					if (apiAccount.allianceName != null) {
+						insertApiAccount.bindString(6, apiAccount.allianceName);
+					}
 					insertApiAccount.executeInsert();
 				}
 
