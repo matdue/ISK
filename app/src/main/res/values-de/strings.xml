@@ -127,4 +127,7 @@
     <string name="account_toast_updated">Aktualisiert: %1$s</string>
     <string name="account_toast_failed">Fehler beim Anlegen: %1$s</string>
 
+    <string name="navdrawer_add_account">Konto hinzufügen</string>
+    <string name="navdrawer_manage_accounts">Konten verwalten</string>
+
 </resources>

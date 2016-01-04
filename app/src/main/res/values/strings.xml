@@ -127,4 +127,7 @@
     <string name="account_toast_updated">Updated: %1$s</string>
     <string name="account_toast_failed">Failed to create: %1$s</string>
 
+    <string name="navdrawer_add_account">Add account</string>
+    <string name="navdrawer_manage_accounts">Manage accounts</string>
+
 </resources>

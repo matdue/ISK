@@ -34,13 +34,13 @@
         <item
             android:id="@+id/navdrawer_account_add"
             android:icon="@drawable/ic_add_white_24dp"
-            android:title="Konto hinzufügen"
+            android:title="@string/navdrawer_add_account"
             android:checkable="false"
             android:orderInCategory="100"/>
         <item
             android:id="@+id/navdrawer_account_manage"
             android:icon="@drawable/ic_settings_white_24dp"
-            android:title="Konten verwalten"
+            android:title="@string/navdrawer_manage_accounts"
             android:checkable="false"
             android:orderInCategory="100"/>
 
