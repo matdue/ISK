@@ -16,6 +16,7 @@
 package de.matdue.isk.eve;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -73,15 +74,15 @@ public class EveApi {
 		return IMAGE_BASE + "Type/" + typeID + "_" + resolution + ".png";
 	}
 	
-	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode) {
-		return queryApi(xmlParser, url, keyID, vCode, null);
+	private void queryApi(ContentHandler xmlParser, String url, String keyID, String vCode) throws EveApiException {
+		queryApi(xmlParser, url, keyID, vCode, null);
 	}
 	
-	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode, String characterID) {
-		return queryApi(xmlParser, url, keyID, vCode, characterID, null, null);
+	private void queryApi(ContentHandler xmlParser, String url, String keyID, String vCode, String characterID) throws EveApiException {
+		queryApi(xmlParser, url, keyID, vCode, characterID, null, null);
 	}
 	
-	private boolean queryApi(ContentHandler xmlParser, String url, String keyID, String vCode, String characterID, String rowCount, String fromID) {
+	private void queryApi(ContentHandler xmlParser, String url, String keyID, String vCode, String characterID, String rowCount, String fromID) throws EveApiException {
 		InputStream inputStream = null;
 		HttpsURLConnection connection = null;
 		
@@ -121,17 +122,16 @@ public class EveApi {
 			
 			if (statusCode != HttpsURLConnection.HTTP_OK) {
 				Log.e(EveApi.class.toString(), "API returned with code " + statusCode);
-				return false;
+				throw new EveApiException(new IOException("EVE API error"));
 			}
 
 			inputStream = new BufferedInputStream(connection.getInputStream());
 			Xml.parse(inputStream, Encoding.UTF_8, xmlParser);
-			
-			return true;
 		} catch (Exception e) {
 			String message = e.getMessage();
 			apiCache.urlAccessed(url, keyID, message != null ? message : e.toString());
 			Log.e(EveApi.class.toString(), "Error in API communication", e);
+			throw new EveApiException(e);
 		} finally {
 			if (connection != null) {
 				try {
@@ -149,11 +149,9 @@ public class EveApi {
 				}
 			}
 		}
-		
-		return false;
 	}
 	
-	public Account validateKey(String keyID, String vCode) {
+	public Account validateKey(String keyID, String vCode) throws EveApiException {
 		final String URL = "/account/APIKeyInfo.xml.aspx";
 		
 		// Lookup in cache
@@ -169,16 +167,7 @@ public class EveApi {
 		RootElement root = prepareAPIKeyInfoXmlParser(result, cacheInformation);
 		
 		// Query API
-		if (!queryApi(root.getContentHandler(), URL, keyID, vCode)) {
-			return null;
-		}
-		
-		// Plausibility check
-		if (result.accessMask == 0 ||
-			result.type == null ||
-			result.characters.size() == 0) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), URL, keyID, vCode);
 
 		// Cache result
 		apiCache.cache(cacheKey, cacheInformation);
@@ -242,11 +231,23 @@ public class EveApi {
 				result.characters.add(newChar);
 			}
 		});
+		root.getChild("error").setStartElementListener(new StartElementListener() {
+			@Override
+			public void start(Attributes attributes) {
+				result.errorCode = attributes.getValue("code");
+			}
+		});
+		root.getChild("error").setEndTextElementListener(new EndTextElementListener() {
+			@Override
+			public void end(String body) {
+				result.errorText = body;
+			}
+		});
 		
 		return root;
 	}
 	
-	public AccountBalance queryAccountBalance(String keyID, String vCode, String characterID) {
+	public AccountBalance queryAccountBalance(String keyID, String vCode, String characterID) throws EveApiException {
 		final String URL = "/char/AccountBalance.xml.aspx";
 		
 		// Lookup in cache
@@ -262,9 +263,7 @@ public class EveApi {
 		RootElement root = prepareAccountBalanceXmlParser(result, cacheInformation);
 		
 		// Query API
-		if (!queryApi(root.getContentHandler(), URL, keyID, vCode, characterID)) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), URL, keyID, vCode, characterID);
 		
 		// Plausibility check
 		if (result.isEmpty() || result.get(0).accountID == null || result.get(0).accountKey == null) {
@@ -277,7 +276,7 @@ public class EveApi {
 		return result.get(0);
 	}
 
-	public List<AccountBalance> queryCorporationAccountBalance(String keyID, String vCode, String corporationID) {
+	public List<AccountBalance> queryCorporationAccountBalance(String keyID, String vCode, String corporationID) throws EveApiException {
 		final String URL = "/corp/AccountBalance.xml.aspx";
 
 		// Lookup in cache
@@ -293,9 +292,7 @@ public class EveApi {
 		RootElement root = prepareAccountBalanceXmlParser(result, cacheInformation);
 
 		// Query API
-		if (!queryApi(root.getContentHandler(), URL, keyID, vCode, corporationID)) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), URL, keyID, vCode, corporationID);
 
 		// Plausibility check
 		if (result.isEmpty()) {
@@ -331,7 +328,7 @@ public class EveApi {
 		return root;
 	}
 
-	public Map<String, String> queryCorpAccountKeys(String keyID, String vCode, String corporationID) {
+	public Map<String, String> queryCorpAccountKeys(String keyID, String vCode, String corporationID) throws EveApiException {
 		final String URL = "/corp/CorporationSheet.xml.aspx";
 
 		// Lookup in cache
@@ -347,9 +344,7 @@ public class EveApi {
 		RootElement root = prepareCorporationSheetXmlParser(result, cacheInformation);
 
 		// Query API
-		if (!queryApi(root.getContentHandler(), URL, keyID, vCode)) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), URL, keyID, vCode);
 
 		// Plausibility check
 		if (result.isEmpty()) {
@@ -396,7 +391,7 @@ public class EveApi {
 		}
 	}
 
-	public List<WalletJournal> queryWallet(String keyID, String vCode, String characterID) {
+	public List<WalletJournal> queryWallet(String keyID, String vCode, String characterID) throws EveApiException {
 		final String journalURL = "/char/WalletJournal.xml.aspx";
 		final String transactionsURL = "/char/WalletTransactions.xml.aspx";
 		
@@ -421,9 +416,7 @@ public class EveApi {
 		RootElement root = prepareWalletTransactionXmlParser(walletTransactionsByIdBatch, walletTransactionsByJournalIdBatch);
 		
 		// Query in batches of 2560 entries
-		if (!queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", null)) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", null);
 		Log.d("EveApi", "Transactions loaded: " + walletTransactionsByIdBatch.size());
 		while (walletTransactionsByIdBatch.size() == 2560) {
 			// Find lowest transactionID
@@ -439,9 +432,7 @@ public class EveApi {
 			walletTransactionsByJournalIdBatch.clear();
 			
 			// Query next batch
-			if (!queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", Long.toString(lowestTransactionID))) {
-				return null;
-			}
+			queryApi(root.getContentHandler(), transactionsURL, keyID, vCode, characterID, "2560", Long.toString(lowestTransactionID));
 			Log.d("EveApi", "Transactions loaded: " + walletTransactionsByIdBatch.size());
 		}
 		walletTransactionsById.putAll(walletTransactionsByIdBatch);
@@ -458,9 +449,7 @@ public class EveApi {
 		root = prepareWalletJournalXmlParser(walletJournalBatch, cacheInformation);
 		
 		// Query in batches of 2560 entries
-		if (!queryApi(root.getContentHandler(), journalURL, keyID, vCode, characterID, "2560", null)) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), journalURL, keyID, vCode, characterID, "2560", null);
 		Log.d("EveApi", "Journals loaded: " + walletJournalBatch.size());
 		while (walletJournalBatch.size() == 2560) {
 			// Find lowest refID
@@ -474,9 +463,7 @@ public class EveApi {
 			walletJournalBatch.clear();
 			
 			// Query next batch
-			if (!queryApi(root.getContentHandler(), journalURL, keyID, vCode, characterID, "2560", Long.toString(lowestRefID))) {
-				return null;
-			}
+			queryApi(root.getContentHandler(), journalURL, keyID, vCode, characterID, "2560", Long.toString(lowestRefID));
 			Log.d("EveApi", "Journals loaded: " + walletJournalBatch.size());
 		}
 		walletJournal.addAll(walletJournalBatch);
@@ -640,7 +627,7 @@ public class EveApi {
 		return root;
 	}
 	
-	public List<MarketOrder> queryMarketOrders(String keyID, String vCode, String characterID) {
+	public List<MarketOrder> queryMarketOrders(String keyID, String vCode, String characterID) throws EveApiException {
 		final String marketOrderURL = "/char/MarketOrders.xml.aspx";
 		
 		// Lookup in cache
@@ -656,9 +643,7 @@ public class EveApi {
 		RootElement root = prepareMarketOrderXmlParser(result, cacheInformation);
 		
 		// Query API
-		if (!queryApi(root.getContentHandler(), marketOrderURL, keyID, vCode, characterID)) {
-			return null;
-		}
+		queryApi(root.getContentHandler(), marketOrderURL, keyID, vCode, characterID);
 		Log.d("EveApi", "Market orders loaded: " + result.size());
 		
 		// Plausibility check

@@ -19,6 +19,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,7 +82,12 @@ public class CheckApiKeyActivityWaitFragment extends Fragment {
                 String id = params[0].getString("keyID");
                 String vCode = params[0].getString("vCode");
                 EveApi api = new EveApi(new EveApiCacheDummy());
-                return api.validateKey(id, vCode);
+                try {
+                    return api.validateKey(id, vCode);
+                } catch (Exception e) {
+                    Log.e("CheckApiKey", "Error validating API key", e);
+                    return null;
+                }
             }
 
             @Override

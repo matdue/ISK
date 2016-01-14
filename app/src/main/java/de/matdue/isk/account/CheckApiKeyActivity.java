@@ -80,6 +80,9 @@ public class CheckApiKeyActivity extends IskActivity implements CheckApiKeyActiv
         if (account == null) {
             // Unknown error happened, probably communication error
             fragment = CheckApiKeyActivityErrorFragment.newInstance(R.string.pilots_key_error_validate);
+        } else if (account.errorCode != null) {
+            // Error returned by EVE Online
+            fragment = CheckApiKeyActivityErrorFragment.newInstance(getString(R.string.pilots_key_error_error, account.errorText));
         } else if (account.isCorporation()) {
             // API key is a corporation key which is not supported yet
             fragment = CheckApiKeyActivityErrorFragment.newInstance(R.string.pilots_key_error_type);

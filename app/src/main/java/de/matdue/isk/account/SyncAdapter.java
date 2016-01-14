@@ -33,6 +33,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import de.matdue.isk.IskApplication;
+import de.matdue.isk.R;
+import de.matdue.isk.eve.EveApiException;
 
 /**
  * Sync adapter performing updating our accounts
@@ -93,6 +95,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numAuthExceptions++;
             errorMessage = e.getMessage();
             Log.e("SyncAdapter", "Authentication failure", e);
+        } catch (EveApiException e) {
+            // Network error, Android will try again later
+            syncResult.stats.numIoExceptions++;
+            errorMessage = getContext().getString(e.isNetworkError() ? R.string.error_network : R.string.error_eve_api);
+            Log.e("SyncAdapter", "Eve Api error", e);
         } catch (Exception e) {
             // Network error, Android will try again later
             syncResult.stats.numIoExceptions++;

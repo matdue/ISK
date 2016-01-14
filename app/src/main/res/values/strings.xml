@@ -69,6 +69,7 @@
     <string name="pilots_key_error_validate">Unable to verify API key, please try again.</string>
     <string name="pilots_key_error_accessmask">Insufficient access mask. Please check API key or choose a different one.</string>
     <string name="pilots_key_error_type">At the moment only character keys are supported.</string>
+    <string name="pilots_key_error_error">Invalid API key: %1$s</string>
     
     <string name="wallet_title">Wallet and transactions</string>
     <string name="wallet_no_data">No data</string>
@@ -129,5 +130,8 @@
 
     <string name="navdrawer_add_account">Add account</string>
     <string name="navdrawer_manage_accounts">Manage accounts</string>
+
+    <string name="error_network">Network error</string>
+    <string name="error_eve_api">EVE Online API error</string>
 
 </resources>

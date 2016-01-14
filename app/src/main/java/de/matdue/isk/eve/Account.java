@@ -27,6 +27,8 @@ public class Account implements Serializable {
 	public String type;
 	public Date expires;
 	public List<Character> characters;
+	public String errorCode;
+	public String errorText;
 	
 	public Account() {
 		characters = new ArrayList<Character>();

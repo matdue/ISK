@@ -74,7 +74,7 @@ public class AccountUpdater {
         bitmapManager = iskApplication.getBitmapManager();
     }
 
-    public int updateCharacter() throws UnknownAccountException {
+    public int updateCharacter() throws UnknownAccountException, InvalidAccountException, EveApiException {
         ApiAccount apiAccount = iskDatabase.queryApiAccount(account.name);
         if (apiAccount == null) {
             throw new UnknownAccountException(account.name);
@@ -98,8 +98,11 @@ public class AccountUpdater {
      * @param apiAccount the account
      * @return Number of updates.
      */
-    private int updateApiAccount(ApiAccount apiAccount) {
+    private int updateApiAccount(ApiAccount apiAccount) throws InvalidAccountException, EveApiException {
         de.matdue.isk.eve.Account account = eveApi.validateKey(apiKey.getKeyID(), apiKey.getVCode());
+        if (account != null && account.errorCode != null) {
+            throw new InvalidAccountException(account.errorText);
+        }
         if (account != null && !account.isCorporation() && account.characters != null) {
             for (de.matdue.isk.eve.Character character : account.characters) {
                 if (apiAccount.characterId.equals(character.characterID)) {
@@ -123,7 +126,7 @@ public class AccountUpdater {
      * @param characterId Character's EVE id
      * @return Number of updates balances.
      */
-    private int updateBalance(String characterId) {
+    private int updateBalance(String characterId) throws EveApiException {
         AccountBalance accountBalance = eveApi.queryAccountBalance(apiKey.getKeyID(), apiKey.getVCode(), characterId);
         if (accountBalance != null) {
             Balance balance = new Balance();
@@ -136,7 +139,7 @@ public class AccountUpdater {
         return 0;
     }
 
-    private int updateWallet(String characterId) {
+    private int updateWallet(String characterId) throws EveApiException {
         List<WalletJournal> wallet = eveApi.queryWallet(apiKey.getKeyID(), apiKey.getVCode(), characterId);
         if (wallet != null) {
             // Prepare data objects
@@ -220,7 +223,7 @@ public class AccountUpdater {
         return orderWatch;
     }
 
-    private int updateMarketOrders(String characterId) {
+    private int updateMarketOrders(String characterId) throws EveApiException {
         List<MarketOrder> marketOrders = eveApi.queryMarketOrders(apiKey.getKeyID(), apiKey.getVCode(), characterId);
         if (marketOrders != null) {
             long seqId = SystemClock.elapsedRealtime();

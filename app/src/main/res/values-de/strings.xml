@@ -69,6 +69,7 @@
     <string name="pilots_key_error_validate">API-Key konnte nicht geprüft werden, bitte wiederholen Sie den Vorgang.</string>
     <string name="pilots_key_error_accessmask">API-Key hat nicht genügend Rechte. Bitte prüfen Sie den Key oder wählen Sie einen anderen.</string>
     <string name="pilots_key_error_type">Zur Zeit werden nur Character-Keys unterstützt.</string>
+    <string name="pilots_key_error_error">Ungültiger API-Key: %1$s</string>
     
     <string name="wallet_title">Kontobewegungen</string>
     <string name="wallet_no_data">Keine Daten</string>
@@ -129,5 +130,8 @@
 
     <string name="navdrawer_add_account">Konto hinzufügen</string>
     <string name="navdrawer_manage_accounts">Konten verwalten</string>
+
+    <string name="error_network">Netzwerkfehler</string>
+    <string name="error_eve_api">EVE Online API-Störung</string>
 
 </resources>
