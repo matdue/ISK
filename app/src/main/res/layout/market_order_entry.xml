@@ -61,4 +61,12 @@
         android:layout_below="@+id/market_order_entry_price"
         layout="@layout/market_order_entry_active" />
 
+    <include
+        android:id="@+id/market_order_entry_incl_inactive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/market_order_entry_price"
+        layout="@layout/market_order_entry_inactive" />
+
 </RelativeLayout>

@@ -396,6 +396,7 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 				viewHolder.price = (TextView) view.findViewById(R.id.market_order_entry_price);
 				
 				viewHolder.activeOrderGroup = view.findViewById(R.id.market_order_entry_incl_active);
+				viewHolder.inactiveOrderGroup = view.findViewById(R.id.market_order_entry_incl_inactive);
 				viewHolder.volume = (TextView) view.findViewById(R.id.market_order_entry_volume);
 				viewHolder.expires = (TextView) view.findViewById(R.id.market_order_entry_expires);
 				viewHolder.watch = (CheckBox) view.findViewById(R.id.market_order_entry_watch);
@@ -452,10 +453,12 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 				
 				view.setTag(R.id.market_order_disposable, null);
 				viewHolder.activeOrderGroup.setVisibility(View.VISIBLE);
+				viewHolder.inactiveOrderGroup.setVisibility(View.GONE);
 			} else {
 				// Inactive order
 				view.setTag(R.id.market_order_disposable, Boolean.TRUE);
 				viewHolder.activeOrderGroup.setVisibility(View.GONE);
+				viewHolder.inactiveOrderGroup.setVisibility(View.VISIBLE);
 			}
 		}
 		
@@ -466,6 +469,7 @@ public class MarketOrderActivity extends IskActivity implements TabLayout.OnTabS
 			TextView price;
 
 			View activeOrderGroup;
+			View inactiveOrderGroup;
 			TextView volume;
 			TextView expires;
 			CheckBox watch;

@@ -91,6 +91,7 @@
     <string name="market_order_orderstate_sell">Verkauf</string>
     <string name="market_order_orderstate_bought">Gekauft oder ausgelaufen</string>
     <string name="market_order_orderstate_sold">Verkauft oder ausgelaufen</string>
+    <string name="market_order_orderstate_finished">Abgeschlossen oder ausgelaufen</string>
     <string name="market_order_fulfilled">%1$d%% erfüllt (%2$s/%3$s)</string>
     <string name="market_order_expires">Gültig bis %1$s</string>
     <string name="market_order_watch">Beobachten</string>
