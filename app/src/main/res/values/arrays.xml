@@ -141,14 +141,21 @@
 		<item>Lottery Give Away</item><!-- 109 -->
 		<item>Aurum Token exchanged for Aur</item><!-- 111 -->
 		<item>Datacore Fee</item><!-- 112 -->
-		<item>War Surrender Fee</item><!-- 113 -->
-		<item>War Ally Contract</item><!-- 114 -->
+		<item>War fee surrender</item><!-- 113 -->
+		<item>War ally contract</item><!-- 114 -->
         <item>Bounty Reimbursement</item><!-- 115 -->
-        <item>Kill Right</item><!-- 116 -->
-        <item>Fee for processing one or more security tags</item><!-- 117 -->
-        <item>Unknown</item><!-- 118 -->
-        <item>Unknown</item><!-- 119 -->
-        <item>Industry Facility Tax</item><!-- 120 -->
+        <item>Kill Right Fee</item><!-- 116 -->
+        <item>Security Processing Fee</item><!-- 117 -->
+        <item>Escrow for Industry Team Auction</item><!-- 118 -->
+        <item>Reimbursement of escrow</item><!-- 119 -->
+        <item>Industry Job Tax</item><!-- 120 -->
+		<item>Infrastructure Hub maintenance</item><!-- 122 -->
+		<item>Asset Safety recovery Tax</item><!-- 123 -->
+		<item>Opportunity reward</item><!-- 124 -->
+		<item>Project Discovery reward</item><!-- 125 -->
+		<item>Project Discovery Tax</item><!-- 126 -->
+		<item>Reprocessing Tax</item><!-- 127 -->
+		<item>Jump Clone Activation Fee</item><!-- 128 -->
 		<item>Modify ISK</item><!-- 10001 -->
 		<item>Primary Marketplace Purchase</item><!-- 10002 -->
 		<item>Battle Reward</item><!-- 10003 -->
@@ -159,7 +166,7 @@
 		<item>Battle WP Loss Reward</item><!-- 10008 -->
 		<item>Battle Win Reward</item><!-- 10009 -->
 		<item>Battle Loss Reward</item><!-- 10010 -->
-        <item>Unknown</item><!-- 10011 -->
+        <item>Reset ISK for Character Reset</item><!-- 10011 -->
         <item>District Contract Deposit</item><!-- 10012 -->
         <item>District Contract Deposit Refund</item><!-- 10013 -->
         <item>District Contract Collateral</item><!-- 10014 -->
@@ -298,6 +305,13 @@
         <item>118</item>
         <item>119</item>
         <item>120</item>
+		<item>122</item>
+		<item>123</item>
+		<item>124</item>
+		<item>125</item>
+		<item>126</item>
+		<item>127</item>
+		<item>128</item>
 	    <item>10001</item>
 	    <item>10002</item>
 	    <item>10003</item>
