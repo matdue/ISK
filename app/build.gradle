@@ -2,7 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.3"
+
+    dexOptions {
+        maxProcessCount 4
+        javaMaxHeapSize "2g"
+    }
 
     defaultConfig {
         applicationId "de.matdue.isk"
@@ -22,11 +27,16 @@ android {
     }
 }
 
+ext {
+    supportLibVersion = '23.3.0'
+}
+
 dependencies {
-    testCompile 'org.testng:testng:6.8'
-    compile 'com.android.support:support-annotations:23.1.1'
-    compile 'com.android.support:support-v4:23.1.1'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:palette-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
+    testCompile 'org.testng:testng:6.9.9'
+    compile "com.android.support:support-annotations:${supportLibVersion}"
+    compile "com.android.support:support-v4:${supportLibVersion}"
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+    compile "com.android.support:palette-v7:${supportLibVersion}"
+    compile "com.android.support:design:${supportLibVersion}"
+    compile 'com.google.code.gson:gson:2.6.2'
 }
