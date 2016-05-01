@@ -18,7 +18,6 @@ package de.matdue.isk;
 import java.util.Arrays;
 
 import de.matdue.isk.bitmap.BitmapManager;
-import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -39,11 +38,6 @@ public abstract class IskActivity extends AppCompatActivity {
 	public IskDatabase getDatabase() {
 		IskApplication iskApp = (IskApplication) getApplication();
 		return iskApp.getIskDatabase();
-	}
-	
-	public EveDatabase getEveDatabase() {
-		IskApplication iskApp = (IskApplication) getApplication();
-		return iskApp.getEveDatabase();
 	}
 	
 	public BitmapManager getBitmapManager() {

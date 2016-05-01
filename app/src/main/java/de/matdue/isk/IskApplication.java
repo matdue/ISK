@@ -16,7 +16,6 @@
 package de.matdue.isk;
 
 import de.matdue.isk.bitmap.BitmapManager;
-import de.matdue.isk.database.EveDatabase;
 import de.matdue.isk.database.IskDatabase;
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
@@ -25,7 +24,6 @@ import android.os.StrictMode;
 public class IskApplication extends Application {
 	
 	private IskDatabase iskDatabase;
-	private EveDatabase eveDatabase;
 	private BitmapManager bitmapManager;
 	
 	@Override
@@ -87,8 +85,23 @@ public class IskApplication extends Application {
 		}
 		
 		iskDatabase = new IskDatabase(this);
-		eveDatabase = new EveDatabase(this);
 		bitmapManager = new BitmapManager(this, getCacheDir());
+
+		deleteEveDatabase();
+	}
+
+	/**
+	 * Delete old, meanwhile unused EVE database.
+	 * Remove this code on 1st May, 2017 or later.
+	 * It doesn't matter if the database exists. It just uses some disk space.
+	 */
+	private void deleteEveDatabase() {
+		String[] databases = databaseList();
+		for (String database : databases) {
+			if (database.startsWith("eve") && database.endsWith(".db")) {
+				deleteDatabase(database);
+			}
+		}
 	}
 
 	@Override
@@ -101,10 +114,6 @@ public class IskApplication extends Application {
 	
 	public IskDatabase getIskDatabase() {
 		return iskDatabase;
-	}
-	
-	public EveDatabase getEveDatabase() {
-		return eveDatabase;
 	}
 	
 	public BitmapManager getBitmapManager() {
