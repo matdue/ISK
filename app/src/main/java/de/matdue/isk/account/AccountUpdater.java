@@ -31,11 +31,16 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.matdue.isk.IskApplication;
 import de.matdue.isk.MarketOrderActivity;
@@ -44,11 +49,17 @@ import de.matdue.isk.R;
 import de.matdue.isk.bitmap.BitmapManager;
 import de.matdue.isk.database.ApiAccount;
 import de.matdue.isk.database.Balance;
-import de.matdue.isk.database.EveDatabase;
+import de.matdue.isk.database.EveStation;
+import de.matdue.isk.database.EveType;
 import de.matdue.isk.database.IskDatabase;
 import de.matdue.isk.database.OrderWatch;
 import de.matdue.isk.database.Wallet;
+import de.matdue.isk.download.DownloadPool;
 import de.matdue.isk.eve.*;
+import de.matdue.isk.eve.crest.DownloadStationTask;
+import de.matdue.isk.eve.crest.DownloadTypeTask;
+import de.matdue.isk.eve.crest.Station;
+import de.matdue.isk.eve.crest.Type;
 
 /**
  * Updates a specific account: Balance, wallet and market orders
@@ -57,19 +68,19 @@ public class AccountUpdater {
 
     private Context context;
     private Account account;
+    private boolean forcedUpdate;
     private ApiKey apiKey;
     private IskDatabase iskDatabase;
-    private EveDatabase eveDatabase;
     private EveApi eveApi;
     private BitmapManager bitmapManager;
 
     public AccountUpdater(Account account, String token, IskApplication iskApplication, boolean forcedUpdate) {
         context = iskApplication;
         this.account = account;
+        this.forcedUpdate = forcedUpdate;
 
         apiKey = new ApiKey(token);
         iskDatabase = iskApplication.getIskDatabase();
-        eveDatabase = iskApplication.getEveDatabase();
         eveApi = new EveApi(new EveApiCacheDatabase(forcedUpdate));
         bitmapManager = iskApplication.getBitmapManager();
     }
@@ -88,6 +99,8 @@ public class AccountUpdater {
 
         // Notify about updates
         submitNotification(apiAccount.characterId);
+
+        iskDatabase.cleanupEveApiHistory();
 
         return updates;
     }
@@ -173,34 +186,13 @@ public class AccountUpdater {
         return 0;
     }
 
-    private OrderWatch createOrderWatch(MarketOrder marketOrder, String characterId, SparseArray<String> itemNameCache, SparseArray<String> stationNameCache) {
+    private OrderWatch createOrderWatch(MarketOrder marketOrder, String characterId) {
         OrderWatch orderWatch = new OrderWatch();
         orderWatch.characterId = characterId;
         orderWatch.orderID = marketOrder.orderID;
         orderWatch.orderState = marketOrder.orderState;
-
         orderWatch.typeID = marketOrder.typeID;
-        String typeName = itemNameCache.get(marketOrder.typeID);
-        if (typeName == null) {
-            typeName = eveDatabase.queryTypeName(marketOrder.typeID);
-            if (typeName == null) {
-                typeName = context.getString(R.string.market_order_unknown_item, Integer.toString(marketOrder.typeID));
-            }
-            itemNameCache.put(marketOrder.typeID, typeName);
-        }
-        orderWatch.typeName = typeName;
-
         orderWatch.stationID = marketOrder.stationID;
-        String stationName = stationNameCache.get(marketOrder.stationID);
-        if (stationName == null) {
-            stationName = eveDatabase.queryStationName(marketOrder.stationID);
-            if (stationName == null) {
-                stationName = context.getString(R.string.market_order_unknown_station, Integer.toString(marketOrder.stationID));
-            }
-            stationNameCache.put(marketOrder.stationID, stationName);
-        }
-        orderWatch.stationName = stationName;
-
         orderWatch.price = marketOrder.price;
         orderWatch.volEntered = marketOrder.volEntered;
         orderWatch.volRemaining = marketOrder.volRemaining;
@@ -242,10 +234,6 @@ public class AccountUpdater {
                 }
             }
 
-            // Cache for item name and station name to minimize database access
-            SparseArray<String> itemNameCache = new SparseArray<>();
-            SparseArray<String> stationNameCache = new SparseArray<>();
-
             for (MarketOrder marketOrder : marketOrders) {
                 // Ignore market orders with a duration of 0
                 // These are immediate buy/sell orders
@@ -253,7 +241,7 @@ public class AccountUpdater {
                     continue;
                 }
 
-                OrderWatch orderWatch = createOrderWatch(marketOrder, characterId, itemNameCache, stationNameCache);
+                OrderWatch orderWatch = createOrderWatch(marketOrder, characterId);
                 orderWatch.seqId = ++seqId;
 
                 // Look up order in 'oldOrderWatches'
@@ -290,6 +278,8 @@ public class AccountUpdater {
                 }
             }
 
+            addNames(orderWatches);
+
             // Mark missing orders as expired/fulfilled
             // but only those who are watched
             for (OrderWatch oldOrderWatch : oldOrderWatches) {
@@ -318,6 +308,151 @@ public class AccountUpdater {
         }
 
         return 0;
+    }
+
+    /**
+     * Sets station and type name in all order watches.
+     * Data is taken from database or will be fetched from EVE Online server.
+     *
+     * @param orderWatches the order watches
+     */
+    private void addNames(Collection<OrderWatch> orderWatches) {
+        if (!forcedUpdate && addNamesFromDatabase(orderWatches)) {
+            return;
+        }
+
+        // Retrieve types and stations from CREST webservice
+        Log.d("AccountUpdater", "Retrieve type and station names");
+        ConcurrentHashMap<String, Station> stationIds = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, Type> typeIds = new ConcurrentHashMap<>();
+
+        DownloadPool downloadPool = new DownloadPool();
+        try {
+            HashSet<Integer> requestedStationIds = new HashSet<>();
+            HashSet<Integer> requestedTypeIds = new HashSet<>();
+            for (OrderWatch orderWatch : orderWatches) {
+                // Download station data
+                if (!requestedStationIds.contains(orderWatch.stationID)) {
+                    requestedStationIds.add(orderWatch.stationID);
+                    downloadPool.execute(new DownloadStationTask(Integer.toString(orderWatch.stationID), stationIds));
+                }
+
+                // Download type data
+                if (!requestedTypeIds.contains(orderWatch.typeID)) {
+                    requestedTypeIds.add(orderWatch.typeID);
+                    downloadPool.execute(new DownloadTypeTask(Integer.toString(orderWatch.typeID), typeIds));
+                }
+            }
+        } finally {
+            downloadPool.shutdown(60);
+        }
+
+        for (OrderWatch orderWatch : orderWatches) {
+            Type type = typeIds.get(Integer.toString(orderWatch.typeID));
+            if (type != null) {
+                orderWatch.typeName = type.name;
+            } else if (orderWatch.typeName == null) {
+                orderWatch.typeName = context.getString(R.string.market_order_unknown_item, Integer.toString(orderWatch.typeID));
+            }
+
+            Station station = stationIds.get(Integer.toString(orderWatch.stationID));
+            if (station != null) {
+                orderWatch.stationName = station.name;
+            } else if (orderWatch.stationName == null) {
+                orderWatch.stationName = context.getString(R.string.market_order_unknown_station, Integer.toString(orderWatch.stationID));
+            }
+        }
+
+        // Update database
+        storeStations(stationIds.values());
+        storeTypes(typeIds.values());
+
+        Log.d("AccountUpdater", "Finished retrieving type and station names");
+    }
+
+    /**
+     * Stores EVE CREST stations in database.
+     *
+     * @param stations stations from CREST interface
+     */
+    private void storeStations(Collection<Station> stations) {
+        ArrayList<EveStation> stationsToStore = new ArrayList<>(stations.size());
+        for (Station station : stations) {
+            EveStation eveStation = new EveStation();
+            eveStation.id = station.id;
+            eveStation.name = station.name;
+            stationsToStore.add(eveStation);
+        }
+        iskDatabase.storeEveStations(stationsToStore);
+    }
+
+    /**
+     * Store EVE CREST types in database.
+     *
+     * @param types types from CREST interface
+     */
+    private void storeTypes(Collection<Type> types) {
+        ArrayList<EveType> typesToStore = new ArrayList<>(types.size());
+        for (Type type : types) {
+            EveType eveType = new EveType();
+            eveType.id = type.id;
+            eveType.name = type.name;
+            typesToStore.add(eveType);
+        }
+        iskDatabase.storeEveTypes(typesToStore);
+    }
+
+    /**
+     * Sets station and type name in all order watches.
+     * Data is loaded from database (cache).
+     *
+     * @param orderWatches the order watches
+     * @return <code>true</code> if all names could be found in database, <code>false</code> if not all names
+     * were found, or database data is outdated
+     */
+    private boolean addNamesFromDatabase(Collection<OrderWatch> orderWatches) {
+        // Cache for item name and station name to minimize database access
+        SparseArray<EveType> eveTypeCache = new SparseArray<>();
+        SparseArray<EveStation> eveStationCache = new SparseArray<>();
+
+        // Set names using database
+        long thirtyDaysAgo = new Date().getTime() - (30 * 24 * 60 * 60 * 1000L);
+        boolean mustUpdateDatabase = false;
+        for (OrderWatch orderWatch : orderWatches) {
+            // Station
+            EveStation eveStation = eveStationCache.get(orderWatch.stationID);
+            if (eveStation != null) {
+                orderWatch.stationName = eveStation.name;
+            } else {
+                eveStation = iskDatabase.queryEveStation(Integer.toString(orderWatch.stationID));
+                if (eveStation != null) {
+                    orderWatch.stationName = eveStation.name;
+                    eveStationCache.put(orderWatch.stationID, eveStation);
+                }
+
+                if (eveStation == null || eveStation.created.getTime() < thirtyDaysAgo) {
+                    mustUpdateDatabase = true;
+                }
+            }
+
+            // Type
+            EveType eveType = eveTypeCache.get(orderWatch.typeID);
+            if (eveType != null) {
+                orderWatch.typeName = eveType.name;
+            } else {
+                eveType = iskDatabase.queryEveType(Integer.toString(orderWatch.typeID));
+                if (eveType != null) {
+                    orderWatch.typeName = eveType.name;
+                    eveTypeCache.put(orderWatch.typeID, eveType);
+                }
+
+                if (eveType == null || eveType.created.getTime() < thirtyDaysAgo) {
+                    mustUpdateDatabase = true;
+                }
+            }
+        }
+
+        return !mustUpdateDatabase;
     }
 
     private void submitNotification(String characterId) {

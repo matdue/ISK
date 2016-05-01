@@ -25,6 +25,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 ext {
@@ -33,6 +37,7 @@ ext {
 
 dependencies {
     testCompile 'org.testng:testng:6.9.9'
+    testCompile 'org.apache.commons:commons-lang3:3.4'
     compile "com.android.support:support-annotations:${supportLibVersion}"
     compile "com.android.support:support-v4:${supportLibVersion}"
     compile "com.android.support:appcompat-v7:${supportLibVersion}"

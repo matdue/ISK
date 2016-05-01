@@ -35,7 +35,7 @@ import android.util.Log;
 public class IskDatabase extends SQLiteOpenHelper {
 	
 	private static final String DATABASE_NAME = "isk.db";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	
 	public IskDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -52,6 +52,13 @@ public class IskDatabase extends SQLiteOpenHelper {
 		db.execSQL(WalletTable.IDX_CREATE);
 		db.execSQL(OrderWatchTable.SQL_CREATE);
 		db.execSQL(OrderWatchItemTable.SQL_CREATE);
+
+		db.execSQL(ApiAccountTable.SQL_CREATE);
+
+		db.execSQL(EveTypeTable.SQL_CREATE);
+		db.execSQL(EveTypeTable.IDX_CREATE);
+		db.execSQL(EveStationTable.SQL_CREATE);
+		db.execSQL(EveStationTable.IDX_CREATE);
 	}
 
 	@Override
@@ -65,6 +72,14 @@ public class IskDatabase extends SQLiteOpenHelper {
 		if (oldVersion < 3) {
 			// 3: New table 'apiAccount'
 			db.execSQL(ApiAccountTable.SQL_CREATE);
+		}
+
+		if (oldVersion < 4) {
+			// 4: New tables 'eveType' and 'eveStation'
+			db.execSQL(EveTypeTable.SQL_CREATE);
+			db.execSQL(EveTypeTable.IDX_CREATE);
+			db.execSQL(EveStationTable.SQL_CREATE);
+			db.execSQL(EveStationTable.IDX_CREATE);
 		}
 	}
 
@@ -1073,6 +1088,180 @@ public class IskDatabase extends SQLiteOpenHelper {
 		}
 
 		return result;
+	}
+
+	public EveType queryEveType(String id) {
+		EveType result = null;
+
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(EveTypeTable.TABLE_NAME,
+					new String[]{EveTypeTable.ID, EveTypeTable.NAME, EveTypeTable.CREATED},
+					EveTypeTable.ID + "=?",
+					new String[]{id},
+					null,
+					null,
+					null);
+			if (cursor.moveToNext()) {
+				result = new EveType();
+				result.id = cursor.getString(0);
+				result.name = cursor.getString(1);
+				result.created = new Date(cursor.getLong(2));
+			}
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryEveType", e);
+		}
+
+		return result;
+	}
+
+	public void storeEveTypes(Iterable<EveType> eveTypes) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			SQLiteStatement insertType = db.compileStatement("INSERT INTO " + EveTypeTable.TABLE_NAME
+					+ " (" + EveTypeTable.ID + "," + EveTypeTable.NAME + "," + EveTypeTable.CREATED + ")"
+					+ " VALUES (?,?,?)");
+			try {
+				db.beginTransaction();
+
+				long now = new Date().getTime();
+				for (EveType eveType : eveTypes) {
+					db.delete(EveTypeTable.TABLE_NAME,
+							EveTypeTable.ID + "=?",
+							new String[]{eveType.id});
+
+					insertType.bindString(1, eveType.id);
+					insertType.bindString(2, eveType.name);
+					insertType.bindLong(3, now);
+					insertType.executeInsert();
+					insertType.clearBindings();
+				}
+
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+				insertType.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeEveType", e);
+		}
+	}
+
+	public EveStation queryEveStation(String id) {
+		EveStation result = null;
+
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(EveStationTable.TABLE_NAME,
+					new String[]{EveStationTable.ID, EveStationTable.NAME, EveStationTable.CREATED},
+					EveStationTable.ID + "=?",
+					new String[]{id},
+					null,
+					null,
+					null);
+			if (cursor.moveToNext()) {
+				result = new EveStation();
+				result.id = cursor.getString(0);
+				result.name = cursor.getString(1);
+				result.created = new Date(cursor.getLong(2));
+			}
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryEveStation", e);
+		}
+
+		return result;
+	}
+
+	public void storeEveStations(Iterable<EveStation> eveStations) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			SQLiteStatement insertStation = db.compileStatement("INSERT INTO " + EveStationTable.TABLE_NAME
+					+ " (" + EveStationTable.ID + "," + EveStationTable.NAME + "," + EveStationTable.CREATED + ")"
+					+ " VALUES (?,?,?)");
+			try {
+				db.beginTransaction();
+
+				long now = new Date().getTime();
+				for (EveStation eveStation : eveStations) {
+					db.delete(EveStationTable.TABLE_NAME,
+							EveStationTable.ID + "=?",
+							new String[]{eveStation.id});
+
+					insertStation.bindString(1, eveStation.id);
+					insertStation.bindString(2, eveStation.name);
+					insertStation.bindLong(3, now);
+					insertStation.executeInsert();
+					insertStation.clearBindings();
+				}
+
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+				insertStation.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeEveStation", e);
+		}
+	}
+
+	public EveFacility queryEveFacility(String id) {
+		EveFacility result = null;
+
+		try {
+			SQLiteDatabase db = getReadableDatabase();
+			Cursor cursor = db.query(EveFacilityTable.TABLE_NAME,
+					new String[]{EveFacilityTable.ID, EveFacilityTable.NAME, EveFacilityTable.CREATED},
+					EveFacilityTable.ID + "=?",
+					new String[]{id},
+					null,
+					null,
+					null);
+			if (cursor.moveToNext()) {
+				result = new EveFacility();
+				result.id = cursor.getString(0);
+				result.name = cursor.getString(1);
+				result.created = new Date(cursor.getLong(2));
+			}
+			cursor.close();
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "queryEveFacility", e);
+		}
+
+		return result;
+	}
+
+	public void storeEveFacilities(Iterable<EveFacility> eveFacilities) {
+		try {
+			SQLiteDatabase db = getWritableDatabase();
+			SQLiteStatement insertApiAccount = db.compileStatement("INSERT INTO " + EveFacilityTable.TABLE_NAME
+					+ " (" + EveFacilityTable.ID + "," + EveFacilityTable.NAME + "," + EveFacilityTable.CREATED + ")"
+					+ " VALUES (?,?,?)");
+			try {
+				db.beginTransaction();
+
+				db.delete(EveFacilityTable.TABLE_NAME,
+						null,
+						null);
+
+				long now = new Date().getTime();
+				for (EveFacility eveFacility : eveFacilities) {
+					insertApiAccount.bindString(1, eveFacility.id);
+					insertApiAccount.bindString(2, eveFacility.name);
+					insertApiAccount.bindLong(3, now);
+					insertApiAccount.executeInsert();
+					insertApiAccount.clearBindings();
+				}
+
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+				insertApiAccount.close();
+			}
+		} catch (SQLiteException e) {
+			Log.e("IskDatabase", "storeEveFacilities", e);
+		}
 	}
 
 }
